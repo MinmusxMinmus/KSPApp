@@ -3,7 +3,7 @@ package controller;
 import kerbals.Kerbal;
 import kerbals.Role;
 import missions.Mission;
-import vessels.Vessel;
+import vessels.*;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,12 +14,14 @@ public class GUIController {
 
     private final List<Kerbal> kerbals;
     private final List<Mission> missions;
-    private final List<Vessel> vessels;
+    private final List<VesselConcept> vessels;
+    private final List<VesselInstance> instances;
 
     public GUIController() {
         this.kerbals = new LinkedList<>();
         this.missions = new LinkedList<>();
         this.vessels = new LinkedList<>();
+        this.instances = new LinkedList<>();
 
         // TODO read from persistency
     }
@@ -37,6 +39,10 @@ public class GUIController {
         return Collections.unmodifiableList(vessels);
     }
 
+    public List<VesselInstance> getInstances() {
+        return Collections.unmodifiableList(instances);
+    }
+
     public void addKerbal(String name, boolean isMale, Role role, int level) {
         kerbals.add(new Kerbal(name, isMale, role, level));
     }
@@ -49,7 +55,17 @@ public class GUIController {
         missions.add(new Mission(name, description, vessel, crew));
     }
 
-    public void addVessel(String name) {
+    public void addVesselConcept(String name, VesselType type, VesselProperties... properties) {
+        vessels.add(new VesselConcept(name, type, properties));
+    }
+
+    public void addVesselInstance(VesselConcept concept) {
+        for (VesselConcept v : vessels) {
+            if (v.getName().equals(concept.getName()) && v.getIteration() == concept.getIteration()) {
+                instances.add(new VesselInstance(concept));
+                break;
+            }
+        }
     }
 
     public void markAssigned(Set<Kerbal> kerbalSet) {

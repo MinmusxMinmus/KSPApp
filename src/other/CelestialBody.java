@@ -1,9 +1,9 @@
-package vessels;
+package other;
 
 import java.util.Locale;
 
-public enum VesselType {
-    STATION, LANDER, ROVER, SPACECRAFT, WATERCRAFT;
+public enum CelestialBody {
+    KERBIN, MUN, MINMUS, DUNA, IKE, EVE, GILLY, MOHO, JOOL, LAYTHE, VALL, TYLO, BOP, POL, DRES, EELOO, KERBOL;
 
     @Override
     public String toString() {

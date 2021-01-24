@@ -76,6 +76,10 @@ class MissionTableModel extends AbstractTableModel {
     }
 }
 
+class MissionComboBoxModel extends DefaultComboBoxModel<Vessel> {
+
+}
+
 public class MainScreen extends JDialog {
 
     private JPanel contentPane;
@@ -281,6 +285,9 @@ public class MainScreen extends JDialog {
         missionNameTextField.setText("");
         missionDescriptionTextArea.setText("");
 
-        //TODO default vessel choice
+        //TODO vessel drop down menu
+        MissionComboBoxModel missionComboBoxModel = new MissionComboBoxModel();
+        missionVesselComboBox.setModel(missionComboBoxModel);
+        missionComboBoxModel.addAll(guiController.getVessels());
     }
 }
