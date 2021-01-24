@@ -38,6 +38,10 @@ class MissionTableModel extends AbstractTableModel {
         return kerbalList.get(row);
     }
 
+    public Set<Kerbal> getKerbals() {
+        return kerbalList.stream().collect(Collectors.toUnmodifiableSet());
+    }
+
     @Override
     public int getRowCount() {
         return kerbalList.size();
@@ -76,7 +80,6 @@ public class MainScreen extends JDialog {
 
     private JPanel contentPane;
     private JPanel cardPanel;
-    private JLabel cardslmao;
 
     // Main window components
     private JButton mainMissionsButton;
@@ -130,7 +133,6 @@ public class MainScreen extends JDialog {
     // Custom main components
 
     // Custom mission components
-    private Set<Kerbal> missionKerbalSet;
     private MissionTableModel freeModel;
     private MissionTableModel assignedModel;
 
@@ -194,22 +196,15 @@ public class MainScreen extends JDialog {
     }
 
     private void setupMissionCreation() {
-        // Crew section preparations
-        Set<Kerbal> kerbalSet = guiController.getKerbals().stream()
-                .filter(Kerbal::isAvailable)
-                .collect(Collectors.toSet());
-        freeModel = new MissionTableModel(kerbalSet);
-        assignedModel = new MissionTableModel(new LinkedList<>());
-        // Inserting kerbals in table
-        missionCrewFreeTable.setModel(freeModel);
-        missionCrewSelectedTable.setModel(assignedModel);
+        // Basic setup
+        missionSetup();
 
         // Available table listener
         missionCrewFreeTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = missionCrewFreeTable.rowAtPoint(e.getPoint());
-                if (row >= 0) {
+                if (row >= 0 && row < freeModel.getRowCount()) {
                     Kerbal k = freeModel.getKerbal(row);
                     freeModel.removeKerbal(k);
                     assignedModel.addKerbal(k);
@@ -222,7 +217,7 @@ public class MainScreen extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = missionCrewSelectedTable.rowAtPoint(e.getPoint());
-                if (row >= 0) {
+                if (row >= 0 && row < assignedModel.getRowCount()) {
                     Kerbal k = assignedModel.getKerbal(row);
                     assignedModel.removeKerbal(k);
                     freeModel.addKerbal(k);
@@ -232,8 +227,7 @@ public class MainScreen extends JDialog {
 
         // Cancel listener
         missionCancelButton.addActionListener(e -> {
-            freeModel = new MissionTableModel(kerbalSet);
-            assignedModel = new MissionTableModel(new LinkedList<>());
+            missionSetup();
             cardLayout.previous(cardPanel);
         });
 
@@ -242,12 +236,22 @@ public class MainScreen extends JDialog {
             String name = missionNameTextField.getText();
             String description = missionDescriptionTextArea.getText();
             Vessel vessel = (Vessel) missionVesselComboBox.getSelectedItem();
-            if (name == null || description == null || vessel == null) {
+            if (name.equals("") || description.equals("")) { // TODO || vessel == null
                 JOptionPane.showMessageDialog(cardPanel, "Please fill out all text fields!");
                 return;
             }
-            guiController.addMission(name, description, vessel, missionKerbalSet);
-            guiController.markAssigned(missionKerbalSet);
+            int ret = JOptionPane.showOptionDialog(cardPanel,
+                    "Are you sure you want to create this mission?",
+                    "Mission creation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    null,
+                    null);
+            if (ret != JOptionPane.YES_OPTION) return;
+            guiController.addMission(name, description, vessel, assignedModel.getKerbals());
+            guiController.markAssigned(assignedModel.getKerbals());
+            missionSetup();
             cardLayout.previous(cardPanel);
         });
     }
@@ -262,5 +266,21 @@ public class MainScreen extends JDialog {
 
     private void mainDelete(ListSelectionEvent e) {
 
+    }
+
+    private void missionSetup() {
+        // Redefine table contents
+        freeModel = new MissionTableModel(guiController.getKerbals().stream()
+                .filter(Kerbal::isAvailable)
+                .collect(Collectors.toSet()));
+        assignedModel = new MissionTableModel(new LinkedList<>());
+        missionCrewFreeTable.setModel(freeModel);
+        missionCrewSelectedTable.setModel(assignedModel);
+
+        // Empty text fields
+        missionNameTextField.setText("");
+        missionDescriptionTextArea.setText("");
+
+        //TODO default vessel choice
     }
 }
