@@ -55,8 +55,8 @@ public class GUIController {
         missions.add(new Mission(name, description, vessel, crew));
     }
 
-    public void addVesselConcept(String name, VesselType type, VesselProperties... properties) {
-        vessels.add(new VesselConcept(name, type, properties));
+    public void addVesselConcept(String name, VesselType type, VesselDestination[] destinations, VesselProperty... properties) {
+        vessels.add(new VesselConcept(name, type, destinations, properties));
     }
 
     public void addVesselInstance(VesselConcept concept) {
@@ -69,6 +69,6 @@ public class GUIController {
     }
 
     public void markAssigned(Set<Kerbal> kerbalSet) {
-        for (Kerbal k : kerbalSet) k.setOnDuty(true);
+        for (Kerbal k : kerbalSet) k.setAvailable(false);
     }
 }

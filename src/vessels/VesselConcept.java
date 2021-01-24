@@ -19,31 +19,55 @@ public class VesselConcept extends Vessel {
     /**
      * Aditional properties the vessel may or may not have. Examples include VTOL capability, SSRT, etc.
      */
-    private final Set<VesselProperties> properties = new HashSet<>();
+    private final Set<VesselProperty> properties = new HashSet<>();
+    /**
+     * Vessel's designed itinerary. Represented by the different locations the ship may find itself in
+     */
+    private final Set<VesselDestination> destinations = new HashSet<>();
+
     private String notes;
 
 
     /** Generates a new concept from scratch, which means that it's not based off of any previous craft.
      * @param name The name of the new vessel family.
      * @param type The general purpose of the vessel.
+     * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(String name, VesselType type, VesselProperties... properties) {
-        this(name, type, null, properties);
+    public VesselConcept(String name,
+                         VesselType type,
+                         VesselDestination[] destinations,
+                         VesselProperty... properties) {
+        this(name, type, null, destinations, properties);
     }
 
-    /** Generates a new concept based on a different craft.
+    /** Generates a new concept based on an existing model.
      * @param vessel The vessel family it will be based on.
+     * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(VesselConcept vessel, VesselProperties... properties) {
-        this(vessel.getName(), vessel.getType(), vessel, properties);
+    public VesselConcept(VesselConcept vessel,
+                         VesselDestination[] destinations,
+                         VesselProperty... properties) {
+        this(vessel.getName(), vessel.getType(), vessel, destinations, properties);
     }
 
-    private VesselConcept(String name, VesselType type, VesselConcept parentConcept, VesselProperties... properties) {
+    /** Private constructor implementation.
+     * @param name The name of the new vessel family.
+     * @param type The general purpose of the vessel.
+     * @param parentConcept The vessel family it will be based on.
+     * @param destinations Vessel's designed itinerary.
+     * @param properties List with various optional properties the vessel might have.
+     */
+    private VesselConcept(String name,
+                          VesselType type,
+                          VesselConcept parentConcept,
+                          VesselDestination[] destinations,
+                          VesselProperty... properties) {
         super(name, type);
         this.parentConcept = parentConcept;
         Collections.addAll(this.properties, properties);
+        Collections.addAll(this.destinations, destinations);
     }
 
 
@@ -68,8 +92,12 @@ public class VesselConcept extends Vessel {
         return Collections.unmodifiableList(iterationChanges);
     }
 
-    public Set<VesselProperties> getProperties() {
+    public Set<VesselProperty> getProperties() {
         return Collections.unmodifiableSet(properties);
+    }
+
+    public Set<VesselDestination> getDestinations() {
+        return Collections.unmodifiableSet(destinations);
     }
 
     public String getNotes() {

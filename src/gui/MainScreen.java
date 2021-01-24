@@ -240,7 +240,7 @@ public class MainScreen extends JDialog {
             String name = missionNameTextField.getText();
             String description = missionDescriptionTextArea.getText();
             Vessel vessel = (Vessel) missionVesselComboBox.getSelectedItem();
-            if (name.equals("") || description.equals("")) { // TODO || vessel == null
+            if (name.strip().equals("") || description.strip().equals("") || vessel == null) {
                 JOptionPane.showMessageDialog(cardPanel, "Please fill out all text fields!");
                 return;
             }

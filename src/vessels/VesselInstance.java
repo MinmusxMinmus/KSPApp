@@ -55,6 +55,6 @@ public class VesselInstance extends Vessel {
 
     @Override
     public String toString() {
-        return concept.toString();
+        return concept.toString() + (inSpace ? "Orbiting ": "Landed on ") + location.toString();
     }
 }

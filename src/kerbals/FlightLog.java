@@ -1,28 +1,32 @@
 package kerbals;
 
-import kerbals.Kerbal;
 import missions.Mission;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public class FlightLog {
 
-    public final List<Mission> log = new LinkedList<>();
-    public final Kerbal subject;
+    private final Mission mission;
+    private final int expGained;
 
-    public FlightLog(Kerbal kerbal) {
-        this.subject = kerbal;
+    private String notes;
+
+    public FlightLog(Mission mission, int expGained) {
+        this.mission = mission;
+        this.expGained = expGained;
     }
 
-    public void addEntry(Mission m) {
-        log.add(m);
+    public Mission getMission() {
+        return mission;
     }
 
-    public List<Mission> getEntries() {
-        return Collections.unmodifiableList(log);
+    public int getExpGained() {
+        return expGained;
     }
 
-    // TODO Specific search methods
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 }

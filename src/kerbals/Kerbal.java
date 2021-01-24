@@ -2,6 +2,10 @@ package kerbals;
 
 import missions.Mission;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Kerbal {
 
     // Basic information
@@ -10,9 +14,11 @@ public class Kerbal {
     private final Role role;
 
     // Specific details
-    private final FlightLog log;
-    private boolean onDuty;
+    private final List<FlightLog> log;
+    private boolean available;
     private int level;
+
+    private String notes;
 
 
     public Kerbal(String name, boolean isMale, Role role, int level) {
@@ -20,28 +26,33 @@ public class Kerbal {
         this.male = isMale;
         this.role = role;
         this.level = level;
-        this.log = new FlightLog(this);
-        this.onDuty = false;
+        this.log = new LinkedList<>();
+        this.available = false;
     }
 
-    public Role getRole() {
-        return role;
+
+    public String getName() {
+        return name;
     }
 
     public boolean isMale() {
         return male;
     }
 
-    public String getName() {
-        return name;
+    public Role getRole() {
+        return role;
+    }
+
+    public List<FlightLog> getLog() {
+        return Collections.unmodifiableList(log);
     }
 
     public boolean isAvailable() {
-        return !onDuty;
+        return !available;
     }
 
-    public void setOnDuty(boolean onDuty) {
-        this.onDuty = onDuty;
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 
     public int getLevel() {
@@ -53,8 +64,11 @@ public class Kerbal {
         level++;
     }
 
-    public void missionComplete(Mission m) {
-        log.addEntry(m);
+    public void missionComplete(Mission m, int expGained) {
+        log.add(new FlightLog(m, expGained));
+    }
 
+    public void setKIA(Mission m) {
+        log.add(new FlightLog(m, 0));
     }
 }
