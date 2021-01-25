@@ -1,8 +1,10 @@
 package vessels;
 
+import other.Listable;
+
 import java.util.*;
 
-public abstract class Vessel {
+public abstract class Vessel implements Listable {
 
     /**
      * Vessel name. Must not include any modifiers, just the ship name.
@@ -31,8 +33,16 @@ public abstract class Vessel {
     }
 
     @Override
-    public String toString() {
+    public String getTextRepresentation() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!this.getClass().equals(obj.getClass())) return false;
+        Vessel v = (Vessel) obj;
+        return this.getName().equals(v.getName());
     }
 }
 

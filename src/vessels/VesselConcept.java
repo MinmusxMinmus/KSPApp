@@ -109,7 +109,15 @@ public class VesselConcept extends Vessel {
     }
 
     @Override
-    public String toString() {
-        return super.toString() + " Mk" + (iteration + 1);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!this.getClass().equals(obj.getClass())) return false;
+        VesselConcept vc = (VesselConcept) obj;
+        return super.equals(vc) && this.iteration == vc.iteration;
+    }
+
+    @Override
+    public String getTextRepresentation() {
+        return super.getTextRepresentation() + " Mk" + (iteration + 1);
     }
 }

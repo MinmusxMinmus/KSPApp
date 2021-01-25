@@ -5,11 +5,11 @@ import missions.Mission;
 public class FlightLog {
 
     private final Mission mission;
-    private final int expGained;
+    private final float expGained;
 
     private String notes;
 
-    public FlightLog(Mission mission, int expGained) {
+    public FlightLog(Mission mission, float expGained) {
         this.mission = mission;
         this.expGained = expGained;
     }
@@ -18,7 +18,7 @@ public class FlightLog {
         return mission;
     }
 
-    public int getExpGained() {
+    public float getExpGained() {
         return expGained;
     }
 

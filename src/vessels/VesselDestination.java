@@ -16,5 +16,20 @@ public enum VesselDestination {
     POL_LOCAL, POL_LIMITED,
     DRES_LOCAL, DRES_LIMITED,
     EELOO_LOCAL, EELOO_LIMITED,
-    KERBOL_LOCAL, KERBOL_LIMITED
+    KERBOL_LOCAL, KERBOL_LIMITED;
+
+    public float recoveryMultiplier() {
+        return switch (name().substring(0, 5)) {
+            case "KERBI" -> 1.0f;
+            case "MUN_L" -> 2.0f;
+            case "MINMU" -> 2.5f;
+            case "KERBO" -> 4.0f;
+            case "EVE_L", "DUNA_", "IKE_L" -> 5.0f;
+            case "GILLY", "DRES_", "JOOL_" -> 6.0f;
+            case "MOHO_" -> 7.0f;
+            case "LAYTH", "VALL_", "TYLO_", "BOP_L", "POL_L" -> 8.0f;
+            case "EELOO" -> 10.0f;
+            default -> 0.0f;
+        };
+    }
 }
