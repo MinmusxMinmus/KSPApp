@@ -13,7 +13,7 @@ class CrewDetails {
     private final Kerbal subject;
     private final String position;
     private final KSPDate boardTime;
-    private float expGained;
+    private final float expGained;
 
     public CrewDetails(Kerbal subject, String position, KSPDate boardTime) {
         this.subject = subject;
@@ -44,7 +44,6 @@ class CrewDetails {
 public class Mission implements Listable {
 
     private final String name;
-    private final String description;
     private final Vessel vessel;
     private final Set<Kerbal> crew;
     private final Set<CrewDetails> crewDetails = new HashSet<>();
@@ -53,9 +52,10 @@ public class Mission implements Listable {
 
     private String notes;
 
+
     public Mission(String name, String description, Vessel vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
         this.name = name;
-        this.description = description;
+        this.notes = description;
         this.vessel = vessel;
         this.crew = crew.keySet();
         this.missionStart = missionStart;
@@ -74,10 +74,6 @@ public class Mission implements Listable {
 
     public String getName() {
         return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public Vessel getVessel() {
@@ -111,6 +107,7 @@ public class Mission implements Listable {
         return missionStart;
     }
 
+    @Override
     public String getNotes() {
         return notes;
     }
@@ -122,5 +119,26 @@ public class Mission implements Listable {
     @Override
     public String getTextRepresentation() {
         return name;
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 1;
+    }
+
+    @Override
+    public String getFieldName(int index) {
+        return switch (index) {
+            case 0 -> "Name";
+            default -> null;
+        };
+    }
+
+    @Override
+    public String getFieldValue(int index) {
+        return switch (index) {
+            case 0 -> name;
+            default -> null;
+        };
     }
 }

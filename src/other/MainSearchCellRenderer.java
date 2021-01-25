@@ -1,7 +1,5 @@
 package other;
 
-import other.Listable;
-
 import javax.swing.*;
 import java.awt.*;
 

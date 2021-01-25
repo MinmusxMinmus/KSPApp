@@ -5,13 +5,13 @@ import java.util.*;
 public class VesselConcept extends Vessel {
 
     /**
-     * Parent vessel, from which the current concept is inspired on. A null value indicates a brand new concept.
-     */
-    private final Vessel parentConcept;
-    /**
      * Concept iteration, roughly indicates the amount of change between the same family of ships.
      */
     private int iteration = 0;
+    /**
+     * Parent vessel, from which the current concept is inspired on. A null value indicates a brand new concept.
+     */
+    private final Vessel parentConcept;
     /**
      * List containing the different changes in the concept's iteration history.
      */
@@ -119,5 +119,30 @@ public class VesselConcept extends Vessel {
     @Override
     public String getTextRepresentation() {
         return super.getTextRepresentation() + " Mk" + (iteration + 1);
+    }
+
+    @Override
+    public int getFieldCount() {
+        return super.getFieldCount() + 2;
+    }
+
+    @Override
+    public String getFieldName(int index) {
+        if (index < super.getFieldCount()) return super.getFieldName(index);
+        return switch (index) {
+            case 2 -> "Iteration";
+            case 3 -> "Parent design";
+            default -> null;
+        };
+    }
+
+    @Override
+    public String getFieldValue(int index) {
+        if (index < super.getFieldCount()) return super.getFieldName(index);
+        return switch (index) {
+            case 2 -> "Mk" + iteration;
+            case 3 -> (parentConcept == null) ? "(None)" : parentConcept.getName();
+            default -> null;
+        };
     }
 }

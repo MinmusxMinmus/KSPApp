@@ -2,8 +2,6 @@ package vessels;
 
 import other.Listable;
 
-import java.util.*;
-
 public abstract class Vessel implements Listable {
 
     /**
@@ -24,6 +22,11 @@ public abstract class Vessel implements Listable {
         this.type = type;
     }
 
+
+    public static String[] getFieldNames() {
+        return new String[]{"Name", };
+    }
+
     public String getName() {
         return name;
     }
@@ -35,6 +38,29 @@ public abstract class Vessel implements Listable {
     @Override
     public String getTextRepresentation() {
         return name;
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 2;
+    }
+
+    @Override
+    public String getFieldName(int index) {
+        return switch (index) {
+            case 0 -> "Name";
+            case 1 -> "Type";
+            default -> null;
+        };
+    }
+
+    @Override
+    public String getFieldValue(int index) {
+        return switch (index) {
+            case 0 -> name;
+            case 1 -> type.toString();
+            default -> null;
+        };
     }
 
     @Override

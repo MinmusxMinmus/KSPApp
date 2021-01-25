@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Kerbal implements Listable {
 
@@ -141,6 +142,7 @@ public class Kerbal implements Listable {
         return experience;
     }
 
+    @Override
     public String getNotes() {
         return notes;
     }
@@ -152,5 +154,32 @@ public class Kerbal implements Listable {
     @Override
     public String getTextRepresentation() {
         return name + " Kerman (" + role.toString() + (available ? ", available)" : ", deployed)");
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 4;
+    }
+
+    @Override
+    public String getFieldName(int index) {
+        return switch (index) {
+            case 0 -> "Name";
+            case 1 -> "Job";
+            case 2 -> "Gender";
+            case 3 -> "Level";
+            default -> null;
+        };
+    }
+
+    @Override
+    public String getFieldValue(int index) {
+        return switch (index) {
+            case 0 -> name;
+            case 1 -> role.toString();
+            case 2 -> male ? "Male" : "Female";
+            case 3 -> Integer.toString(getLevel());
+            default -> null;
+        };
     }
 }

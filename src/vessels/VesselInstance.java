@@ -9,11 +9,13 @@ import java.util.Set;
 
 public class VesselInstance extends Vessel {
 
-    private final VesselConcept concept;
     private final int iteration;
+    private final VesselConcept concept;
     private boolean inSpace;
     private CelestialBody location;
     private final Set<Kerbal> crew = new HashSet<>();
+
+    private String notes;
 
     /** Defines a new instance of the vessel concept, at the rough location specified.
      * @param concept Vessel design
@@ -67,5 +69,41 @@ public class VesselInstance extends Vessel {
     @Override
     public String getTextRepresentation() {
         return concept.getTextRepresentation() + (inSpace ? ": Orbiting ": ": Landed on ") + location.toString();
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    @Override
+    public String getNotes() {
+        return notes;
+    }
+
+    @Override
+    public int getFieldCount() {
+        return super.getFieldCount() + 3;
+    }
+
+    @Override
+    public String getFieldName(int index) {
+        if (index < super.getFieldCount()) return super.getFieldName(index);
+        return switch (index) {
+            case 2 -> "Iteration";
+            case 3 -> "Status";
+            case 4 -> "Location";
+            default -> null;
+        };
+    }
+
+    @Override
+    public String getFieldValue(int index) {
+        if (index < super.getFieldCount()) return super.getFieldName(index);
+        return switch (index) {
+            case 2 -> "Mk" + iteration;
+            case 4 -> inSpace ? "In orbit" : "Surface landed";
+            case 5 -> location.toString();
+            default -> null;
+        };
     }
 }
