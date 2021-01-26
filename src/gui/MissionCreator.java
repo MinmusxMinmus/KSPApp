@@ -7,17 +7,20 @@ import other.MainSearchCellRenderer;
 import other.MissionAssignedTableModel;
 import other.MissionFreeTableModel;
 import vessels.Vessel;
+import vessels.VesselConcept;
+import vessels.VesselInstance;
 
 import javax.swing.*;
+import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
-public class MissionCreator extends JFrame {
+public class MissionCreator extends KSPGUI {
     private JPanel mainPanel;
     private JLabel missionCreatorLabel;
     private JPanel dataPanel;
@@ -28,8 +31,8 @@ public class MissionCreator extends JFrame {
     private JLabel descriptionLabel;
     private JTextArea descriptionTextArea;
     private JPanel vesselPanel;
-    private JLabel vesselLabel;
-    private JComboBox<Vessel> vesselComboBox;
+    private JLabel activeVesselsLabel;
+    private JComboBox<VesselInstance> activeVesselsComboBox;
     private JPanel crewPanel;
     private JPanel crewSelectionPanel;
     private JScrollPane availableCrewPane;
@@ -55,33 +58,59 @@ public class MissionCreator extends JFrame {
     private JLabel secondLabel;
     private JTextField secondTextField;
     private JPanel buttonsPanel;
-    private JButton okButton;
+    private JButton OKButton;
     private JButton cancelButton;
-    private JPanel contentPanel;
     private JPanel descriptionAreaPanel;
     private JPanel secondPanel;
+    private JComboBox<VesselConcept> vesselDesignsComboBox;
+    private JLabel vesselDesignsLabel;
+    private JCheckBox newVesselCheckBox;
 
     // Custom components
-    private final GUIController controller;
-    private MissionFreeTableModel freeModel;
-    private MissionAssignedTableModel assignedModel;
+    private final MissionFreeTableModel freeModel; // TODO replace with abstract class and hierarchy
+    private final MissionAssignedTableModel assignedModel = new MissionAssignedTableModel(new LinkedList<>());
 
     public MissionCreator(GUIController controller) {
-        this.controller = controller;
+        super(controller, MISSION_CREATOR);
+        setContentPane(mainPanel);
 
-        // Window settings
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setTitle("Mission creator");
-        setContentPane(contentPanel);
+        // Initializing
+        activeVesselsComboBox.setRenderer(new MainSearchCellRenderer());
+        vesselDesignsComboBox.setRenderer(new MainSearchCellRenderer());
 
-        vesselComboBox.setRenderer(new MainSearchCellRenderer());
+        // Define table contents
+        freeModel = new MissionFreeTableModel(controller.getKerbals().stream()
+                .filter(Kerbal::isAvailable)
+                .collect(Collectors.toSet()));
+        crewFreeTable.setModel(freeModel);
+        crewSelectedTable.setModel(assignedModel);
 
-        reset();
+        // Vessel combo box reset
+        for (VesselInstance vi : controller.getVesselInstances()) activeVesselsComboBox.addItem(vi);
+        for (VesselConcept vc : controller.getVesselConcepts()) vesselDesignsComboBox.addItem(vc);
+
+        // Good luck charm
+        revalidate();
+
+        // Setup events
+        listenerSetup();
+    }
+
+    private void listenerSetup() {
+
+        // New vessel listener
+        newVesselCheckBox.addItemListener(e -> {
+            switch (e.getStateChange()) {
+                case ItemEvent.SELECTED -> {
+                    vesselDesignsComboBox.setEnabled(true);
+                    vesselDesignsLabel.setEnabled(true);
+                }
+                case ItemEvent.DESELECTED -> {
+                    vesselDesignsComboBox.setEnabled(false);
+                    vesselDesignsLabel.setEnabled(false);
+                }
+            }
+        });
 
         // Available table listener
         crewFreeTable.addMouseListener(new MouseAdapter() {
@@ -101,11 +130,12 @@ public class MissionCreator extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = crewSelectedTable.rowAtPoint(e.getPoint());
-                if (row >= 0 && row < assignedModel.getRowCount() - 1) { // -1, because of the position text field
-                    Kerbal k = assignedModel.getKerbal(row);
-                    assignedModel.removeKerbal(k);
-                    freeModel.addKerbal(k);
-                }
+                if (row >= 0)
+                    if (row < assignedModel.getRowCount()) { // -1, because of the position text field TODO ????
+                        Kerbal k = assignedModel.getKerbal(row);
+                        assignedModel.removeKerbal(k);
+                        freeModel.addKerbal(k);
+                    }
             }
         });
 
@@ -118,11 +148,13 @@ public class MissionCreator extends JFrame {
         });
 
         // Confirm listener
-        okButton.addActionListener(e -> {
+        OKButton.addActionListener(e -> {
             // Read values from text fields and combo boxes
             String name = nameTextField.getText();
             String description = descriptionTextArea.getText();
-            Vessel vessel = (Vessel) vesselComboBox.getSelectedItem();
+            Vessel vessel = (Vessel) (vesselDesignsComboBox.isEnabled()
+                                ? vesselDesignsComboBox.getSelectedItem()
+                                : activeVesselsComboBox.getSelectedItem());
             String year = yearTextField.getText();
             String day = dayTextField.getText();
             String hour = hourTextField.getText();
@@ -146,66 +178,22 @@ public class MissionCreator extends JFrame {
             KSPDate date = (hour.strip().equals("") || minute.strip().equals("") || second.strip().equals(""))
                     ? new KSPDate(parseInt(year),
                     parseInt(day),
-                    LocalDate.now())
+                    OffsetDateTime.now())
                     : new KSPDate(parseInt(year),
                     parseInt(day), parseInt(hour),
                     parseInt(minute),
                     parseInt(second),
-                    LocalDate.now());
+                    OffsetDateTime.now());
 
-            // Proper mission creation
+            // Mission creation
             controller.addMission(name,
                     description,
                     vessel,
                     assignedModel.getCrew(),
                     date);
 
-            reset();
+            // Form end
             dispose();
         });
-
-    }
-
-    /**
-     * Reset routine, called whenever the screen switches over to some other one.
-     */
-    private void reset() {
-        // Redefine table contents
-        freeModel = new MissionFreeTableModel(controller.getKerbals().stream()
-                .filter(Kerbal::isAvailable)
-                .collect(Collectors.toSet()));
-        assignedModel = new MissionAssignedTableModel(new LinkedList<>());
-        crewFreeTable.setModel(freeModel);
-        crewSelectedTable.setModel(assignedModel);
-
-        // Empty text fields
-        nameTextField.setText("");
-        descriptionTextArea.setText("");
-        yearTextField.setText("");
-        dayTextField.setText("");
-        hourTextField.setText("");
-        minuteTextField.setText("");
-        secondTextField.setText("");
-
-        // Vessel combo box reset
-        for (Vessel v : controller.getAllVessels()) vesselComboBox.addItem(v);
-        revalidate();
-    }
-
-    /** Utility method to display a choice box with the desired message.
-     * @param dialogTitle The window's name.
-     * @param message The message displayed.
-     * @return true if the user clicked on "Yes", false otherwise.
-     */
-    private boolean ask(String dialogTitle, String message) {
-        int ret = JOptionPane.showOptionDialog(mainPanel,
-                message,
-                dialogTitle,
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                null,
-                null);
-        return ret == JOptionPane.YES_OPTION;
     }
 }

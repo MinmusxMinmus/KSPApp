@@ -4,14 +4,14 @@ import javax.swing.table.AbstractTableModel;
 
 public class MainTableMultipleModel extends AbstractTableModel {
 
-    private Listable item;
+    private KSPObject item;
 
-    public void setItem(Listable item) {
+    public void setItem(KSPObject item) {
         this.item = item;
         fireTableDataChanged();
     }
 
-    public Listable getItem() {
+    public KSPObject getItem() {
         return item;
     }
 

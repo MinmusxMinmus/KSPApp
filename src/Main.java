@@ -1,22 +1,33 @@
 import controller.GUIController;
 import gui.MainScreen;
-import kerbals.Role;
+import kerbals.Job;
 import other.KSPDate;
-import vessels.VesselDestination;
+import vessels.Destination;
 import vessels.VesselType;
+
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        GUIController c = new GUIController();
+        try {
+            GUIController c = new GUIController();
 
-        c.addKerbalHired("Tester", true, Role.PILOT, new KSPDate(0, 0));
-        c.addKerbalHired("Testina", false, Role.ENGINEER, new KSPDate(0, 0));
+//            c.addKerbalHired("Tester", true, Job.PILOT, new KSPDate(0, 0));
+//            c.addKerbalHired("Testina", false, Job.ENGINEER, new KSPDate(0, 0));
+//
+//            c.addVesselConcept("Penis pincher", VesselType.LANDER, new Destination[]{Destination.KERBIN_LOCAL});
+//            c.addVesselInstance(c.getVesselConcept("Penis pincher"));
+//            c.addVesselInstance(c.getVesselConcept("Penis pincher"));
+//
+//            c.saveChanges();
 
-        c.addVesselConcept("Penis pincher", VesselType.LANDER, new VesselDestination[]{VesselDestination.KERBIN_LOCAL});
-        c.addVesselInstance(c.getVesselConcept("Penis pincher"));
-        c.addVesselInstance(c.getVesselConcept("Penis pincher"));
-        MainScreen gui = new MainScreen(c);
-        gui.pack();
-        gui.setVisible(true);
+            MainScreen gui = new MainScreen(c);
+            gui.pack();
+            gui.setVisible(true);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

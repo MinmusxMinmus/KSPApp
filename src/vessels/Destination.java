@@ -1,6 +1,6 @@
 package vessels;
 
-public enum VesselDestination {
+public enum Destination {
     KERBIN_LOCAL, KERBIN_LIMITED,
     MUN_LOCAL, MUN_LIMITED,
     MINMUS_LOCAL, MINMUS_LIMITED,
@@ -16,7 +16,7 @@ public enum VesselDestination {
     POL_LOCAL, POL_LIMITED,
     DRES_LOCAL, DRES_LIMITED,
     EELOO_LOCAL, EELOO_LIMITED,
-    KERBOL_LOCAL, KERBOL_LIMITED;
+    KERBOL_LIMITED;
 
     public float recoveryMultiplier() {
         return switch (name().substring(0, 5)) {

@@ -1,21 +1,36 @@
 package kerbals;
 
-import missions.Mission;
+import java.util.StringJoiner;
 
 public class FlightLog {
 
-    private final Mission mission;
+    private static final String DELIMITER = ":fl:";
+
+    private final String missionName;
     private final float expGained;
 
     private String notes;
 
-    public FlightLog(Mission mission, float expGained) {
-        this.mission = mission;
+    public FlightLog(String mission, float expGained) {
+        this.missionName = mission;
         this.expGained = expGained;
     }
 
-    public Mission getMission() {
-        return mission;
+    public static FlightLog fromString(String s) {
+        String[] split = s.split(DELIMITER);
+        if (split.length != 2) return null;
+        return new FlightLog(split[0], Float.parseFloat(split[1]));
+    }
+
+    public static String toString(FlightLog log) {
+        return new StringJoiner(DELIMITER)
+                .add(log.missionName)
+                .add(Float.toString(log.expGained))
+                .toString();
+    }
+
+    public String getMissionName() {
+        return missionName;
     }
 
     public float getExpGained() {

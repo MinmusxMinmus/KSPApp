@@ -1,74 +1,57 @@
 package vessels;
 
-import other.Listable;
+import other.KSPObject;
 
-public abstract class Vessel implements Listable {
+import java.util.Collection;
+import java.util.LinkedList;
 
-    /**
-     * Vessel name. Must not include any modifiers, just the ship name.
-     */
-    private final String name;
+public abstract class Vessel extends KSPObject {
+
+    public static final String CONCEPT_STRING = "VesselConcept";
+    public static final String INSTANCE_STRING = "VesselInstance";
+
     /**
      * Vessel purpose. Roughly indicates the way a vessel is intended to work.
      */
     private final VesselType type;
+    /**
+     * Concept iteration, roughly indicates the amount of change between the same family of ships.
+     */
+    private int iteration = 0;
 
     /** New vessel from scratch.
-     * @param name Vessel name.
      * @param type Rough description of the vessel's purpose
      */
-    public Vessel(String name, VesselType type) {
-        this.name = name;
+    public Vessel(VesselType type, int iteration) {
         this.type = type;
+        this.iteration = iteration;
     }
-
 
     public static String[] getFieldNames() {
         return new String[]{"Name", };
     }
 
-    public String getName() {
-        return name;
-    }
 
     public VesselType getType() {
         return type;
     }
 
-    @Override
-    public String getTextRepresentation() {
-        return name;
-    }
+    public abstract String getName();
 
     @Override
-    public int getFieldCount() {
-        return 2;
+    public Collection<String> toStorableCollection() {
+        Collection<String> ret = new LinkedList<>();
+        ret.add(this.getClass().getSimpleName());
+        ret.add(new LinkedList<>(super.toStorableCollection()).get(0));
+        return ret;
     }
 
-    @Override
-    public String getFieldName(int index) {
-        return switch (index) {
-            case 0 -> "Name";
-            case 1 -> "Type";
-            default -> null;
-        };
+    public int getIteration() {
+        return iteration;
     }
 
-    @Override
-    public String getFieldValue(int index) {
-        return switch (index) {
-            case 0 -> name;
-            case 1 -> type.toString();
-            default -> null;
-        };
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!this.getClass().equals(obj.getClass())) return false;
-        Vessel v = (Vessel) obj;
-        return this.getName().equals(v.getName());
+    public void newIteration() {
+        iteration++;
     }
 }
 
