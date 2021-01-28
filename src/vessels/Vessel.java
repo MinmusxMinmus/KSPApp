@@ -1,14 +1,12 @@
 package vessels;
 
+import other.ControllerInterface;
 import other.KSPObject;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
 public abstract class Vessel extends KSPObject {
-
-    public static final String CONCEPT_STRING = "VesselConcept";
-    public static final String INSTANCE_STRING = "VesselInstance";
 
     /**
      * Vessel purpose. Roughly indicates the way a vessel is intended to work.
@@ -22,28 +20,26 @@ public abstract class Vessel extends KSPObject {
     /** New vessel from scratch.
      * @param type Rough description of the vessel's purpose
      */
-    public Vessel(VesselType type, int iteration) {
+    public Vessel(ControllerInterface controllerInterface, VesselType type, int iteration) {
+        super(controllerInterface);
         this.type = type;
         this.iteration = iteration;
-    }
-
-    public static String[] getFieldNames() {
-        return new String[]{"Name", };
-    }
-
-
-    public VesselType getType() {
-        return type;
     }
 
     public abstract String getName();
 
     @Override
     public Collection<String> toStorableCollection() {
-        Collection<String> ret = new LinkedList<>();
-        ret.add(this.getClass().getSimpleName());
-        ret.add(new LinkedList<>(super.toStorableCollection()).get(0));
+        Collection<String> ret = new LinkedList<>(super.toStorableCollection());
+
+        ret.add(type.name());
+        ret.add(Integer.toString(iteration));
+
         return ret;
+    }
+
+    public VesselType getType() {
+        return type;
     }
 
     public int getIteration() {

@@ -1,6 +1,8 @@
 package gui;
 
 import controller.GUIController;
+import other.Editable;
+import other.KSPObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,7 @@ public abstract class KSPGUI extends JFrame {
     protected static final String MAIN_SCREEN = "KSP Autism App";
 
     protected final GUIController controller;
+    protected Editable edit;
 
     public KSPGUI(GUIController controller, String title) {
         this.controller = controller;
@@ -34,18 +37,28 @@ public abstract class KSPGUI extends JFrame {
      * @return true if the user clicked on "Yes", false otherwise.
      */
     protected boolean ask(String title, String message) {
-        int ret = JOptionPane.showOptionDialog(getContentPane(),
+        return JOptionPane.showOptionDialog(getContentPane(),
                 message,
                 title,
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 null,
-                null);
-        return ret == JOptionPane.YES_OPTION;
+                null) == JOptionPane.YES_OPTION;
     }
 
     protected void say(String message) {
         JOptionPane.showMessageDialog(getContentPane(), message);
+    }
+
+    protected String askString(String title, String message) {
+        return JOptionPane.showInputDialog(getContentPane(),
+                message,
+                title,
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void setEdit(Editable edit) {
+        this.edit = edit;
     }
 }

@@ -1,11 +1,13 @@
 package vessels;
 
+import other.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VesselConcept extends Vessel {
+public class VesselConcept extends Vessel implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 8; // ALWAYS ACCOUNT FOR DESCRIPTION, IN THIS CASE PARENT CLASS TOO
+    public static final int ENCODE_FIELD_AMOUNT = 9; // ALWAYS ACCOUNT FOR DESCRIPTION, IN THIS CASE PARENT CLASS TOO
 
     public static final String DELIMITER = ":VC:";
 
@@ -16,7 +18,7 @@ public class VesselConcept extends Vessel {
     /**
      * Parent vessel, from which the current concept is inspired on. A null value indicates a brand new concept.
      */
-    private final String parentConcept;
+    private String parentConcept;
     /**
      * List containing the different changes in the concept's iteration history.
      */
@@ -29,6 +31,9 @@ public class VesselConcept extends Vessel {
      * Vessel's designed itinerary. Represented by the different locations the ship may find itself in
      */
     private final Set<Destination> destinations;
+    private final KSPDate creationDate;
+
+    private VesselConcept parentConceptObj;
 
 
     /** Generates a new concept from scratch, which means that it's not based off of any previous craft.
@@ -37,17 +42,16 @@ public class VesselConcept extends Vessel {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(String name,
-                         VesselType type,
-                         Destination[] destinations,
-                         VesselProperty... properties) {
-        this(type,
+    public VesselConcept(ControllerInterface controller, String name, VesselType type, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
+        this(controller,
+                type,
                 0,
                 name,
-                null,
+                "None",
                 new LinkedList<>(),
                 Arrays.stream(properties).collect(Collectors.toUnmodifiableSet()),
-                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()));
+                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()),
+                creationDate);
     }
 
     /** Generates a new concept based on an existing model.
@@ -55,17 +59,16 @@ public class VesselConcept extends Vessel {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(String name,
-                         VesselConcept vessel,
-                         Destination[] destinations,
-                         VesselProperty... properties) {
-        this(vessel.getType(),
+    public VesselConcept(ControllerInterface controller, String name, VesselConcept vessel, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
+        this(controller,
+                vessel.getType(),
                 0,
                 name,
                 vessel.getName(),
                 new LinkedList<>(),
                 Arrays.stream(properties).collect(Collectors.toUnmodifiableSet()),
-                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()));
+                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()),
+                creationDate);
     }
 
     /** Private constructor implementation.
@@ -75,39 +78,44 @@ public class VesselConcept extends Vessel {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    private VesselConcept(VesselType type,
+    private VesselConcept(ControllerInterface controller,
+                          VesselType type,
                           int iteration,
                           String name,
                           String parentConcept,
                           List<IterationChange> iterationChanges,
                           Set<VesselProperty> properties,
-                          Set<Destination> destinations) {
-        super(type, iteration);
+                          Set<Destination> destinations,
+                          KSPDate creationDate) {
+        super(controller, type, iteration);
         this.name = name;
         this.parentConcept = parentConcept;
         this.iterationChanges = iterationChanges;
         this.properties = properties;
         this.destinations = destinations;
+        this.creationDate = creationDate;
     }
 
     /** Generates a concept from a list of fields stored in persistence.
      * @param fields List of the vessel's fields
      */
-    public VesselConcept(LinkedList<String> fields) {
-        this(VesselType.valueOf(fields.get(1)),
+    public VesselConcept(ControllerInterface controller, LinkedList<String> fields) {
+        this(controller,
+                VesselType.valueOf(fields.get(1)),
                 Integer.parseInt(fields.get(2)),
                 fields.get(3),
-                fields.get(4).equals("(none)") ? null : fields.get(4),
-                changesFromString(fields.get(5)),
+                fields.get(4),
+                changesFromString(controller, fields.get(5)),
                 propertiesFromString(fields.get(6)),
-                destinationsFromString(fields.get(7))
+                destinationsFromString(fields.get(7)),
+                KSPDate.fromString(controller, fields.get(8))
         );
         setDescription(fields.get(0));
     }
 
-    private static List<IterationChange> changesFromString(String s) {
+    private static List<IterationChange> changesFromString(ControllerInterface controller, String s) {
         if (s.equals("(none)")) return new LinkedList<>();
-        return Arrays.stream(s.split(DELIMITER)).map(IterationChange::fromString).collect(Collectors.toList());
+        return Arrays.stream(s.split(DELIMITER)).map(ss -> IterationChange.fromString(controller, ss)).collect(Collectors.toList());
     }
 
     private String changesToString() {
@@ -164,53 +172,59 @@ public class VesselConcept extends Vessel {
     }
 
     @Override
+    public void ready() {
+        parentConceptObj = getController().getConcept(parentConcept);
+        if (parentConceptObj != null) parentConceptObj.addEventListener(this);
+    }
+
+    @Override
     public String getTextRepresentation() {
         return getName() + " Mk" + (getIteration() + 1);
     }
 
     @Override
-    public int getFieldCount() {
-        return 4;
-    }
+    public List<Field> getFields() {
+        List<Field> fields = new LinkedList<>();
 
-    @Override
-    public String getFieldName(int index) {
-        return switch (index) {
-            case 0 -> "Name";
-            case 1 -> "Iteration";
-            case 2 -> "Type";
-            case 3 -> "Parent design";
-            default -> null;
-        };
-    }
+        fields.add(new Field("Name", name));
+        fields.add(new Field("Iteration", "Mk" + getIteration()));
+        fields.add(new Field("Type", getType().toString()));
+        fields.add(new Field("Parent design", parentConcept));
+        for (VesselProperty property : properties) fields.add(new Field("Property", property.toString()));
+        for (Destination d : destinations) fields.add(new Field("Designed to work on:", d.toString()));
 
-    @Override
-    public String getFieldValue(int index) {
-        return switch (index) {
-            case 0 -> name;
-            case 1 -> "Mk" + getIteration();
-            case 2 -> getType().toString();
-            case 3 -> (parentConcept == null) ? "(None)" : parentConcept;
-            default -> null;
-        };
+        return fields;
     }
 
     @Override
     public Collection<String> toStorableCollection() {
         Collection<String> ret = new LinkedList<>(super.toStorableCollection());
 
-        ret.add(getType().name());
-        ret.add(Integer.toString(getIteration()));
         ret.add(name);
-        ret.add(parentConcept == null ? "(none)" : parentConcept);
+        ret.add(parentConcept);
         ret.add(changesToString());
         ret.add(propertiesToString());
         ret.add(destinationsToString());
+        ret.add(creationDate.toStorableString());
 
         return ret;
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override // TODO I put this so I didn't have to make a new class for VesselCreator.designModel. Fix later
+    public String toString() {
+        return getTextRepresentation();
+    }
+
+    @Override
+    public void onDeletion(KSPObjectDeletionEvent event) {
+        // Deleted parent concept
+        if (event.getSource() instanceof VesselConcept) {
+            parentConceptObj = null;
+            parentConcept = "[REDACTED]";
+        }
     }
 }

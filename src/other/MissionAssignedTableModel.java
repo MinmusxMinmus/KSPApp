@@ -27,7 +27,9 @@ public class MissionAssignedTableModel extends AbstractTableModel {
     }
 
     public void removeKerbal(Kerbal kerbal) {
-        kerbalList.remove(kerbal);
+        int index = kerbalList.indexOf(kerbal);
+        kerbalList.remove(index);
+        positionList.remove(index);
         fireTableDataChanged();
     }
 

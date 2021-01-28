@@ -2,6 +2,8 @@ package other;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringJoiner;
 
 public class KSPDate extends KSPObject {
@@ -16,7 +18,8 @@ public class KSPDate extends KSPObject {
     private final int second;
     private final OffsetDateTime realDate;
 
-    public KSPDate(int year, int day, int hour, int minute, int second, OffsetDateTime date) {
+    public KSPDate(ControllerInterface controller, int year, int day, int hour, int minute, int second, OffsetDateTime date) {
+        super(controller);
         this.year = year;
         this.day = day;
         this.hour = hour;
@@ -25,19 +28,20 @@ public class KSPDate extends KSPObject {
         this.realDate = date;
     }
 
-    public KSPDate(int year, int day, int hour, int minute, int second) {
-        this(year, day, hour, minute, second, OffsetDateTime.now());
+    public KSPDate(ControllerInterface controller, int year, int day, int hour, int minute, int second) {
+        this(controller, year, day, hour, minute, second, OffsetDateTime.now());
     }
 
-    public KSPDate(int year, int day, OffsetDateTime date) {
-        this(year, day, 0, 0, 0, date);
+    public KSPDate(ControllerInterface controller, int year, int day, OffsetDateTime date) {
+        this(controller, year, day, 0, 0, 0, date);
     }
 
-    public KSPDate(int year, int day) {
-        this(year, day, OffsetDateTime.now());
+    public KSPDate(ControllerInterface controller, int year, int day) {
+        this(controller, year, day, OffsetDateTime.now());
     }
 
-    public KSPDate(String stored) {
+    public KSPDate(ControllerInterface controller, String stored) {
+        super(controller);
         String[] parts = stored.split(DELIMITER);
         this.year = Integer.parseInt(parts[0]);
         this.day = Integer.parseInt(parts[1]);
@@ -82,49 +86,44 @@ public class KSPDate extends KSPObject {
                 .toString();
     }
 
-    public static KSPDate fromString(String s) {
+    public static KSPDate fromString(ControllerInterface controller, String s) {
         if (s.split(DELIMITER).length != ENCODE_FIELD_AMOUNT) return null;
-        return new KSPDate(s);
+        return new KSPDate(controller, s);
     }
 
     @Override
-    public int getFieldCount() {
-        return 6;
-    }
+    public void ready() { }
 
     @Override
-    public String getFieldName(int index) {
-        return switch (index) {
-            case 0 -> "Year";
-            case 1 -> "Day";
-            case 2 -> "Hour";
-            case 3 -> "Minute";
-            case 4 -> "Second";
-            case 5 -> "IRL date";
-            default -> "???";
-        };
-    }
+    public List<Field> getFields() {
+        List<Field> fields = new LinkedList<>();
 
-    @Override
-    public String getFieldValue(int index) {
-        return switch (index) {
-            case 0 -> Integer.toString(year);
-            case 1 -> Integer.toString(day);
-            case 2 -> Integer.toString(hour);
-            case 3 -> Integer.toString(minute);
-            case 4 -> Integer.toString(second);
-            case 5 -> realDate.toString();
-            default -> "???";
-        };
+        fields.add(new Field("Year", Integer.toString(year)));
+        fields.add(new Field("Day", Integer.toString(day)));
+        fields.add(new Field("Hour", Integer.toString(hour)));
+        fields.add(new Field("Minute", Integer.toString(minute)));
+        fields.add(new Field("Second", Integer.toString(second)));
+        fields.add(new Field("IRL date", realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss"))));
+
+        return fields;
     }
 
     @Override
     public String getTextRepresentation() {
-        return  "Y" + year +
-                "D" + day +
-                "H" + hour +
-                "M" + minute +
-                "S" + second +
-                " (" + realDate.format(DateTimeFormatter.BASIC_ISO_DATE) + ")";
+        return   "Y" + year +
+                " D" + day +
+                " H" + hour +
+                " M" + minute +
+                " S" + second +
+                " (" + realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss")) + ")";
+    }
+
+    public String getTextRepresentation(boolean realDate) {
+        return realDate ? getTextRepresentation() :
+                 "Y" + year +
+                " D" + day +
+                " H" + hour +
+                " M" + minute +
+                " S" + second;
     }
 }

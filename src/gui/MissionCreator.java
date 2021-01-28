@@ -28,7 +28,6 @@ public class MissionCreator extends KSPGUI {
     private JLabel nameLabel;
     private JTextField nameTextField;
     private JPanel descriptionPanel;
-    private JLabel descriptionLabel;
     private JTextArea descriptionTextArea;
     private JPanel vesselPanel;
     private JLabel activeVesselsLabel;
@@ -41,30 +40,30 @@ public class MissionCreator extends KSPGUI {
     private JLabel assignedCrewLabel;
     private JScrollPane assignedCrewPane;
     private JTable crewSelectedTable;
-    private JLabel addCrewMembersLabel;
-    private JPanel startPanel;
-    private JPanel yearPanel;
-    private JLabel yearLabel;
     private JTextField yearTextField;
-    private JPanel dayPanel;
-    private JLabel dayLabel;
     private JTextField dayTextField;
-    private JPanel hourPanel;
-    private JLabel hourLabel;
     private JTextField hourTextField;
-    private JPanel minutePanel;
-    private JLabel minuteLabel;
     private JTextField minuteTextField;
-    private JLabel secondLabel;
     private JTextField secondTextField;
     private JPanel buttonsPanel;
     private JButton OKButton;
     private JButton cancelButton;
     private JPanel descriptionAreaPanel;
-    private JPanel secondPanel;
     private JComboBox<VesselConcept> vesselDesignsComboBox;
     private JLabel vesselDesignsLabel;
     private JCheckBox newVesselCheckBox;
+    private JPanel creationDatePanel;
+    private JPanel yearPanel;
+    private JLabel yearLabel;
+    private JPanel dayPanel;
+    private JLabel dayLabel;
+    private JPanel hourPanel;
+    private JLabel hourLabel;
+    private JPanel minutePanel;
+    private JLabel minuteLabel;
+    private JPanel secondPanel;
+    private JLabel secondLabel;
+    private JCheckBox preciseTimeCheckBox;
 
     // Custom components
     private final MissionFreeTableModel freeModel; // TODO replace with abstract class and hierarchy
@@ -86,8 +85,8 @@ public class MissionCreator extends KSPGUI {
         crewSelectedTable.setModel(assignedModel);
 
         // Vessel combo box reset
-        for (VesselInstance vi : controller.getVesselInstances()) activeVesselsComboBox.addItem(vi);
-        for (VesselConcept vc : controller.getVesselConcepts()) vesselDesignsComboBox.addItem(vc);
+        for (VesselInstance vi : controller.getInstances()) activeVesselsComboBox.addItem(vi);
+        for (VesselConcept vc : controller.getConcepts()) vesselDesignsComboBox.addItem(vc);
 
         // Good luck charm
         revalidate();
@@ -97,6 +96,16 @@ public class MissionCreator extends KSPGUI {
     }
 
     private void listenerSetup() {
+
+        // Precise time listener
+        preciseTimeCheckBox.addItemListener(e -> {
+            hourTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            secondTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            hourLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            secondLabel.setEnabled(preciseTimeCheckBox.isSelected());
+        });
 
         // New vessel listener
         newVesselCheckBox.addItemListener(e -> {
@@ -130,8 +139,11 @@ public class MissionCreator extends KSPGUI {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = crewSelectedTable.rowAtPoint(e.getPoint());
+                int col = crewSelectedTable.columnAtPoint(e.getPoint());
                 if (row >= 0)
-                    if (row < assignedModel.getRowCount()) { // -1, because of the position text field TODO ????
+                    if (row < assignedModel.getRowCount() // Is a row on the table
+                            && col != assignedModel.getColumnCount() - 1 // Is not the last cell (Position in the mission)
+                            && crewSelectedTable.getSelectedRow() == row) { // Double click
                         Kerbal k = assignedModel.getKerbal(row);
                         assignedModel.removeKerbal(k);
                         freeModel.addKerbal(k);
@@ -166,8 +178,12 @@ public class MissionCreator extends KSPGUI {
                     || description.strip().equals("")
                     || vessel == null
                     || year.strip().equals("")
-                    || day.strip().equals("")) {
-                JOptionPane.showMessageDialog(mainPanel, "Please fill out all text fields!");
+                    || day.strip().equals("")
+                    || preciseTimeCheckBox.isSelected() && (
+                    hour.strip().equals("")
+                            || minute.strip().equals("")
+                            || second.strip().equals(""))) {
+                say("Please fill out all text fields!");
                 return;
             }
 
@@ -175,18 +191,20 @@ public class MissionCreator extends KSPGUI {
             if (!ask("Create mission", "Are you sure you want to create this mission?")) return;
 
             // Date creation
-            KSPDate date = (hour.strip().equals("") || minute.strip().equals("") || second.strip().equals(""))
-                    ? new KSPDate(parseInt(year),
+            KSPDate date = (!preciseTimeCheckBox.isSelected())
+                    ? new KSPDate(controller,
+                    parseInt(year),
                     parseInt(day),
                     OffsetDateTime.now())
-                    : new KSPDate(parseInt(year),
+                    : new KSPDate(controller,
+                    parseInt(year),
                     parseInt(day), parseInt(hour),
                     parseInt(minute),
                     parseInt(second),
                     OffsetDateTime.now());
 
             // Mission creation
-            controller.addMission(name,
+            controller.createMission(name,
                     description,
                     vessel,
                     assignedModel.getCrew(),

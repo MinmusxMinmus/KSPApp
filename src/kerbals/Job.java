@@ -6,10 +6,10 @@ public enum Job {
     PILOT, SCIENTIST, ENGINEER;
 
     public static Job fromString(String s) {
-        return switch (s.substring(0, 1)) {
-            case "P" -> PILOT;
-            case "S" -> SCIENTIST;
-            case "E" -> ENGINEER;
+        return switch (s.toLowerCase(Locale.ROOT).substring(0, 1)) {
+            case "p" -> PILOT;
+            case "s" -> SCIENTIST;
+            case "e" -> ENGINEER;
             default -> PILOT;
         };
     }

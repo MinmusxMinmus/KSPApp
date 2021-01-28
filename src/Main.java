@@ -1,23 +1,31 @@
 import controller.GUIController;
 import gui.MainScreen;
 import kerbals.Job;
+import other.Destination;
 import other.KSPDate;
-import vessels.Destination;
 import vessels.VesselType;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
         try {
             GUIController c = new GUIController();
+            Random random = new Random();
 
-//            c.addKerbalHired("Tester", true, Job.PILOT, new KSPDate(0, 0));
-//            c.addKerbalHired("Testina", false, Job.ENGINEER, new KSPDate(0, 0));
+//            c.createKerbalHired("Tester", true, false, Job.PILOT, new KSPDate(c, 0, 0));
+//            c.createKerbalHired("Testina", false, true, Job.ENGINEER, new KSPDate(c, 0, 0));
 //
-//            c.addVesselConcept("Penis pincher", VesselType.LANDER, new Destination[]{Destination.KERBIN_LOCAL});
-//            c.addVesselInstance(c.getVesselConcept("Penis pincher"));
-//            c.addVesselInstance(c.getVesselConcept("Penis pincher"));
+//            c.createConcept("Penis pincher", VesselType.LANDER, null, new KSPDate(c, 0, 0, OffsetDateTime.now()), new Destination[]{Destination.KERBIN_LOCAL});
+//
+//            c.createInstance(c.getConcept("Penis pincher"), random.nextInt());
+//            c.createInstance(c.getConcept("Penis pincher"), random.nextInt());
+//
+//            long id = c.createInstance(c.getConcept("Penis pincher"), random.nextInt());
+//
+//            c.getInstance(id).destroyed("Jeb forgot to close the hatch");
 //
 //            c.saveChanges();
 

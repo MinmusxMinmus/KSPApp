@@ -1,4 +1,6 @@
-package vessels;
+package other;
+
+import java.util.Locale;
 
 public enum Destination {
     KERBIN_LOCAL, KERBIN_LIMITED,
@@ -31,5 +33,11 @@ public enum Destination {
             case "EELOO" -> 10.0f;
             default -> 0.0f;
         };
+    }
+
+
+    @Override
+    public String toString() {
+        return name().charAt(0) + name().substring(1).toLowerCase(Locale.ROOT).replaceAll("_", " ");
     }
 }

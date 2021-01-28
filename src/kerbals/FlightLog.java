@@ -1,33 +1,49 @@
 package kerbals;
 
+import missions.Mission;
+import other.*;
+
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringJoiner;
 
-public class FlightLog {
+public class FlightLog extends KSPObject implements KSPObjectListener {
 
     private static final String DELIMITER = ":fl:";
+    private static final int ENCODE_FIELD_AMOUNT = 2;
 
-    private final String missionName;
+    private String missionName;
     private final float expGained;
 
-    private String notes;
+    private Mission mission;
 
-    public FlightLog(String mission, float expGained) {
+    public FlightLog(ControllerInterface controller, String mission, float expGained) {
+        super(controller);
         this.missionName = mission;
         this.expGained = expGained;
     }
 
-    public static FlightLog fromString(String s) {
+    public FlightLog(ControllerInterface controller, String[] fields) {
+        super(controller);
+        this.missionName = fields[0];
+        this.expGained = Float.parseFloat(fields[1]);
+    }
+
+    public static FlightLog fromString(ControllerInterface controller, String s) {
         String[] split = s.split(DELIMITER);
-        if (split.length != 2) return null;
-        return new FlightLog(split[0], Float.parseFloat(split[1]));
+        if (split.length != ENCODE_FIELD_AMOUNT) return null;
+        return new FlightLog(controller, split);
     }
 
     public static String toString(FlightLog log) {
-        return new StringJoiner(DELIMITER)
-                .add(log.missionName)
-                .add(Float.toString(log.expGained))
-                .toString();
+        StringJoiner joiner = new StringJoiner(DELIMITER);
+
+        joiner.add(log.missionName);
+        joiner.add(Float.toString(log.expGained));
+
+        return joiner.toString();
     }
+
 
     public String getMissionName() {
         return missionName;
@@ -37,11 +53,33 @@ public class FlightLog {
         return expGained;
     }
 
-    public String getNotes() {
-        return notes;
+    @Override
+    public void ready() {
+        mission = getController().getMission(missionName);
+        if (mission != null) mission.addEventListener(this);
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    @Override
+    public List<Field> getFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Mission", missionName));
+        fields.add(new Field("Experience gained", Float.toString(expGained)));
+
+        return fields;
+    }
+
+    @Override
+    public String getTextRepresentation() {
+        return missionName + " (+" + expGained + "xp)";
+    }
+
+    @Override
+    public void onDeletion(KSPObjectDeletionEvent event) {
+        // Mission deletion
+        if (event.getSource() instanceof Mission) {
+            mission = null;
+            missionName = "[REDACTED]";
+        }
     }
 }

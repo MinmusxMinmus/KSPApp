@@ -3,17 +3,21 @@ package gui;
 import controller.GUIController;
 import kerbals.Kerbal;
 import missions.Mission;
+import other.Editable;
 import other.KSPObject;
 import other.MainSearchCellRenderer;
-import other.MainTableMultipleModel;
-import vessels.Vessel;
+import other.KSPObjectTableModel;
 import vessels.VesselConcept;
 import vessels.VesselInstance;
 
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainScreen extends KSPGUI {
 
@@ -21,6 +25,7 @@ public class MainScreen extends KSPGUI {
     private static final String MISSION_LIST = "Missions";
     private static final String VESSEL_CONCEPT_LIST = "Vessel concepts";
     private static final String VESSEL_INSTANCE_LIST = "Vessel instances";
+    private static final String CRASHED_INSTANCE_LIST = "Crashed vessels";
     // TODO add new item: edit here
 
     private JPanel mainPanel;
@@ -49,8 +54,8 @@ public class MainScreen extends KSPGUI {
 
 
     // Custom main components
-    private final DefaultComboBoxModel<KSPObject> searchModel = new DefaultComboBoxModel<>();
-    private final MainTableMultipleModel tableModel = new MainTableMultipleModel();
+    private final DefaultListModel<KSPObject> searchModel = new DefaultListModel<>();
+    private final KSPObjectTableModel tableModel = new KSPObjectTableModel();
     private final DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
     private String currentSelection;
 
@@ -72,6 +77,7 @@ public class MainScreen extends KSPGUI {
         comboBoxModel.addElement(MISSION_LIST);
         comboBoxModel.addElement(VESSEL_CONCEPT_LIST);
         comboBoxModel.addElement(VESSEL_INSTANCE_LIST);
+        comboBoxModel.addElement(CRASHED_INSTANCE_LIST);
         // TODO add new item: edit here
 
         // Search result list requires a model to insert and remove data
@@ -87,6 +93,16 @@ public class MainScreen extends KSPGUI {
 
     private void listenerSetup() {
 
+        // Focus listener
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                super.focusGained(e);
+                revalidate();
+                repaint();
+            }
+        });
+
         // Combo box list updater
         selectionComboBox.addActionListener(e -> {
             String edit = (String) selectionComboBox.getSelectedItem();
@@ -95,26 +111,16 @@ public class MainScreen extends KSPGUI {
             currentSelection = edit;
             searchModel.removeAllElements();
             switch (edit) {
-                case KERBAL_LIST -> {
-                    // Add astronauts to list
-                    List<Kerbal> kerbals = controller.getKerbals();
-                    searchModel.addAll(kerbals);
-                }
-                case MISSION_LIST -> {
-                    // Add missions to list
-                    List<Mission> missions = controller.getMissions();
-                    searchModel.addAll(missions);
-                }
-                case VESSEL_CONCEPT_LIST -> {
-                    // Add vessel concepts to list
-                    List<VesselConcept> vessels = controller.getVesselConcepts();
-                    searchModel.addAll(vessels);
-                }
-                case VESSEL_INSTANCE_LIST -> {
-                    // Add vessel concepts to list
-                    List<VesselInstance> vessels = controller.getVesselInstances();
-                    searchModel.addAll(vessels);
-                }
+                case KERBAL_LIST -> // Add astronauts to list
+                        searchModel.addAll(controller.getKerbals());
+                case MISSION_LIST -> // Add missions to list
+                        searchModel.addAll(controller.getMissions());
+                case VESSEL_CONCEPT_LIST -> // Add vessel concepts to list
+                        searchModel.addAll(controller.getConcepts());
+                case VESSEL_INSTANCE_LIST -> // Add vessel instances to list
+                        searchModel.addAll(controller.getInstances());
+                case CRASHED_INSTANCE_LIST -> // Add crashed instances to list
+                        searchModel.addAll(controller.getCrashedInstances());
                 // TODO add new item: edit here
             }
         });
@@ -136,26 +142,60 @@ public class MainScreen extends KSPGUI {
                     window = new MissionCreator(controller);
                     name = MISSION_CREATOR;
                 }
-                case VESSEL_CONCEPT_LIST, VESSEL_INSTANCE_LIST -> {
+                case VESSEL_CONCEPT_LIST -> {
                     window = new VesselCreator(controller);
                     name = VESSEL_CREATOR;
+                }
+                case VESSEL_INSTANCE_LIST, CRASHED_INSTANCE_LIST -> {
+                    say("To make a physical vessel, create a mission for it");
+                    return;
                 }
                 // TODO Add new item: edit here
                 default -> window = new MainScreen(controller);
             }
 
             window.appear(name);
-            reset();
         });
 
         // Edit button listener
         editButton.addActionListener(e -> {
-            // TODO
+            KSPObject object = searchList.getSelectedValue();
+            String s = (String) selectionComboBox.getSelectedItem();
+            if (object != null && s != null) {
+                EditWindow edit = new EditWindow("Editing " + s.toLowerCase(Locale.ROOT).substring(0, s.length()), (Editable) object, this);
+                edit.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        reset();
+                    }
+                });
+            }
         });
 
         // Delete button listener
         deleteButton.addActionListener(e -> {
-            // TODO
+            KSPObject object = searchList.getSelectedValue();
+            String s = (String) selectionComboBox.getSelectedItem();
+            if (object != null && s != null) {
+                boolean ask = ask("Delete " + s.toLowerCase(Locale.ROOT),
+                        "Are you sure you want to delete this "
+                                + s.substring(0, s.length() - 1).toLowerCase(Locale.ROOT) + "?");
+                if (!ask) return;
+                String status;
+                while (true) {
+                    status = askString("Deletion reason", """
+                            Please type the reason for the deletion.
+                            Try to keep it short and concise, as it has to somewhat fit in the display tables.
+                            Each category has its own way to interpret that reason, and because of that you should beaware of the different formats.
+                            Kerbals: Reason of suspension (KIAs are managed by missions)
+                            Missions: Reason of classification.
+                            Vessel concepts: Reason of deletion
+                            Vessel instances: Reason for no longer being tracked (Vessel destruction is handled by mission)""");
+                    if (status != null) break;
+                    say("Please input a reason!");
+                }
+                controller.delete(object, status);
+            }
         });
 
         // Search selection listener
