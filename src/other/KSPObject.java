@@ -1,5 +1,10 @@
 package other;
 
+import other.interfaces.ControllerInterface;
+import other.interfaces.Displayable;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Vector;

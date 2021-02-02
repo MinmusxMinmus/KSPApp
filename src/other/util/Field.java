@@ -1,4 +1,4 @@
-package other;
+package other.util;
 
 public final class Field {
     private final String name;

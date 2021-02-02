@@ -1,4 +1,6 @@
-package other;
+package other.display;
+
+import other.KSPObject;
 
 import javax.swing.*;
 import java.awt.*;

@@ -3,6 +3,12 @@ package missions;
 import controller.GUIController;
 import kerbals.Kerbal;
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+import other.util.CelestialBody;
+import other.util.Field;
+import other.util.KSPDate;
 import vessels.VesselConcept;
 import vessels.VesselInstance;
 
@@ -11,60 +17,59 @@ import java.util.stream.Collectors;
 
 public class Mission extends KSPObject implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 8; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 7; // ALWAYS ACCOUNT FOR DESCRIPTION
     private static final String DELIMITER = ":m:";
 
-    private final String name;
-    private final String vessel;
+    // Persistent fields
+    private String name;
     private long vesselId;
     private final Map<String, CrewDetails> crew;
-    private final KSPDate missionStart;
-    private final List<MissionEvent> eventLog;
+    private final KSPDate start;
+    private final List<MissionEvent> events;
     private boolean active = true;
 
     // Dynamic fields
-    private VesselInstance vesselInstance;
-    private Set<Kerbal> crewObjects;
+    private VesselInstance vesselObj;
+    private Set<Kerbal> crewObjs;
 
+    // Constructors
     /** Generates a mission from scratch, with a brand new vessel.
      * @param name Mission name
      * @param concept The vessel concept
      * @param crew A map corresponding to the crew and their roles
-     * @param missionStart Mission start date
+     * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, VesselConcept concept, Map<Kerbal, String> crew, KSPDate missionStart) {
+    public Mission(ControllerInterface controller, String name, VesselConcept concept, Map<Kerbal, String> crew, KSPDate start) {
         super(controller);
         this.name = name;
-        this.vessel = concept.getName();
         this.vesselId = new Random(this.hashCode()).nextLong();
         // Creating the vessel
         Kerbal[] crew2 = new Kerbal[crew.keySet().size()];
         crew.keySet().toArray(crew2);
-        controller.addInstance(new VesselInstance(controller, concept, vesselId, crew2));
+        controller.addInstance(new VesselInstance(controller, concept, vesselId, this, crew2)); // TODO this might break, since VesselInstance accesses mission.getName()
         // Formatting crew map
         TreeMap<String, CrewDetails> crew3 = new TreeMap<>();
-        crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), missionStart)));
+        crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
         this.crew = crew3;
-        this.missionStart = missionStart;
-        eventLog = new LinkedList<>();
+        this.start = start;
+        events = new LinkedList<>();
     }
 
     /** Generates a mission from scratch, launched from an existing vessel.
      * @param name Mission name
      * @param vesselId ID of the specific vessel
      * @param crew A map corresponding to the crew and their roles
-     * @param missionStart Mission start date
+     * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, long vesselId, Map<Kerbal, String> crew, KSPDate missionStart) {
+    public Mission(ControllerInterface controller, String name, long vesselId, Map<Kerbal, String> crew, KSPDate start) {
         super(controller);
         this.name = name;
-        this.vessel = controller.getInstance(vesselId).getConcept();
         this.vesselId = vesselId;
         TreeMap<String, CrewDetails> crew2 = new TreeMap<>();
-        crew.keySet().forEach(k -> crew2.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), missionStart)));
+        crew.keySet().forEach(k -> crew2.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
         this.crew = crew2;
-        this.missionStart = missionStart;
-        eventLog = new LinkedList<>();
+        this.start = start;
+        events = new LinkedList<>();
     }
 
     /** Generate a mission from a list of fields stored in persistence. =
@@ -73,57 +78,37 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public Mission(GUIController controller, LinkedList<String> fields) {
         super(controller);
         this.name = fields.get(1);
-        this.vessel = fields.get(2);
-        this.vesselId = Long.parseLong(fields.get(3));
-        this.crew = crewFromString(fields.get(4));
-        this.missionStart = KSPDate.fromString(controller, fields.get(5));
-        this.eventLog = eventLogFromString(fields.get(6));
-        this.active = Boolean.parseBoolean(fields.get(7));
-        setDescription(fields.get(0));
-    }
+        this.vesselId = Long.parseLong(fields.get(2));
 
-    private String crewToString() {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
-        for (Map.Entry<String, CrewDetails> e : crew.entrySet()) {
-            joiner.add(e.getKey() + "<>" + CrewDetails.toString(e.getValue()));
-        }
-        return joiner.toString();
-    }
-
-    private Map<String, CrewDetails> crewFromString(String s) {
         Map<String, CrewDetails> ret = new HashMap<>();
-        Set<String> entries = new HashSet<>(Arrays.asList(s.split(DELIMITER)));
+        Set<String> entries = new HashSet<>(Arrays.asList(fields.get(3).split(DELIMITER)));
         for (String e : entries) {
             String[] pair = e.split("<>");
             if (pair.length != 2) continue;
             ret.put(pair[0], CrewDetails.fromString(getController(), pair[1]));
         }
-        return ret;
-    }
+        this.crew = ret;
+        this.start = KSPDate.fromString(controller, fields.get(4));
 
-    private List<MissionEvent> eventLogFromString(String s) {
-        if (s.equals("(none)")) return new LinkedList<>();
-       List<MissionEvent> ret = new LinkedList<>();
-       String[] events = s.split(DELIMITER);
-       for (String event : events) ret.add(MissionEvent.fromString(getController(), event));
-       return ret;
-    }
-
-    private String eventLogToString() {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
-        for (MissionEvent event : eventLog) {
-            Collection<String> det = event.toStorableCollection();
-            StringJoiner subj = new StringJoiner(MissionEvent.DELIMITER);
-            for (String s : det) subj.add(s);
-            joiner.add(subj.toString());
+        List<MissionEvent> result;
+        String s = fields.get(6);
+        if (s.equals("(none)")) {
+            result = new LinkedList<>();
+        } else {
+            List<MissionEvent> ret1 = new LinkedList<>();
+            String[] events = s.split(DELIMITER);
+            for (String event : events) ret1.add(MissionEvent.fromString(getController(), event));
+            result = ret1;
         }
-        return joiner.toString().equals("") ? "(none)" : joiner.toString();
+        this.events = result;
+        this.active = Boolean.parseBoolean(fields.get(7));
+        setDescription(fields.get(0));
     }
 
-
+    // Logic methods
     public void kerbalRescued(Kerbal kerbal, KSPDate dateRescued) {
         this.crew.put(kerbal.getName(), new CrewDetails(getController(), kerbal.getName(), "Rescued subject", dateRescued));
-        logEvent(new MissionEvent(getController(), getName(), vesselInstance.isInSpace(), vesselInstance.getLocation(), "Rescued " + kerbal.getName()));
+        logEvent(new MissionEvent(getController(), getName(), vesselObj.isInSpace(), vesselObj.getLocation(), "Rescued " + kerbal.getName()));
     }
 
     /** Executed whenever a kerbal unfortunately goes KIA. This method assumes the cause of death to not be vessel crash.
@@ -141,9 +126,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
      */
     public void vesselDestroyed(String details) {
         // Victims
-        String deathDetails = "Died during destruction of " + vesselInstance.getName();
+        String deathDetails = "Died during destruction of " + vesselObj.getName();
         // Vessel
-        vesselInstance.destroyed(details);
+        vesselObj.crash(details);
         // Dynamic vessel is not set to null, because the vessel is not removed from memory.3
     }
 
@@ -155,15 +140,15 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.active = false;
 
         // All crew in vessel check
-        if (crew.size() != vesselInstance.getCrew().size())
-            System.err.println("WARNING: Not all crew is in the current vessel. All crew: " + crew.size() + ", vessel crew: " + vesselInstance.getCrew().size());
+        if (crew.size() != vesselObj.getCrew().size())
+            System.err.println("WARNING: Not all crew is in the current vessel. All crew: " + crew.size() + ", vessel crew: " + vesselObj.getCrew().size());
 
         // Recover vessel
-        if (vesselInstance != null) vesselInstance.recover();
-        vesselInstance = null;
+        if (vesselObj != null) vesselObj.recover();
+        vesselObj = null;
 
         // Log nominal end
-        logEvent(new MissionEvent(getController(), name, vesselInstance.isInSpace(), vesselInstance.getLocation(), "Nominal end: " + status));
+        logEvent(new MissionEvent(getController(), name, vesselObj.isInSpace(), vesselObj.getLocation(), "Nominal end: " + status));
     }
 
     /** Executed when a mission ends via total destruction of all crew members and vessel involved.
@@ -173,22 +158,20 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.active = false;
 
         // All crew members + vessel should be gone
-        if (!crewObjects.isEmpty()) System.err.println("WARNING: Total destruction mission end with kerbal objects still around. Mission: " + name + ", crew count: " + crewObjects.size());
+        if (!crewObjs.isEmpty()) System.err.println("WARNING: Total destruction mission end with kerbal objects still around. Mission: " + name + ", crew count: " + crewObjs.size());
         if (!crew.isEmpty()) System.err.println("WARNING: Total destruction mission end with kerbal names still around. Mission: " + name + ", crew count: " + crew.keySet().size());
-        if (vesselInstance != null) System.err.println("WARNING: Total destruction mission end with vessel instance still around. Mission: " + name + ", instance: " + vesselInstance.getName());
-        if (vessel != null) System.err.println("WARNING: Total destruction mission end with vessel name still around. Mission: " + name + ", vessel name " + vessel);
+        if (vesselObj != null) System.err.println("WARNING: Total destruction mission end with vessel instance still around. Mission: " + name + ", instance: " + vesselObj.getName());
         // TODO perhaps replace warnings with a return false? This shouldn't happen anyway, it's for debugging.
 
         // Log catastrophic end
-        logEvent(new MissionEvent(getController(), name, vesselInstance.isInSpace(), vesselInstance.getLocation(), "Catastrophic end: " + status));
+        logEvent(new MissionEvent(getController(), name, vesselObj.isInSpace(), vesselObj.getLocation(), "Catastrophic end: " + status));
     }
 
     public void logEvent(MissionEvent event) {
-        eventLog.add(event);
+        events.add(event);
     }
 
-
-
+    // Getter/Setter methods
     public String getName() {
         return name;
     }
@@ -209,25 +192,37 @@ public class Mission extends KSPObject implements KSPObjectListener {
         return crew.get(kerbal.getName()).getExpGained();
     }
 
-    public List<MissionEvent> getEventLog() {
-        return Collections.unmodifiableList(eventLog);
+    public List<MissionEvent> getEvents() {
+        return Collections.unmodifiableList(events);
     }
 
-    public KSPDate getMissionStart() {
-        return missionStart;
+    public KSPDate getStart() {
+        return start;
     }
 
-
+    // Overrides
     @Override
     public Collection<String> toStorableCollection() {
         Collection<String> ret = super.toStorableCollection();
 
         ret.add(name);
-        ret.add(vessel);
+
         ret.add(Long.toString(vesselId));
-        ret.add(crewToString());
-        ret.add(missionStart.toStorableString());
-        ret.add(eventLogToString());
+        StringJoiner joiner = new StringJoiner(DELIMITER);
+        for (Map.Entry<String, CrewDetails> e : crew.entrySet()) {
+            joiner.add(e.getKey() + "<>" + CrewDetails.toString(e.getValue()));
+        }
+        ret.add(joiner.toString());
+        ret.add(start.toStorableString());
+
+        StringJoiner joiner1 = new StringJoiner(DELIMITER);
+        for (MissionEvent event : events) {
+            Collection<String> det = event.toStorableCollection();
+            StringJoiner subj = new StringJoiner(MissionEvent.DELIMITER);
+            for (String s : det) subj.add(s);
+            joiner1.add(subj.toString());
+        }
+        ret.add(joiner1.toString().equals("") ? "(none)" : joiner1.toString());
         ret.add(Boolean.toString(active));
 
         return ret;
@@ -241,52 +236,51 @@ public class Mission extends KSPObject implements KSPObjectListener {
     @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
-        VesselInstance vessel = getController().getInstance(vesselId);
-
-        // TODO format fields for completed missions
 
         fields.add(new Field("Name", name));
-        fields.add(new Field("Mission start", missionStart.getTextRepresentation(true)));
-        fields.add(new Field("Vessel", vesselInstance.getTextRepresentation()));
+        fields.add(new Field("Mission start", start.getTextRepresentation(true)));
+        fields.add(new Field("Vessel", vesselId == 0 ? "[REDACTED]" : vesselObj == null ? "???" : vesselObj.getName()));
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
         for (Map.Entry<String, CrewDetails> e : crew.entrySet())
-            fields.add(new Field(e.getKey(), e.getValue().getTextRepresentation()));
-        for (MissionEvent ev : eventLog) fields.add(new Field("Milestone", ev.getTextRepresentation()));
+            fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().getTextRepresentation(false, false)));
+        for (MissionEvent ev : events) fields.add(new Field("Milestone", ev.getTextRepresentation()));
 
         return fields;
     }
 
     @Override
+    public void ready() {
+        // Get vessel
+        if (vesselObj != null) vesselObj.addEventListener(this);
+
+        // Get crew
+        this.crewObjs = getController().getKerbals().stream()
+                .filter(c -> crew.containsKey(c.getName()))
+                .collect(Collectors.toSet());
+        for (Kerbal k : crewObjs) k.addEventListener(this);
+
+        // Crew check
+        if (crewObjs.size() != crew.keySet().size())
+            System.err.println("WARNING: Crew member miscount in mission \"" + name + "\", this usually means that certain kerbals weren't found on the database.\n" +
+                    "Expected " + crew.keySet().size() + ", got " + crewObjs.size());
+    }
+
+    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
-        // Kerbal deleted (???)
+        // Kerbal deleted
         if (event.getSource() instanceof Kerbal k) {
-            crewObjects.remove(k);
+            System.err.println("WARNING: Expect a crash, kerbal" + k.getName() + " deleted while on active mission " + name);
+            crewObjs.remove(k);
             CrewDetails details = crew.get(k.getName());
             crew.remove(k.getName());
             crew.put("[REDACTED#" + k.hashCode() + "]", details);
         }
 
-        // Vessel deleted (???)
+        // Vessel deleted
         if (event.getSource() instanceof VesselInstance vi) {
             System.err.println("WARNING: Vessel " + vi.getName() + "#" + vi.getId() + " deleted from mission " + name + " unexpectedly. A crash will most likely happen soon!");
+            vesselObj = null;
+            vesselId = 0;
         }
-    }
-
-    @Override
-    public void ready() {
-        // Get vessel
-        vesselInstance = getController().getInstance(vesselId);
-        if (vesselInstance != null) vesselInstance.addEventListener(this);
-
-        // Get crew
-        this.crewObjects = getController().getKerbals().stream()
-                .filter(c -> crew.containsKey(c.getName()))
-                .collect(Collectors.toSet());
-        for (Kerbal k : crewObjects) k.addEventListener(this);
-
-        // Crew check
-        if (crewObjects.size() != crew.keySet().size())
-            System.err.println("WARNING: Crew member miscount in mission \"" + name + "\". " +
-                    "Expected " + crew.keySet().size() + ", got " + crewObjects.size());
     }
 }

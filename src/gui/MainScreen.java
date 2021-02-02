@@ -1,22 +1,16 @@
 package gui;
 
 import controller.GUIController;
-import kerbals.Kerbal;
-import missions.Mission;
-import other.Editable;
+import other.interfaces.Editable;
 import other.KSPObject;
-import other.MainSearchCellRenderer;
-import other.KSPObjectTableModel;
-import vessels.VesselConcept;
-import vessels.VesselInstance;
+import other.display.MainSearchCellRenderer;
+import other.display.KSPObjectTableModel;
 
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 
 public class MainScreen extends KSPGUI {
@@ -98,15 +92,14 @@ public class MainScreen extends KSPGUI {
             @Override
             public void focusGained(FocusEvent e) {
                 super.focusGained(e);
-                revalidate();
-                repaint();
+                reset();
             }
         });
 
         // Combo box list updater
         selectionComboBox.addActionListener(e -> {
             String edit = (String) selectionComboBox.getSelectedItem();
-            if (edit == null || edit.equals(currentSelection)) return;
+            if (edit == null) return;
 
             currentSelection = edit;
             searchModel.removeAllElements();
@@ -195,6 +188,7 @@ public class MainScreen extends KSPGUI {
                     say("Please input a reason!");
                 }
                 controller.delete(object, status);
+                reset();
             }
         });
 
@@ -242,6 +236,7 @@ public class MainScreen extends KSPGUI {
 
         // Default combo box: show astronauts
         selectionComboBox.setSelectedItem(KERBAL_LIST);
+        currentSelection = KERBAL_LIST;
 
         // Default description
         descriptionArea.setText("Notes about the item will be shown here...");

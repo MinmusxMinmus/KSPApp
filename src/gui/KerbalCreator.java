@@ -2,7 +2,7 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Job;
-import other.KSPDate;
+import other.util.KSPDate;
 
 import javax.swing.*;
 import java.time.OffsetDateTime;

@@ -2,16 +2,22 @@ package kerbals;
 
 import missions.Mission;
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+import other.util.CelestialBody;
+import other.util.Field;
+import other.util.KSPDate;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
+public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
     public static final int ENCODE_FIELD_AMOUNT = 12; // ALWAYS ACCOUNT FOR DESCRIPTION
 
-    // Persistent information
+    // Persistent fields
     /**
      * The kerbal's name. The surname is not included.
      */
@@ -29,36 +35,36 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
      */
     private Job job;
     /**
-     * The mission where the kerbal was rescued in.
+     * The mission where the kerbal was rescued in. Alternatively, the means of hiring.
      */
     private String origin;
     /**
      * The date in which the kerbal joined the space center crew.
      */
-    private KSPDate hiringDate;
+    private final KSPDate hiringDate;
     /**
      * The kerbal's flight log. Contains information regarding all of the past missions.
      */
-    private List<FlightLog> log;
+    private final List<FlightLog> log;
     /**
      * Indicates the mission the kerbal is currently on
      */
-    private String currentMission;
+    private String mission;
     /**
      * Honorable mentions that speak to the kerbal's achievements.
      */
-    private List<Condecoration> condecorations;
+    private final List<Condecoration> condecorations;
     /**
      * The kerbal's total experience
      */
     private float experience;
-    private boolean KIA = false; // TODO add to persistence
+    private boolean KIA = false;
 
     // Dynamic fields
-    private Mission originMission;
-    private Mission activeMission;
+    private Mission originObj;
+    private Mission missionObj;
 
-
+    // Constructors
     /** Generates a new kerbal.
      * @param name The kerbal's name.
      * @param isMale The kerbal's gender.
@@ -75,7 +81,7 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
         this.hiringDate = hiringDate;
 
         this.log = new LinkedList<>();
-        this.currentMission = null;
+        this.mission = null;
         this.condecorations = new LinkedList<>();
         this.experience = 0;
 
@@ -92,56 +98,49 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
         this.job = Job.fromString(fields.get(4));
         this.origin = fields.get(5);
         this.hiringDate = KSPDate.fromString(controller, fields.get(6));
-        this.log = flightLogFromString(controller, fields.get(7));
-        this.currentMission = fields.get(8).equals("(none)") ? null :fields.get(8);
-        this.condecorations = condecorationsFromString(controller, fields.get(9));
+
+        List<FlightLog> result;
+        String field = fields.get(7);
+        if (field.equals("(none)")) result = new LinkedList<>();
+        else result = Arrays.stream(field.split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
+        this.log = result;
+        this.mission = fields.get(8).equals("(none)") ? null :fields.get(8);
+
+        List<Condecoration> result1;
+        String fields1 = fields.get(9);
+        if (fields1.equals("(none)")) result1 = new LinkedList<>();
+        else
+            result1 = Arrays.stream(fields1.split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
+        this.condecorations = result1;
         this.experience = Float.parseFloat(fields.get(10));
         this.KIA = Boolean.parseBoolean(fields.get(11));
         setDescription((fields.get(0)));
     }
 
-    private String flightLogToString() {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
-        for (FlightLog log : log) joiner.add(FlightLog.toString(log));
-        return joiner.toString().equals("") ? "(none)" : joiner.toString();
-    }
-
-    private static List<FlightLog> flightLogFromString(ControllerInterface controller, String field) {
-        if (field.equals("(none)")) return new LinkedList<>();
-        return Arrays.stream(field.split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
-    }
-
-    private String condecorationsToString() {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
-        for (Condecoration c : condecorations) joiner.add(Condecoration.toString(c));
-        return joiner.toString().equals("") ? "(none)" : joiner.toString();
-    }
-
-    private static List<Condecoration> condecorationsFromString(ControllerInterface c, String fields) {
-        if (fields.equals("(none)")) return new LinkedList<>();
-        return Arrays.stream(fields.split(DELIMITER)).map(s -> Condecoration.fromString(c, s)).collect(Collectors.toList());
-    }
-
-
+    // Logic methods
     /** Executed whenever a kerbal embarks on a new mission
      * @param m Current mission
      */
     public void missionStart(Mission m) {
-        currentMission = m.getName();
-        activeMission = m;
+        mission = m.getName();
+        missionObj = m;
+        m.addEventListener(this);
     }
 
     /** Executed whenever a kerbal is succesfully recovered back from a mission.
      */
     public void recover() {
-        // Add new entry to flight log, set new experience
-        FlightLog fl = new FlightLog(getController(), currentMission, activeMission.getExperienceGained(this));
-        fl.setDescription("Succesfully recovered from " + currentMission);
+        // Add new entry to flight log, make it a listener, set new experience
+        FlightLog fl = new FlightLog(getController(), mission, missionObj.getExperienceGained(this));
+        fl.setDescription("Succesfully recovered from " + mission);
         log.add(fl);
-        experience += activeMission.getExperienceGained(this);
+        missionObj.addEventListener(fl);
+        experience += missionObj.getExperienceGained(this);
 
-        currentMission = null;
-        activeMission = null;
+        mission = null;
+        // No longer interested in this mission
+        missionObj.removeEventListener(this);
+        missionObj = null;
     }
 
     /** Executed whenever the kerbal unfortunately goes KIA.
@@ -155,37 +154,47 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
         KIA = true;
 
         // Final log entry
-        FlightLog fl = new FlightLog(getController(), currentMission == null ? "(none)" : currentMission, activeMission == null ? 0.0f : activeMission.getExperienceGained(this));
+        FlightLog fl = new FlightLog(getController(), this.mission == null ? "(none)" : this.mission, missionObj == null ? 0.0f : missionObj.getExperienceGained(this));
         fl.setDescription("KIA in " + (inSpace ? "orbit of  " : "") + location.toString() + " (+" + expGained + "):\n" + details);
         log.add(fl);
 
-        activeMission = null;
+        missionObj = null;
     }
 
+    // TODO Switch vessel
+
+    // Getter/Setter methods
     public String getName() {
         return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isMale() {
         return male;
     }
+    public void setMale(boolean male) {
+        this.male = male;
+    }
 
     public boolean isBadass() {
         return badass;
     }
-
     public void setBadass(boolean badass) {
         this.badass = badass;
     }
 
-    public Job getRole() {
+    public Job getJob() {
         return job;
+    }
+    public void setJob(Job job) {
+        this.job = job;
     }
 
     public String getOrigin() {
         return origin;
     }
-
     public void setOrigin(String origin) {
         this.origin = origin;
     }
@@ -199,15 +208,15 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
     }
 
     public boolean isAvailable() {
-        return currentMission == null;
+        return mission == null;
     }
 
-    public Mission getCurrentMission() {
-        return activeMission;
+    public Mission getMission() {
+        return missionObj;
     }
 
     public float getExpGainedFromCurrentMission() {
-        return activeMission.getExperienceGained(this);
+        return missionObj.getExperienceGained(this);
     }
 
     public int getLevel() {
@@ -227,13 +236,20 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
         return experience;
     }
 
+    public boolean isKIA() {
+        return KIA;
+    }
+
+    // Overrides
     @Override
     public void ready() {
         // Set origin
-        originMission = getController().getMission(origin);
+        originObj = getController().getMission(origin);
+        if (originObj != null) originObj.addEventListener(this);
 
         // Set current mission
-        activeMission = currentMission == null ? null : getController().getMission(currentMission);
+        missionObj = mission == null ? null : getController().getMission(mission);
+        if (missionObj != null) missionObj.addEventListener(this);
     }
 
     @Override
@@ -246,9 +262,15 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
         ret.add(job.toString());
         ret.add(origin);
         ret.add(hiringDate.toStorableString());
-        ret.add(flightLogToString());
-        ret.add(currentMission == null ? "(none)" : currentMission);
-        ret.add(condecorationsToString());
+
+        StringJoiner joiner = new StringJoiner(DELIMITER);
+        for (FlightLog log1 : log) joiner.add(FlightLog.toString(log1));
+        ret.add(joiner.toString().equals("") ? "(none)" : joiner.toString());
+        ret.add(mission == null ? "(none)" : mission);
+
+        StringJoiner joiner1 = new StringJoiner(DELIMITER);
+        for (Condecoration c : condecorations) joiner1.add(Condecoration.toString(c));
+        ret.add(joiner1.toString().equals("") ? "(none)" : joiner1.toString());
         ret.add(Float.toString(experience));
         ret.add(Boolean.toString(KIA));
 
@@ -259,17 +281,16 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
-        // TODO update with KIA information
-
-        fields.add(new Field("Name", name + " Kerman"));
+        fields.add(new Field("Name", name + " Kerman" + (KIA ? " (KIA)" : "")));
+        if (KIA) fields.add(new Field("Last mission", log.get(log.size() - 1).getMissionName()));
         fields.add(new Field("Job", job.toString()));
         fields.add(new Field("Gender", male ? "Male" : "Female"));
         fields.add(new Field("Badass?", badass ? "Yes" : "No"));
         fields.add(new Field("Level", Integer.toString(getLevel())));
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.getTextRepresentation(false)));
-        fields.add(new Field("Deployed?", currentMission == null ? "No" : "Yes"));
-        if (currentMission != null) fields.add(new Field("Current mission", currentMission));
+        fields.add(new Field("Deployed?", mission == null ? "No" : "Yes"));
+        if (mission != null) fields.add(new Field("Current mission", mission));
         for (FlightLog l : log) fields.add(new Field("Mission", l.getTextRepresentation()));
         for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.getTextRepresentation()));
 
@@ -278,26 +299,24 @@ public class Kerbal extends KSPObject implements Editable, KSPObjectListener {
 
     @Override
     public String getTextRepresentation() {
-        return name + " Kerman (" + job.toString() + (currentMission == null ? ", available)" : ", deployed on " + currentMission + ")");
-    }
-
-    @Override
-    public boolean isEditable(int rowIndex) {
-        return false;
-    }
-
-    @Override
-    public boolean setField(int index, Object object) {
-        return false;
+        return name + " Kerman (" + job.toString() + (mission == null ? ", available)" : ", deployed on " + mission + ")");
     }
 
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
-        // Mission deleted: origin classified
-        if (event.getSource() instanceof Mission) origin = "[CLASSIFIED]";
-    }
-
-    public boolean isKIA() {
-        return KIA;
+        // Mission deleted
+        if (event.getSource() instanceof Mission m) {
+            // Active mission
+            if (m.equals(missionObj)) {
+                mission = "[REDACTED]";
+                missionObj = null;
+                System.err.println("WARNING: Kerbal " + name + " got his active mission \"" + m.getName() + "\" removed!");
+            }
+            // Origin mission
+            if (m.equals(originObj)) {
+                origin = "[CLASSIFIED]";
+                originObj = null;
+            }
+        }
     }
 }

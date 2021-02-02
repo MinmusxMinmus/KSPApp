@@ -1,11 +1,9 @@
 package gui;
 
 import controller.GUIController;
-import other.Editable;
-import other.KSPObject;
+import other.interfaces.Editable;
 
 import javax.swing.*;
-import java.awt.*;
 
 public abstract class KSPGUI extends JFrame {
 

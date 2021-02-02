@@ -1,13 +1,9 @@
 package gui;
 
-import controller.GUIController;
-import other.Editable;
-import other.EditableKSPObjectTableModel;
-import other.KSPObject;
+import other.interfaces.Editable;
+import other.display.EditableKSPObjectTableModel;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class EditWindow extends JDialog {
 

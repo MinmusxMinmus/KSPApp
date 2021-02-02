@@ -1,11 +1,10 @@
 package vessels;
 
-import other.ControllerInterface;
-import other.Field;
-import other.KSPDate;
+import other.interfaces.ControllerInterface;
+import other.util.Field;
+import other.util.KSPDate;
 import other.KSPObject;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 

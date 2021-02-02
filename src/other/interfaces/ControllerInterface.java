@@ -1,4 +1,4 @@
-package other;
+package other.interfaces;
 
 import kerbals.Kerbal;
 import missions.Mission;

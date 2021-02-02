@@ -1,4 +1,7 @@
-package other;
+package other.util;
+
+import other.KSPObject;
+import other.interfaces.ControllerInterface;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -126,4 +129,12 @@ public class KSPDate extends KSPObject {
                 " M" + minute +
                 " S" + second;
     }
+
+    public String getTextRepresentation(boolean realDate, boolean simpleDate) {
+        if (!simpleDate) return realDate ?
+                "Y" + year + " D" + day +  " (" + this.realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss")) + ")"
+                : "Y" + year + " D" + day;
+        return getTextRepresentation(realDate);
+    }
+
 }

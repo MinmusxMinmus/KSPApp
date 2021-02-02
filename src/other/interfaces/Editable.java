@@ -1,4 +1,6 @@
-package other;
+package other.interfaces;
+
+import other.interfaces.Displayable;
 
 /**
  * Works in pair with {@link Displayable} to indicate the object is, indeed, editable.

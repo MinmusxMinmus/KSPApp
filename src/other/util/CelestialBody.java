@@ -1,4 +1,4 @@
-package other;
+package other.util;
 
 import java.util.Locale;
 

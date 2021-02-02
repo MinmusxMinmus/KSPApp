@@ -1,19 +1,23 @@
 package missions;
 
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+import other.util.CelestialBody;
+import other.util.Field;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class MissionEvent extends KSPObject {
+public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":ME:";
     public static final int ENCODE_FIELD_AMOUNT = 4;
 
     // Persistent details
-    private final String missionName;
+    private String missionName;
     private final boolean oldInSpace;
     private final CelestialBody oldLocation;
     private final String details;
@@ -53,6 +57,7 @@ public class MissionEvent extends KSPObject {
     @Override
     public void ready() {
         mission = getController().getMission(missionName);
+        if (mission != null) mission.addEventListener(this);
     }
 
     @Override
@@ -69,5 +74,14 @@ public class MissionEvent extends KSPObject {
     @Override
     public String getTextRepresentation() {
         return null;
+    }
+
+    @Override
+    public void onDeletion(KSPObjectDeletionEvent event) {
+        // Mission deletion
+        if (event.getSource() instanceof Mission) {
+            missionName = "[REDACTED]";
+            mission = null;
+        }
     }
 }

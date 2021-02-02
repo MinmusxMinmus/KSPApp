@@ -1,35 +1,36 @@
-package other;
+package other.display;
 
 import kerbals.Kerbal;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MissionAssignedTableModel extends AbstractTableModel {
+public class MissionTableModel extends AbstractTableModel {
 
     private final List<Kerbal> kerbalList;
-    private final List<String> positionList;
 
-    public MissionAssignedTableModel(Collection<Kerbal> kerbals) {
+    public MissionTableModel(Collection<Kerbal> kerbals) {
         this.kerbalList = kerbals.stream()
                 .sorted(Comparator.comparing(Kerbal::getName))
                 .collect(Collectors.toList());
-        this.positionList = new LinkedList<>();
-        for (int i = 0; i != kerbalList.size(); i++) positionList.add("Undecided");
+    }
+
+    public List<Kerbal> getKerbalList() {
+        return kerbalList;
     }
 
     public void addKerbal(Kerbal kerbal) {
         kerbalList.add(kerbal);
         kerbalList.sort(Comparator.comparing(Kerbal::getName));
-        positionList.add(kerbalList.indexOf(kerbal), "Undecided");
         fireTableDataChanged();
     }
 
     public void removeKerbal(Kerbal kerbal) {
-        int index = kerbalList.indexOf(kerbal);
-        kerbalList.remove(index);
-        positionList.remove(index);
+        kerbalList.remove(kerbal);
         fireTableDataChanged();
     }
 
@@ -37,11 +38,8 @@ public class MissionAssignedTableModel extends AbstractTableModel {
         return kerbalList.get(row);
     }
 
-    public Map<Kerbal, String> getCrew() {
-        Map<Kerbal, String> ret = new HashMap<>();
-        for (int i = 0; i != kerbalList.size(); i++)
-            ret.put(kerbalList.get(i), (String) getValueAt(i, 4));
-        return Collections.unmodifiableMap(ret);
+    public Set<Kerbal> getCrew() {
+        return kerbalList.stream().collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -51,19 +49,17 @@ public class MissionAssignedTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 5;
+        return 4;
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Kerbal k = kerbalList.get(rowIndex);
-        String position = positionList.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> k.getName() + " Kerman";
             case 1 -> k.isMale() ? "Male" : "Female";
-            case 2 -> k.getRole().toString();
+            case 2 -> k.getJob().toString();
             case 3 -> k.getLevel();
-            case 4 -> position;
             default -> "???";
         };
     }
@@ -75,21 +71,12 @@ public class MissionAssignedTableModel extends AbstractTableModel {
             case 1 -> "Gender";
             case 2 -> "Job";
             case 3 -> "Level";
-            case 4 -> "Position";
             default -> "???";
         };
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == 4;
-    }
-
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        super.setValueAt(aValue, rowIndex, columnIndex);
-        if (columnIndex != 4) return;
-        String position = (String) aValue;
-        positionList.set(rowIndex, position);
+        return false;
     }
 }

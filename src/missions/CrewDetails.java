@@ -2,15 +2,20 @@ package missions;
 
 import kerbals.Kerbal;
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+import other.util.Field;
+import other.util.KSPDate;
 
 import java.util.*;
 
-public class CrewDetails extends KSPObject {
+public class CrewDetails extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":cd:";
     public static final int ENCODE_FIELD_AMOUNT = 5;
 
-    private final String name;
+    private String name;
     private final String position;
     private final KSPDate boardTime;
     private float expGained;
@@ -67,6 +72,7 @@ public class CrewDetails extends KSPObject {
     @Override
     public void ready() {
         this.kerbal = getController().getKerbal(name);
+        if (kerbal != null) kerbal.addEventListener(this);
     }
 
     @Override
@@ -84,7 +90,7 @@ public class CrewDetails extends KSPObject {
     @Override
     public String getTextRepresentation() {
         return name + " Kerman" +
-                (kerbal.isKIA() ? " (KIA)" : "") +
+                (kerbal != null && kerbal.isKIA() ? " (KIA)" : "") +
                 position +
                 ", boarded at " +
                 boardTime.getTextRepresentation(false) +
@@ -100,5 +106,14 @@ public class CrewDetails extends KSPObject {
         ret.add(Float.toString(expGained));
 
         return ret;
+    }
+
+    @Override
+    public void onDeletion(KSPObjectDeletionEvent event) {
+        // Kerbal deleted
+        if (event.getSource() instanceof Kerbal k) {
+            kerbal = null;
+            name = "[REDACTED]";
+        }
     }
 }

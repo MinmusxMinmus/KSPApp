@@ -1,4 +1,6 @@
-package other;
+package other.interfaces;
+
+import other.KSPObject;
 
 public class KSPObjectDeletionEvent{
 

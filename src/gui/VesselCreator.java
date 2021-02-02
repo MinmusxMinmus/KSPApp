@@ -1,9 +1,9 @@
 package gui;
 
 import controller.GUIController;
-import other.Destination;
-import other.GoodListModel;
-import other.KSPDate;
+import other.util.Destination;
+import other.display.GoodListModel;
+import other.util.KSPDate;
 import vessels.VesselConcept;
 import vessels.VesselProperty;
 import vessels.VesselType;
@@ -14,8 +14,6 @@ import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 
 import static java.lang.Integer.parseInt;
 

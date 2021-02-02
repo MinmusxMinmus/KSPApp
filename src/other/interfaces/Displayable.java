@@ -1,7 +1,8 @@
-package other;
+package other.interfaces;
+
+import other.util.Field;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Retarded class to define the different ways for a component to list itself

@@ -1,4 +1,7 @@
-package other;
+package other.display;
+
+import other.display.KSPObjectTableModel;
+import other.interfaces.Editable;
 
 public class EditableKSPObjectTableModel extends KSPObjectTableModel {
 

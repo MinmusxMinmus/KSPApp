@@ -1,4 +1,7 @@
-package other;
+package other.display;
+
+import other.interfaces.Displayable;
+import other.util.Field;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.LinkedList;

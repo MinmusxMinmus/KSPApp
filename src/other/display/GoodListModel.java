@@ -1,4 +1,4 @@
-package other;
+package other.display;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;

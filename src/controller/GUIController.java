@@ -4,6 +4,9 @@ import kerbals.Job;
 import kerbals.Kerbal;
 import missions.Mission;
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.util.Destination;
+import other.util.KSPDate;
 import persistencelib.Atom;
 import persistencelib.Key;
 import persistencelib.StorageManager;
@@ -48,9 +51,9 @@ public class GUIController implements ControllerInterface {
 
         for (Kerbal k : kerbals) k.ready();
         for (Mission m : missions) m.ready();
-        for (Vessel v : concepts) v.ready();
-        for (Vessel v : instances) v.ready();
-        for (Vessel v : crashedInstances) v.ready();
+        for (VesselConcept v : concepts) v.ready();
+        for (VesselInstance v : instances) v.ready();
+        for (VesselInstance v : crashedInstances) v.ready();
     }
 
     private void getPersistenceCrashedInstances() {
@@ -138,12 +141,17 @@ public class GUIController implements ControllerInterface {
         k.ready();
     }
 
-    public void createMission(String name, String description, Vessel vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m;
-        if (vessel instanceof VesselInstance) // Existing ship
-            m = new Mission(this, name, ((VesselInstance) vessel).getId(), crew, missionStart);
-        else // New ship
-            m = new Mission(this, name, (VesselConcept) vessel, crew, missionStart);
+    public void createMission(String name, String description, VesselInstance vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Mission m = new Mission(this, name, ((VesselInstance) vessel).getId(), crew, missionStart);
+        for (Kerbal k : crew.keySet()) k.missionStart(m);
+        m.setDescription(description);
+        addMission(m);
+        m.ready();
+    }
+
+    public void createMission(String name, String description, VesselConcept vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Mission m = new Mission(this, name, (VesselConcept) vessel, crew, missionStart);
+        for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
         m.ready();
@@ -164,11 +172,14 @@ public class GUIController implements ControllerInterface {
         if (object instanceof Kerbal k ) kerbals.remove(k);
         else if (object instanceof Mission m ) missions.remove(m);
         else if (object instanceof VesselConcept vc) concepts.remove(vc);
-        else if (object instanceof VesselInstance vi) instances.remove(vi);
+        else if (object instanceof VesselInstance vi) {
+            instances.remove(vi); // One of these will work, you know
+            crashedInstances.remove(vi);
+        }
     }
 
-    public long createInstance(VesselConcept concept, int rng) {
-        VesselInstance vi = new VesselInstance(this, concept, new Random(rng).nextLong());
+    public long createInstance(VesselConcept concept, int rng, Mission mission) {
+        VesselInstance vi = new VesselInstance(this, concept, new Random(rng).nextLong(), mission);
         addInstance(vi);
         vi.ready();
         return vi.getId();

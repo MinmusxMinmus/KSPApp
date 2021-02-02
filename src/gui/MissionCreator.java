@@ -2,16 +2,14 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.KSPDate;
-import other.MainSearchCellRenderer;
-import other.MissionAssignedTableModel;
-import other.MissionFreeTableModel;
-import vessels.Vessel;
+import other.util.KSPDate;
+import other.display.MainSearchCellRenderer;
+import other.display.MissionAssignedTableModel;
+import other.display.MissionTableModel;
 import vessels.VesselConcept;
 import vessels.VesselInstance;
 
 import javax.swing.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
@@ -66,7 +64,9 @@ public class MissionCreator extends KSPGUI {
     private JCheckBox preciseTimeCheckBox;
 
     // Custom components
-    private final MissionFreeTableModel freeModel; // TODO replace with abstract class and hierarchy
+    private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals().stream()
+            .filter(Kerbal::isAvailable)
+            .collect(Collectors.toSet()));
     private final MissionAssignedTableModel assignedModel = new MissionAssignedTableModel(new LinkedList<>());
 
     public MissionCreator(GUIController controller) {
@@ -78,9 +78,6 @@ public class MissionCreator extends KSPGUI {
         vesselDesignsComboBox.setRenderer(new MainSearchCellRenderer());
 
         // Define table contents
-        freeModel = new MissionFreeTableModel(controller.getKerbals().stream()
-                .filter(Kerbal::isAvailable)
-                .collect(Collectors.toSet()));
         crewFreeTable.setModel(freeModel);
         crewSelectedTable.setModel(assignedModel);
 
@@ -109,16 +106,10 @@ public class MissionCreator extends KSPGUI {
 
         // New vessel listener
         newVesselCheckBox.addItemListener(e -> {
-            switch (e.getStateChange()) {
-                case ItemEvent.SELECTED -> {
-                    vesselDesignsComboBox.setEnabled(true);
-                    vesselDesignsLabel.setEnabled(true);
-                }
-                case ItemEvent.DESELECTED -> {
-                    vesselDesignsComboBox.setEnabled(false);
-                    vesselDesignsLabel.setEnabled(false);
-                }
-            }
+            vesselDesignsComboBox.setEnabled(newVesselCheckBox.isSelected());
+            vesselDesignsLabel.setEnabled(newVesselCheckBox.isSelected());
+            activeVesselsComboBox.setEnabled(!newVesselCheckBox.isSelected());
+            activeVesselsLabel.setEnabled(!newVesselCheckBox.isSelected());
         });
 
         // Available table listener
@@ -164,9 +155,8 @@ public class MissionCreator extends KSPGUI {
             // Read values from text fields and combo boxes
             String name = nameTextField.getText();
             String description = descriptionTextArea.getText();
-            Vessel vessel = (Vessel) (vesselDesignsComboBox.isEnabled()
-                                ? vesselDesignsComboBox.getSelectedItem()
-                                : activeVesselsComboBox.getSelectedItem());
+            VesselConcept vessel = (VesselConcept) vesselDesignsComboBox.getSelectedItem();
+            VesselInstance instance = (VesselInstance) activeVesselsComboBox.getSelectedItem();
             String year = yearTextField.getText();
             String day = dayTextField.getText();
             String hour = hourTextField.getText();
@@ -204,10 +194,15 @@ public class MissionCreator extends KSPGUI {
                     OffsetDateTime.now());
 
             // Mission creation
-            controller.createMission(name,
+            if (newVesselCheckBox.isSelected()) controller.createMission(name,
                     description,
                     vessel,
-                    assignedModel.getCrew(),
+                    assignedModel.getCrew2(),
+                    date);
+            else controller.createMission(name,
+                    description,
+                    instance,
+                    assignedModel.getCrew2(),
                     date);
 
             // Form end

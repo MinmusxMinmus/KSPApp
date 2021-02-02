@@ -2,8 +2,12 @@ package kerbals;
 
 import missions.Mission;
 import other.*;
+import other.interfaces.ControllerInterface;
+import other.interfaces.KSPObjectDeletionEvent;
+import other.interfaces.KSPObjectListener;
+import other.util.Field;
+import other.util.KSPDate;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -13,8 +17,8 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     private static final String DELIMITER = ":C:";
     private static final int ENCODE_FIELD_AMOUNT = 5;
 
-    private final String missionName;
-    private final String kerbalName;
+    private String missionName;
+    private String kerbalName;
     private final KSPDate date;
     private final String mention;
 
@@ -85,17 +89,23 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     @Override
     public void ready() {
         mission = getController().getMission(missionName);
-        mission.addEventListener(this);
+        if (mission != null) mission.addEventListener(this);
         kerbal = getController().getKerbal(kerbalName);
+        if (kerbal != null) kerbal.addEventListener(this);
     }
 
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
-        if (event.getSource() instanceof Mission m) { // Classified mission
+        // Mission deletion
+        if (event.getSource() instanceof Mission m) {
             mission = null;
+            missionName = "[REDACTED]";
             classifiedReason = event.getStatus();
-        } else if (event.getSource() instanceof Kerbal k) { // Unavailable kerbal
+        }
+        // Kerbal deletion
+        if (event.getSource() instanceof Kerbal k) {
             kerbal = null;
+            kerbalName = "[REDACTED]";
             inactiveReason = event.getStatus();
         }
     }
