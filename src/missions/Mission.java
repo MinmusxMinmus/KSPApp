@@ -32,6 +32,8 @@ public class Mission extends KSPObject implements KSPObjectListener {
     private Vessel vesselObj; // replace with vesselObjs
     private Set<Kerbal> crewObjs;
 
+    // TODO remove constructors, replace with constructor w.o. vessel/s.
+
     // Constructors
     /** Generates a mission from scratch, with a brand new vessel.
      * @param name Mission name
@@ -48,7 +50,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         crew.keySet().toArray(crew2);
         Vessel vessel = new Vessel(controller, concept, vesselId, this, vessels, crew2);
         vessel.setDescription("Created for " + name);
-        controller.addVessel(vessel); // TODO this might break, since VesselInstance accesses mission.getName()
+        controller.addVessel(vessel);
         // Formatting crew map
         TreeMap<String, CrewDetails> crew3 = new TreeMap<>();
         crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
