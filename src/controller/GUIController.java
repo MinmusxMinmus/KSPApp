@@ -48,11 +48,7 @@ public class GUIController implements ControllerInterface {
         getPersistenceInstances();
         getPersistenceCrashedInstances();
 
-        for (Kerbal k : kerbals) k.ready();
-        for (Mission m : missions) m.ready();
-        for (Concept v : concepts) v.ready();
-        for (Vessel v : vessels) v.ready();
-        for (Vessel v : crashedVessels) v.ready();
+        ready();
     }
 
     private void getPersistenceCrashedInstances() {
@@ -148,8 +144,8 @@ public class GUIController implements ControllerInterface {
         m.ready();
     }
 
-    public void createMission(String name, String description, Concept vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, vessel, crew, missionStart);
+    public void createMission(String name, String description, Concept vessel, Map<Kerbal, String> crew, KSPDate missionStart, Set<Vessel> vessels) {
+        Mission m = new Mission(this, name, vessel, crew, missionStart, vessels);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
@@ -177,9 +173,9 @@ public class GUIController implements ControllerInterface {
         }
     }
 
-    public long createInstance(Concept concept, int rng, Mission mission) {
-        Vessel vi = new Vessel(this, concept, new Random(rng).nextLong(), mission);
-        addInstance(vi);
+    public long createInstance(Concept concept, int rng, Mission mission, Vessel... vessels) {
+        Vessel vi = new Vessel(this, concept, new Random(rng).nextLong(), mission, new HashSet<>(Arrays.asList(vessels)));
+        addVessel(vi);
         vi.ready();
         return vi.getId();
     }
@@ -338,21 +334,25 @@ public class GUIController implements ControllerInterface {
 
     @Override
     public void addKerbal(Kerbal kerbal) {
+        kerbal.ready();
         kerbals.add(kerbal);
     }
 
     @Override
     public void addMission(Mission mission) {
+        mission.ready();
         missions.add(mission);
     }
 
     @Override
     public void addConcept(Concept concept) {
+        concept.ready();
         concepts.add(concept);
     }
 
     @Override
-    public void addInstance(Vessel instance) {
+    public void addVessel(Vessel instance) {
+        instance.ready();
         vessels.add(instance);
     }
 
@@ -366,5 +366,14 @@ public class GUIController implements ControllerInterface {
     public void vesselCrashed(Vessel vessel) {
         vessels.remove(vessel);
         crashedVessels.add(vessel);
+    }
+
+    @Override
+    public void ready() {
+        for (Kerbal k : kerbals) k.ready();
+        for (Mission m : missions) m.ready();
+        for (Concept v : concepts) v.ready();
+        for (Vessel v : vessels) v.ready();
+        for (Vessel v : crashedVessels) v.ready();
     }
 }

@@ -45,6 +45,7 @@ public class MainScreen extends KSPGUI {
     private JScrollPane searchScrollPane;
     private JButton saveChangesButton;
     private JButton discardChangesButton;
+    private JButton updateButton;
 
 
     // Custom main components
@@ -190,6 +191,11 @@ public class MainScreen extends KSPGUI {
                 controller.delete(object, status);
                 reset();
             }
+        });
+
+        // Update button listener
+        updateButton.addActionListener(e -> {
+            controller.ready();
         });
 
         // Search selection listener

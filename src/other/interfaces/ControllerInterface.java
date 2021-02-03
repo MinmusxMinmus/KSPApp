@@ -26,11 +26,13 @@ public interface ControllerInterface {
     void addKerbal(Kerbal kerbal);
     void addMission(Mission mission);
     void addConcept(Concept concept);
-    void addInstance(Vessel instance);
+    void addVessel(Vessel vessel);
 
     // Special case: recovered instances get deleted from memory
     void vesselRecovered(Vessel vessel);
 
     // Special case: crashed instances get moved to their own list
     void vesselCrashed(Vessel vessel);
+
+    void ready();
 }

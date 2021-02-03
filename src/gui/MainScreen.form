@@ -101,7 +101,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="e1aa9" binding="buttonPanel" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="e1aa9" binding="buttonPanel" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="10" left="10" bottom="10" right="10"/>
             <constraints>
               <grid row="1" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
@@ -135,6 +135,15 @@
                 <properties>
                   <text value="Delete"/>
                   <toolTipText value="Deletes the currently selected item" noi18n="true"/>
+                </properties>
+              </component>
+              <component id="7fd1c" class="javax.swing.JButton" binding="updateButton" default-binding="true">
+                <constraints>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Update" noi18n="true"/>
+                  <toolTipText value="Click this if something isn't linked correctly" noi18n="true"/>
                 </properties>
               </component>
             </children>
