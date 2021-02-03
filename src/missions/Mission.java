@@ -39,14 +39,16 @@ public class Mission extends KSPObject implements KSPObjectListener {
      * @param crew A map corresponding to the crew and their roles
      * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, Concept concept, Map<Kerbal, String> crew, KSPDate start) {
+    public Mission(ControllerInterface controller, String name, Concept concept, Map<Kerbal, String> crew, KSPDate start, Set<Vessel> vessels) {
         super(controller);
         this.name = name;
         this.vesselId = new Random(this.hashCode()).nextLong();
         // Creating the vessel
         Kerbal[] crew2 = new Kerbal[crew.keySet().size()];
         crew.keySet().toArray(crew2);
-        controller.addInstance(new Vessel(controller, concept, vesselId, this, crew2)); // TODO this might break, since VesselInstance accesses mission.getName()
+        Vessel vessel = new Vessel(controller, concept, vesselId, this, vessels, crew2);
+        vessel.setDescription("Created for " + name);
+        controller.addVessel(vessel); // TODO this might break, since VesselInstance accesses mission.getName()
         // Formatting crew map
         TreeMap<String, CrewDetails> crew3 = new TreeMap<>();
         crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
