@@ -12,14 +12,17 @@ import other.util.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// TODO when the vessel crashes, mark all crew as KIA. Pass parameter "Survivor" as a list of kerbals, in case some of them managed to survive.
+
 public class Vessel extends KSPObject implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 8; // ALWAYS ACCOUNT FOR DESCRIPTION (IN THIS CASE, FOR TYPE AND ITERATION AS WELL)
+    public static final int ENCODE_FIELD_AMOUNT = 10; // ALWAYS ACCOUNT FOR DESCRIPTION (IN THIS CASE, FOR TYPE AND ITERATION AS WELL)
     public static final String DELIMITER = ":VI:";
 
     // Persistent fields
     private final long id;
     private String concept;
+    private final int iteration;
     private boolean inSpace;
     private CelestialBody location;
     private final Set<String> crew;
@@ -43,6 +46,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this(controller,
                 id,
                 concept.getName(),
+                concept.getIteration(),
                 inSpace,
                 location,
                 Arrays.stream(crew).filter(Objects::nonNull).map(Kerbal::getName).collect(Collectors.toSet()),
@@ -68,10 +72,11 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     /** Private implementation. Add params later
      */
-    private Vessel(ControllerInterface controller, long id, String concept, boolean inSpace, CelestialBody location, Set<String> crew, boolean crashed, String crashDetails, String missionName) {
+    private Vessel(ControllerInterface controller, long id, String concept, int iteration, boolean inSpace, CelestialBody location, Set<String> crew, boolean crashed, String crashDetails, String missionName) {
         super(controller);
         this.id = id;
         this.concept = concept;
+        this.iteration = iteration;
         this.inSpace = inSpace;
         this.location = location;
         this.crew = crew;
@@ -87,12 +92,13 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this(controller,
                 Long.parseLong(fields.get(1)),
                 fields.get(2),
-                Boolean.parseBoolean(fields.get(3)),
-                CelestialBody.valueOf(fields.get(4)),
-                crewMembersFromString(fields.get(5)),
-                Boolean.parseBoolean(fields.get(6)),
-                fields.get(7).equals("(none)") ? null : fields.get(7),
-                fields.get(8)
+                Integer.parseInt(fields.get(3)),
+                Boolean.parseBoolean(fields.get(4)),
+                CelestialBody.valueOf(fields.get(5)),
+                crewMembersFromString(fields.get(6)),
+                Boolean.parseBoolean(fields.get(7)),
+                fields.get(8).equals("(none)") ? null : fields.get(8),
+                fields.get(9)
         );
         setDescription(fields.get(0));
     }
@@ -214,6 +220,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
         ret.add(Long.toString(id));
         ret.add(concept);
+        ret.add(Integer.toString(iteration));
         ret.add(Boolean.toString(inSpace));
         ret.add(location.name());
         StringJoiner joiner = new StringJoiner(DELIMITER);
