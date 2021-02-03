@@ -246,7 +246,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
         fields.add(new Field("Name", name));
         fields.add(new Field("Mission start", start.getTextRepresentation(true)));
-        fields.add(new Field("Vessel", vesselId == 0 ? "[REDACTED]" : vesselObj == null ? "???" : vesselObj.getName()));
+        fields.add(new Field("Vessel", vesselId == 0 ? "[REDACTED]" : vesselObj == null ? Long.toString(vesselId) : vesselObj.getName()));
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
         for (Map.Entry<String, CrewDetails> e : crew.entrySet())
             fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().getTextRepresentation(false, false)));
@@ -258,6 +258,8 @@ public class Mission extends KSPObject implements KSPObjectListener {
     @Override
     public void ready() {
         // Get vessel
+        vesselObj = getController().getInstance(vesselId);
+        if (vesselObj == null) vesselObj = getController().getCrashedInstance(vesselId);
         if (vesselObj != null) vesselObj.addEventListener(this);
 
         // Get crew
