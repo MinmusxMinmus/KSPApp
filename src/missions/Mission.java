@@ -22,14 +22,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
     // Persistent fields
     private String name;
-    private long vesselId;
-    private final Map<String, CrewDetails> crew;
+    private long vesselId; // replace with vessels
+    private final Map<String, CrewDetails> crew; // perhaps replace with a new object?
     private final KSPDate start;
     private final List<MissionEvent> events;
     private boolean active = true;
 
     // Dynamic fields
-    private Vessel vesselObj;
+    private Vessel vesselObj; // replace with vesselObjs
     private Set<Kerbal> crewObjs;
 
     // Constructors
@@ -151,6 +151,8 @@ public class Mission extends KSPObject implements KSPObjectListener {
         logEvent(new MissionEvent(getController(), name, vesselObj.isInSpace(), vesselObj.getLocation(), "Nominal end: " + status));
     }
 
+    // merge into missionEnd()
+
     /** Executed when a mission ends via total destruction of all crew members and vessel involved.
      * @param status Mission end description
      */
@@ -170,6 +172,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public void logEvent(MissionEvent event) {
         events.add(event);
     }
+
+    // addKerbals()
+
+    // addVessels()
 
     // Getter/Setter methods
     public String getName() {

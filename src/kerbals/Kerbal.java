@@ -49,7 +49,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     /**
      * Indicates the mission the kerbal is currently on
      */
-    private String mission;
+    private String mission; // replace with missions
     /**
      * Honorable mentions that speak to the kerbal's achievements.
      */
@@ -57,12 +57,13 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     /**
      * The kerbal's total experience
      */
-    private float experience;
+    private float experience; // replace with milestones
     private boolean KIA = false;
+    // location
 
     // Dynamic fields
     private Mission originObj;
-    private Mission missionObj;
+    private Mission missionObj; // replace with missionObjs
 
     // Constructors
     /** Generates a new kerbal.
@@ -125,9 +126,11 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         mission = m.getName();
         missionObj = m;
         m.addEventListener(this);
-    }
+    } // edit for multiple missions
 
-    /** Executed whenever a kerbal is succesfully recovered back from a mission.
+    // missionEnd()
+
+    /** Executed whenever a kerbal is succesfully recovered.
      */
     public void recover() {
         // Add new entry to flight log, make it a listener, set new experience
@@ -141,7 +144,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         // No longer interested in this mission
         missionObj.removeEventListener(this);
         missionObj = null;
-    }
+    } // edit (no mission finish, update milestones)
 
     /** Executed whenever the kerbal unfortunately goes KIA.
      * @param mission The mission that caused their death
@@ -161,7 +164,13 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         missionObj = null;
     }
 
-    // TODO Switch vessel
+    // switchVessel(old, new)
+
+    // leaveVessel()
+
+    // updateLocation()
+
+    // addCondecoration()
 
     // Getter/Setter methods
     public String getName() {

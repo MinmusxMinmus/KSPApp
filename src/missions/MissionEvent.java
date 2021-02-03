@@ -18,7 +18,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     // Persistent details
     private String missionName;
-    private final boolean oldInSpace;
+    private final boolean oldInSpace; // TODO replace with Location object
     private final CelestialBody oldLocation;
     private final String details;
 

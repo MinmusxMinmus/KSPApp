@@ -12,7 +12,7 @@ import other.util.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO when the vessel crashes, mark all crew as KIA. Pass parameter "Survivor" as a list of kerbals, in case some of them managed to survive.
+// when the vessel crashes, mark all crew as KIA. Pass parameter "Survivor" as a list of kerbals, in case some of them managed to survive.
 
 public class Vessel extends KSPObject implements KSPObjectListener {
 
@@ -24,14 +24,16 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     private String concept;
     private final int iteration;
     private boolean inSpace;
-    private CelestialBody location;
+    private CelestialBody location; // replace with Location object
     private final Set<String> crew;
+    // vessels
+    // stranded
     private boolean crashed;
     private String crashDetails;
-    private String missionName;
+    private String missionName; // replace with missions
 
     // Dynamic fields
-    private Mission missionObj;
+    private Mission missionObj; // replace with missionObjs
     private final Set<Kerbal> crewObjs = new HashSet<>();
     private Concept conceptObj;
 
@@ -150,9 +152,19 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         if (missionObj != null) missionName = missionObj.getName();
 
         getController().instanceCrashed(this);
-    }
+    } // Kerbal... victims
 
-    // TODO updatePosition()
+    // updateLocation()
+
+    // completeMission()
+
+    // addMission()
+
+    // removeMission()
+
+    // addVessel()
+
+    // removeVessel()
 
     // Getter/Setter methods
     public String getName() {
