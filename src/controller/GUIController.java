@@ -20,16 +20,15 @@ public class GUIController implements ControllerInterface {
 
     private static final String KERBAL_REGION = "Kerbals";
     private static final String MISSION_REGION = "Missions";
-    private static final String VESSEL_REGION = "Vessels";
     private static final String CONCEPT_REGION = "Concepts";
-    private static final String INSTANCE_REGION = "Instances";
+    private static final String VESSEL_REGION = "Vessels";
     private static final String CRASHED_REGION = "Crashed";
 
     private final List<Kerbal> kerbals;
     private final List<Mission> missions;
     private final List<Concept> concepts;
-    private final List<Vessel> instances;
-    private final List<Vessel> crashedInstances = new LinkedList<>();
+    private final List<Vessel> vessels;
+    private final List<Vessel> crashedVessels = new LinkedList<>();
 
     // Persistence
 
@@ -39,7 +38,7 @@ public class GUIController implements ControllerInterface {
         this.kerbals = new LinkedList<>();
         this.missions = new LinkedList<>();
         this.concepts = new LinkedList<>();
-        this.instances = new LinkedList<>();
+        this.vessels = new LinkedList<>();
 
         manager = new StorageManager("KSPDB", Version.V100);
 
@@ -52,8 +51,8 @@ public class GUIController implements ControllerInterface {
         for (Kerbal k : kerbals) k.ready();
         for (Mission m : missions) m.ready();
         for (Concept v : concepts) v.ready();
-        for (Vessel v : instances) v.ready();
-        for (Vessel v : crashedInstances) v.ready();
+        for (Vessel v : vessels) v.ready();
+        for (Vessel v : crashedVessels) v.ready();
     }
 
     private void getPersistenceCrashedInstances() {
@@ -68,13 +67,13 @@ public class GUIController implements ControllerInterface {
                                 Vessel.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
                         return;
                     }
-                    crashedInstances.add(new Vessel(this, new LinkedList<>(c)));
+                    crashedVessels.add(new Vessel(this, new LinkedList<>(c)));
                 });
     }
 
     private void getPersistenceInstances() {
-        if (manager.getRegion(INSTANCE_REGION) == null) manager.addRegion(INSTANCE_REGION);
-        Atom atom = manager.getRegion(INSTANCE_REGION);
+        if (manager.getRegion(VESSEL_REGION) == null) manager.addRegion(VESSEL_REGION);
+        Atom atom = manager.getRegion(VESSEL_REGION);
         atom.getItems().stream()
                 .map(atom::getItem)
                 .forEach(c -> {
@@ -83,7 +82,7 @@ public class GUIController implements ControllerInterface {
                                 Vessel.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
                         return;
                     }
-                    instances.add(new Vessel(this, new LinkedList<>(c)));
+                    vessels.add(new Vessel(this, new LinkedList<>(c)));
                 });
     }
 
@@ -142,7 +141,7 @@ public class GUIController implements ControllerInterface {
     }
 
     public void createMission(String name, String description, Vessel vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, ((Vessel) vessel).getId(), crew, missionStart);
+        Mission m = new Mission(this, name, vessel.getId(), crew, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
@@ -150,7 +149,7 @@ public class GUIController implements ControllerInterface {
     }
 
     public void createMission(String name, String description, Concept vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, (Concept) vessel, crew, missionStart);
+        Mission m = new Mission(this, name, vessel, crew, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
@@ -173,8 +172,8 @@ public class GUIController implements ControllerInterface {
         else if (object instanceof Mission m ) missions.remove(m);
         else if (object instanceof Concept vc) concepts.remove(vc);
         else if (object instanceof Vessel vi) {
-            instances.remove(vi); // One of these will work, you know
-            crashedInstances.remove(vi);
+            vessels.remove(vi); // One of these will work, you know
+            crashedVessels.remove(vi);
         }
     }
 
@@ -221,12 +220,12 @@ public class GUIController implements ControllerInterface {
         }
         manager.replaceRegion(atom);
 
-        if (manager.getRegion(INSTANCE_REGION) == null) manager.addRegion(INSTANCE_REGION);
-        atom = manager.getRegion(INSTANCE_REGION);
+        if (manager.getRegion(VESSEL_REGION) == null) manager.addRegion(VESSEL_REGION);
+        atom = manager.getRegion(VESSEL_REGION);
         // Remove all previous items
         for (Key key : atom.getItems()) atom.removeItem(key);
         // Add everything again
-        for (Vessel m : instances) {
+        for (Vessel m : vessels) {
             atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
             count++;
         }
@@ -237,7 +236,7 @@ public class GUIController implements ControllerInterface {
         // Remove all previous items
         for (Key key : atom.getItems()) atom.removeItem(key);
         // Add everything again
-        for (Vessel m : crashedInstances) {
+        for (Vessel m : crashedVessels) {
             atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
             count++;
         }
@@ -258,8 +257,8 @@ public class GUIController implements ControllerInterface {
         kerbals.clear();
         missions.clear();
         concepts.clear();
-        instances.clear();
-        crashedInstances.clear();
+        vessels.clear();
+        crashedVessels.clear();
 
         // Read from manager again
         getPersistenceKerbals();
@@ -286,12 +285,12 @@ public class GUIController implements ControllerInterface {
 
     @Override
     public Vessel getInstance(long id) {
-        return instances.stream().filter(i -> i.getId() == id).findFirst().orElse(null);
+        return vessels.stream().filter(i -> i.getId() == id).findFirst().orElse(null);
     }
 
     @Override
     public Vessel getCrashedInstance(long id) {
-        return crashedInstances.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+        return crashedVessels.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
     }
 
     @Override
@@ -316,25 +315,25 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public Set<Vessel> getInstances() {
-        instances.sort((vi1, vi2) -> {
+    public Set<Vessel> getVessels() {
+        vessels.sort((vi1, vi2) -> {
             // Different family
             if (!vi1.getName().equals(vi2.getName())) return vi1.getName().compareTo(vi2.getName());
             // Same family, refer to iteration
             if (vi1.getIteration() != vi2.getIteration()) return vi2.getIteration() - vi1.getIteration();
             // Same iteration, refer to location
-            if (!vi1.getLocation().equals(vi2.getLocation())) return vi1.getLocation().compareTo(vi2.getLocation());
+            if (!vi1.getLocation().getCelestialBody().equals(vi2.getLocation().getCelestialBody())) return vi1.getLocation().getCelestialBody().compareTo(vi2.getLocation().getCelestialBody());
             // Same location, refer to specific location
-            if (vi1.isInSpace() != vi2.isInSpace()) return vi1.isInSpace() ? 1 : -1; // Vessels in space take priority
+            if (vi1.getLocation().isInSpace() != vi2.getLocation().isInSpace()) return vi1.getLocation().isInSpace() ? 1 : -1; // Vessels in space take priority
             // Same specific location, apply random order
             return vi2.hashCode() - vi1.hashCode();
         });
-        return new HashSet<>(instances);
+        return new HashSet<>(vessels);
     }
 
     @Override
-    public Set<Vessel> getCrashedInstances() {
-        return new HashSet<>(crashedInstances);
+    public Set<Vessel> getCrashedVessels() {
+        return new HashSet<>(crashedVessels);
     }
 
     @Override
@@ -354,18 +353,18 @@ public class GUIController implements ControllerInterface {
 
     @Override
     public void addInstance(Vessel instance) {
-        instances.add(instance);
+        vessels.add(instance);
     }
 
     @Override
-    public void instanceRecovered(Vessel instance) {
-        instance.fireDeletionEvent("Recovered lmao");
-        instances.remove(instance);
+    public void vesselRecovered(Vessel vessel) {
+        vessel.fireDeletionEvent("Recovered lmao");
+        vessels.remove(vessel);
     }
 
     @Override
-    public void instanceCrashed(Vessel vessel) {
-        instances.remove(vessel);
-        crashedInstances.add(vessel);
+    public void vesselCrashed(Vessel vessel) {
+        vessels.remove(vessel);
+        crashedVessels.add(vessel);
     }
 }

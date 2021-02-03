@@ -111,9 +111,9 @@ public class MainScreen extends KSPGUI {
                 case VESSEL_CONCEPT_LIST -> // Add vessel concepts to list
                         searchModel.addAll(controller.getConcepts());
                 case VESSEL_INSTANCE_LIST -> // Add vessel instances to list
-                        searchModel.addAll(controller.getInstances());
+                        searchModel.addAll(controller.getVessels());
                 case CRASHED_INSTANCE_LIST -> // Add crashed instances to list
-                        searchModel.addAll(controller.getCrashedInstances());
+                        searchModel.addAll(controller.getCrashedVessels());
                 // TODO add new item: edit here
             }
         });

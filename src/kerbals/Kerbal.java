@@ -1,13 +1,13 @@
 package kerbals;
 
 import missions.Mission;
-import other.*;
+import other.KSPObject;
 import other.interfaces.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
-import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
+import other.util.Location;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -148,17 +148,16 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     /** Executed whenever the kerbal unfortunately goes KIA.
      * @param mission The mission that caused their death
-     * @param inSpace True if the kerbal died in space, false otherwise
-     * @param location Celestial body's SoI where the kerbal went KIA
+     * @param location Location where the kerbal went KIA
      * @param details Additional KIA details
      */
-    public void KIA(Mission mission, boolean inSpace, CelestialBody location, float expGained, String details) {
+    public void KIA(Mission mission, Location location, float expGained, String details) {
         // Set KIA
         KIA = true;
 
         // Final log entry
         FlightLog fl = new FlightLog(getController(), this.mission == null ? "(none)" : this.mission, missionObj == null ? 0.0f : missionObj.getExperienceGained(this));
-        fl.setDescription("KIA in " + (inSpace ? "orbit of  " : "") + location.toString() + " (+" + expGained + "):\n" + details);
+        fl.setDescription("KIA " + location.toString().substring(0, 1).toLowerCase(Locale.ROOT) + location.toString().substring(1) + " (+" + expGained + "):\n" + details);
         log.add(fl);
 
         missionObj = null;

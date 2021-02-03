@@ -82,7 +82,7 @@ public class MissionCreator extends KSPGUI {
         crewSelectedTable.setModel(assignedModel);
 
         // Vessel combo box reset
-        for (Vessel vi : controller.getInstances()) activeVesselsComboBox.addItem(vi);
+        for (Vessel vi : controller.getVessels()) activeVesselsComboBox.addItem(vi);
         for (Concept vc : controller.getConcepts()) vesselDesignsComboBox.addItem(vc);
 
         // Good luck charm

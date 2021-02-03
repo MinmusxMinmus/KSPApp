@@ -18,10 +18,10 @@ public interface ControllerInterface {
     Set<Concept> getConcepts();
 
     Vessel getInstance(long id);
-    Set<Vessel> getInstances();
+    Set<Vessel> getVessels();
 
     Vessel getCrashedInstance(long id);
-    Set<Vessel> getCrashedInstances();
+    Set<Vessel> getCrashedVessels();
 
     void addKerbal(Kerbal kerbal);
     void addMission(Mission mission);
@@ -29,8 +29,8 @@ public interface ControllerInterface {
     void addInstance(Vessel instance);
 
     // Special case: recovered instances get deleted from memory
-    void instanceRecovered(Vessel instance);
+    void vesselRecovered(Vessel vessel);
 
     // Special case: crashed instances get moved to their own list
-    void instanceCrashed(Vessel vessel);
+    void vesselCrashed(Vessel vessel);
 }

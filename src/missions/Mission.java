@@ -2,13 +2,13 @@ package missions;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.*;
+import other.KSPObject;
 import other.interfaces.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
-import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
+import other.util.Location;
 import vessels.Concept;
 import vessels.Vessel;
 
@@ -108,17 +108,16 @@ public class Mission extends KSPObject implements KSPObjectListener {
     // Logic methods
     public void kerbalRescued(Kerbal kerbal, KSPDate dateRescued) {
         this.crew.put(kerbal.getName(), new CrewDetails(getController(), kerbal.getName(), "Rescued subject", dateRescued));
-        logEvent(new MissionEvent(getController(), getName(), vesselObj.isInSpace(), vesselObj.getLocation(), "Rescued " + kerbal.getName()));
+        logEvent(new MissionEvent(getController(), getName(),vesselObj.getLocation(), "Rescued " + kerbal.getName()));
     }
 
     /** Executed whenever a kerbal unfortunately goes KIA. This method assumes the cause of death to not be vessel crash.
      * @param kerbal The unfortunate victim
-     * @param inSpace True if the kerbal died in space, false otherwise
-     * @param location Celestial body's SoI where the kerbal went KIA
+     * @param location Location where the kerbal went KIA
      * @param details Additional KIA details
      */
-    public void kerbalKIA(Kerbal kerbal, boolean inSpace, CelestialBody location, String details) {
-        kerbal.KIA(this, inSpace, location, crew.get(kerbal.getName()).getExpGained(), details);
+    public void kerbalKIA(Kerbal kerbal, Location location, String details) {
+        kerbal.KIA(this, location, crew.get(kerbal.getName()).getExpGained(), details);
     }
 
     /** Executed when the current active vessel is completely destroyed. Also kills all kerbals involved.
@@ -148,7 +147,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         vesselObj = null;
 
         // Log nominal end
-        logEvent(new MissionEvent(getController(), name, vesselObj.isInSpace(), vesselObj.getLocation(), "Nominal end: " + status));
+        logEvent(new MissionEvent(getController(), name, vesselObj.getLocation(), "Nominal end: " + status));
     }
 
     // merge into missionEnd()
@@ -166,7 +165,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         // TODO perhaps replace warnings with a return false? This shouldn't happen anyway, it's for debugging.
 
         // Log catastrophic end
-        logEvent(new MissionEvent(getController(), name, vesselObj.isInSpace(), vesselObj.getLocation(), "Catastrophic end: " + status));
+        logEvent(new MissionEvent(getController(), name, vesselObj.getLocation(), "Catastrophic end: " + status));
     }
 
     public void logEvent(MissionEvent event) {

@@ -6,6 +6,7 @@ import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.CelestialBody;
 import other.util.Field;
+import other.util.Location;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,12 +15,11 @@ import java.util.StringJoiner;
 public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":ME:";
-    public static final int ENCODE_FIELD_AMOUNT = 4;
+    public static final int ENCODE_FIELD_AMOUNT = 3;
 
     // Persistent details
     private String missionName;
-    private final boolean oldInSpace; // TODO replace with Location object
-    private final CelestialBody oldLocation;
+    private final Location oldLocation; // TODO replace with Location object
     private final String details;
 
     // Dynamic details
@@ -27,13 +27,12 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
 
     private MissionEvent(ControllerInterface controller, String[] fields) {
-        this(controller, fields[0], Boolean.parseBoolean(fields[1]), CelestialBody.valueOf(fields[2]), fields[3]);
+        this(controller, fields[0], Location.fromString(fields[1]), fields[2]);
     }
 
-    public MissionEvent(ControllerInterface controller, String missionName, boolean oldInSpace, CelestialBody oldLocation, String details) {
+    public MissionEvent(ControllerInterface controller, String missionName, Location oldLocation, String details) {
         super(controller);
         this.missionName = missionName;
-        this.oldInSpace = oldInSpace;
         this.oldLocation = oldLocation;
         this.details = details;
     }
@@ -47,8 +46,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         StringJoiner joiner = new StringJoiner(DELIMITER);
 
         joiner.add(me.missionName);
-        joiner.add(Boolean.toString(me.oldInSpace));
-        joiner.add(me.oldLocation.name());
+        joiner.add(Location.toString(me.oldLocation));
         joiner.add(me.details);
 
         return joiner.toString();
@@ -65,7 +63,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Mission", missionName));
-        fields.add(new Field("Previous location", (oldInSpace ? "Orbiting " : "Landed on ") + oldLocation.toString()));
+        fields.add(new Field("Previous location", oldLocation == null ? "Unknown" : oldLocation.toString()));
         fields.add(new Field("Details", details));
 
         return fields;
