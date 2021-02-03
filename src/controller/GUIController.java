@@ -27,9 +27,9 @@ public class GUIController implements ControllerInterface {
 
     private final List<Kerbal> kerbals;
     private final List<Mission> missions;
-    private final List<VesselConcept> concepts;
-    private final List<VesselInstance> instances;
-    private final List<VesselInstance> crashedInstances = new LinkedList<>();
+    private final List<Concept> concepts;
+    private final List<Vessel> instances;
+    private final List<Vessel> crashedInstances = new LinkedList<>();
 
     // Persistence
 
@@ -51,9 +51,9 @@ public class GUIController implements ControllerInterface {
 
         for (Kerbal k : kerbals) k.ready();
         for (Mission m : missions) m.ready();
-        for (VesselConcept v : concepts) v.ready();
-        for (VesselInstance v : instances) v.ready();
-        for (VesselInstance v : crashedInstances) v.ready();
+        for (Concept v : concepts) v.ready();
+        for (Vessel v : instances) v.ready();
+        for (Vessel v : crashedInstances) v.ready();
     }
 
     private void getPersistenceCrashedInstances() {
@@ -63,12 +63,12 @@ public class GUIController implements ControllerInterface {
                 .map(atom::getItem)
                 .forEach(c -> {
 
-                    if (c.size() != VesselInstance.ENCODE_FIELD_AMOUNT) {
+                    if (c.size() != Vessel.ENCODE_FIELD_AMOUNT) {
                         System.err.println("WARNING: Corrupt crashed vessel instance found: " + c + "\nExpected " +
-                                VesselInstance.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
+                                Vessel.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
                         return;
                     }
-                    crashedInstances.add(new VesselInstance(this, new LinkedList<>(c)));
+                    crashedInstances.add(new Vessel(this, new LinkedList<>(c)));
                 });
     }
 
@@ -78,12 +78,12 @@ public class GUIController implements ControllerInterface {
         atom.getItems().stream()
                 .map(atom::getItem)
                 .forEach(c -> {
-                    if (c.size() != VesselInstance.ENCODE_FIELD_AMOUNT) {
+                    if (c.size() != Vessel.ENCODE_FIELD_AMOUNT) {
                         System.err.println("WARNING: Corrupt vessel instance found: " + c + "\nExpected " +
-                                VesselInstance.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
+                                Vessel.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
                         return;
                     }
-                    instances.add(new VesselInstance(this, new LinkedList<>(c)));
+                    instances.add(new Vessel(this, new LinkedList<>(c)));
                 });
     }
 
@@ -94,12 +94,12 @@ public class GUIController implements ControllerInterface {
                 .map(atom::getItem)
                 .forEach(c -> {
 
-                    if (c.size() != VesselConcept.ENCODE_FIELD_AMOUNT) {
+                    if (c.size() != Concept.ENCODE_FIELD_AMOUNT) {
                         System.err.println("WARNING: Corrupt vessel concept found: " + c + "\nExpected " +
-                                VesselConcept.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
+                                Concept.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
                         return;
                     }
-                    concepts.add(new VesselConcept(this, new LinkedList<>(c)));
+                    concepts.add(new Concept(this, new LinkedList<>(c)));
                 });
     }
 
@@ -141,28 +141,28 @@ public class GUIController implements ControllerInterface {
         k.ready();
     }
 
-    public void createMission(String name, String description, VesselInstance vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, ((VesselInstance) vessel).getId(), crew, missionStart);
+    public void createMission(String name, String description, Vessel vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Mission m = new Mission(this, name, ((Vessel) vessel).getId(), crew, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
         m.ready();
     }
 
-    public void createMission(String name, String description, VesselConcept vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, (VesselConcept) vessel, crew, missionStart);
+    public void createMission(String name, String description, Concept vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Mission m = new Mission(this, name, (Concept) vessel, crew, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
         m.ready();
     }
 
-    public void createConcept(String name, VesselType type, VesselConcept redesign, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
-        VesselConcept vc;
+    public void createConcept(String name, VesselType type, Concept redesign, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
+        Concept vc;
         // From scratch, type != null
-        if (redesign == null) vc = new VesselConcept(this, name, type, creationDate, destinations, properties);
+        if (redesign == null) vc = new Concept(this, name, type, creationDate, destinations, properties);
         // Inspired, type == null;
-        else vc = new VesselConcept(this, name, redesign, creationDate, destinations, properties);
+        else vc = new Concept(this, name, redesign, creationDate, destinations, properties);
         addConcept(vc);
         vc.ready();
     }
@@ -171,15 +171,15 @@ public class GUIController implements ControllerInterface {
         object.fireDeletionEvent(status);
         if (object instanceof Kerbal k ) kerbals.remove(k);
         else if (object instanceof Mission m ) missions.remove(m);
-        else if (object instanceof VesselConcept vc) concepts.remove(vc);
-        else if (object instanceof VesselInstance vi) {
+        else if (object instanceof Concept vc) concepts.remove(vc);
+        else if (object instanceof Vessel vi) {
             instances.remove(vi); // One of these will work, you know
             crashedInstances.remove(vi);
         }
     }
 
-    public long createInstance(VesselConcept concept, int rng, Mission mission) {
-        VesselInstance vi = new VesselInstance(this, concept, new Random(rng).nextLong(), mission);
+    public long createInstance(Concept concept, int rng, Mission mission) {
+        Vessel vi = new Vessel(this, concept, new Random(rng).nextLong(), mission);
         addInstance(vi);
         vi.ready();
         return vi.getId();
@@ -215,7 +215,7 @@ public class GUIController implements ControllerInterface {
         // Remove all previous items
         for (Key key : atom.getItems()) atom.removeItem(key);
         // Add everything again
-        for (VesselConcept m : concepts) {
+        for (Concept m : concepts) {
             atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
             count++;
         }
@@ -226,7 +226,7 @@ public class GUIController implements ControllerInterface {
         // Remove all previous items
         for (Key key : atom.getItems()) atom.removeItem(key);
         // Add everything again
-        for (VesselInstance m : instances) {
+        for (Vessel m : instances) {
             atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
             count++;
         }
@@ -237,7 +237,7 @@ public class GUIController implements ControllerInterface {
         // Remove all previous items
         for (Key key : atom.getItems()) atom.removeItem(key);
         // Add everything again
-        for (VesselInstance m : crashedInstances) {
+        for (Vessel m : crashedInstances) {
             atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
             count++;
         }
@@ -280,17 +280,17 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public VesselConcept getConcept(String name) {
+    public Concept getConcept(String name) {
         return concepts.stream().filter(c -> c.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Override
-    public VesselInstance getInstance(long id) {
+    public Vessel getInstance(long id) {
         return instances.stream().filter(i -> i.getId() == id).findFirst().orElse(null);
     }
 
     @Override
-    public VesselInstance getCrashedInstance(long id) {
+    public Vessel getCrashedInstance(long id) {
         return crashedInstances.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
     }
 
@@ -305,7 +305,7 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public Set<VesselConcept> getConcepts() {
+    public Set<Concept> getConcepts() {
         concepts.sort((vc1, vc2) -> {
             // Different family
             if (!vc1.getName().equals(vc2.getName())) return vc1.getName().compareTo(vc2.getName());
@@ -316,7 +316,7 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public Set<VesselInstance> getInstances() {
+    public Set<Vessel> getInstances() {
         instances.sort((vi1, vi2) -> {
             // Different family
             if (!vi1.getName().equals(vi2.getName())) return vi1.getName().compareTo(vi2.getName());
@@ -333,7 +333,7 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public Set<VesselInstance> getCrashedInstances() {
+    public Set<Vessel> getCrashedInstances() {
         return new HashSet<>(crashedInstances);
     }
 
@@ -348,24 +348,24 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public void addConcept(VesselConcept concept) {
+    public void addConcept(Concept concept) {
         concepts.add(concept);
     }
 
     @Override
-    public void addInstance(VesselInstance instance) {
+    public void addInstance(Vessel instance) {
         instances.add(instance);
     }
 
     @Override
-    public void instanceRecovered(VesselInstance instance) {
+    public void instanceRecovered(Vessel instance) {
         instance.fireDeletionEvent("Recovered lmao");
         instances.remove(instance);
     }
 
     @Override
-    public void instanceCrashed(VesselInstance vesselInstance) {
-        instances.remove(vesselInstance);
-        crashedInstances.add(vesselInstance);
+    public void instanceCrashed(Vessel vessel) {
+        instances.remove(vessel);
+        crashedInstances.add(vessel);
     }
 }

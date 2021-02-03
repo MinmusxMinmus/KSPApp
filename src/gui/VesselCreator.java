@@ -4,7 +4,7 @@ import controller.GUIController;
 import other.util.Destination;
 import other.display.GoodListModel;
 import other.util.KSPDate;
-import vessels.VesselConcept;
+import vessels.Concept;
 import vessels.VesselProperty;
 import vessels.VesselType;
 
@@ -46,7 +46,7 @@ public class VesselCreator extends KSPGUI {
     private JPanel descriptionPanel;
     private JTextArea descriptionTextArea;
     private JCheckBox redesignCheckBox;
-    private JComboBox<VesselConcept> designComboBox;
+    private JComboBox<Concept> designComboBox;
     private JPanel locationsPanel;
     private JScrollPane locationsAvailableScrollPane;
     private JScrollPane locationsSelectedScrollPane;
@@ -72,7 +72,7 @@ public class VesselCreator extends KSPGUI {
     private final GoodListModel<VesselProperty> availablePModel = new GoodListModel<>(VesselProperty.values());
     private final GoodListModel<VesselProperty> selectedPModel = new GoodListModel<>();
 
-    private final DefaultComboBoxModel<VesselConcept> designModel = new DefaultComboBoxModel<>();
+    private final DefaultComboBoxModel<Concept> designModel = new DefaultComboBoxModel<>();
     private final DefaultComboBoxModel<VesselType> typeModel = new DefaultComboBoxModel<>();
 
     public VesselCreator(GUIController controller) {
@@ -174,8 +174,8 @@ public class VesselCreator extends KSPGUI {
             VesselType type = redesignCheckBox.isSelected()
                     ? null
                     : (VesselType) typeComboBox.getSelectedItem();
-            VesselConcept redesign = redesignCheckBox.isSelected()
-                    ? (VesselConcept) designComboBox.getSelectedItem()
+            Concept redesign = redesignCheckBox.isSelected()
+                    ? (Concept) designComboBox.getSelectedItem()
                     : null;
             String year = yearTextField.getText().strip();
             String day = dayTextField.getText().strip();

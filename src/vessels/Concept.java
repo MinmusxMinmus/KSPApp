@@ -11,7 +11,7 @@ import other.util.KSPDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VesselConcept extends KSPObject implements KSPObjectListener {
+public class Concept extends KSPObject implements KSPObjectListener {
 
     public static final int ENCODE_FIELD_AMOUNT = 9; // ALWAYS ACCOUNT FOR DESCRIPTION, IN THIS CASE PARENT CLASS TOO
 
@@ -49,7 +49,7 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
     private final KSPDate creationDate;
 
     // Dynamic fields
-    private VesselConcept conceptObj;
+    private Concept conceptObj;
 
     // Constructors
     /** Generates a new concept from scratch, which means that it's not based off of any previous craft.
@@ -58,7 +58,7 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(ControllerInterface controller, String name, VesselType type, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
+    public Concept(ControllerInterface controller, String name, VesselType type, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
         this(controller,
                 type,
                 0,
@@ -75,7 +75,7 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    public VesselConcept(ControllerInterface controller, String name, VesselConcept vessel, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
+    public Concept(ControllerInterface controller, String name, Concept vessel, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
         this(controller,
                 vessel.getType(),
                 1,
@@ -94,15 +94,15 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
      * @param destinations Vessel's designed itinerary.
      * @param properties List with various optional properties the vessel might have.
      */
-    private VesselConcept(ControllerInterface controller,
-                          VesselType type,
-                          int iteration,
-                          String name,
-                          String concept,
-                          List<IterationChange> iterations,
-                          Set<VesselProperty> properties,
-                          Set<Destination> destinations,
-                          KSPDate creationDate) {
+    private Concept(ControllerInterface controller,
+                    VesselType type,
+                    int iteration,
+                    String name,
+                    String concept,
+                    List<IterationChange> iterations,
+                    Set<VesselProperty> properties,
+                    Set<Destination> destinations,
+                    KSPDate creationDate) {
         super(controller);
         this.name = name;
         this.iteration = iteration;
@@ -117,7 +117,7 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
     /** Generates a concept from a list of fields stored in persistence.
      * @param fields List of the vessel's fields
      */
-    public VesselConcept(ControllerInterface controller, LinkedList<String> fields) {
+    public Concept(ControllerInterface controller, LinkedList<String> fields) {
         this(controller,
                 VesselType.valueOf(fields.get(1)),
                 Integer.parseInt(fields.get(2)),
@@ -240,7 +240,7 @@ public class VesselConcept extends KSPObject implements KSPObjectListener {
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Deleted parent concept
-        if (event.getSource() instanceof VesselConcept) {
+        if (event.getSource() instanceof Concept) {
             conceptObj = null;
             concept = "[REDACTED]";
         }

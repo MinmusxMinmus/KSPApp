@@ -12,7 +12,7 @@ import other.util.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VesselInstance extends KSPObject implements KSPObjectListener {
+public class Vessel extends KSPObject implements KSPObjectListener {
 
     public static final int ENCODE_FIELD_AMOUNT = 8; // ALWAYS ACCOUNT FOR DESCRIPTION (IN THIS CASE, FOR TYPE AND ITERATION AS WELL)
     public static final String DELIMITER = ":VI:";
@@ -30,7 +30,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
     // Dynamic fields
     private Mission missionObj;
     private final Set<Kerbal> crewObjs = new HashSet<>();
-    private VesselConcept conceptObj;
+    private Concept conceptObj;
 
     // Constructors
     /** Defines a new instance of the vessel concept, at the rough location specified.
@@ -39,7 +39,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
      * @param inSpace True if the craft is in space, false otherwise (surface of a celestial body, atmosphere, etc)
      * @param location Celestial body the craft is located at.
      */
-    public VesselInstance(ControllerInterface controller, long id, VesselConcept concept, boolean inSpace, CelestialBody location, Mission mission, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, long id, Concept concept, boolean inSpace, CelestialBody location, Mission mission, Kerbal... crew) {
         this(controller,
                 id,
                 concept.getName(),
@@ -56,7 +56,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
      * @param concept Vessel design
      * @param id Vessel identifier
      */
-    public VesselInstance(ControllerInterface controller, VesselConcept concept, long id, Mission mission, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, Concept concept, long id, Mission mission, Kerbal... crew) {
         this(controller,
                 id,
                 concept,
@@ -68,7 +68,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
 
     /** Private implementation. Add params later
      */
-    private VesselInstance(ControllerInterface controller, long id, String concept, boolean inSpace, CelestialBody location, Set<String> crew, boolean crashed, String crashDetails, String missionName) {
+    private Vessel(ControllerInterface controller, long id, String concept, boolean inSpace, CelestialBody location, Set<String> crew, boolean crashed, String crashDetails, String missionName) {
         super(controller);
         this.id = id;
         this.concept = concept;
@@ -83,7 +83,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
     /** Generates a new vessel instance from a list of fields stored in persistence.
      * @param fields List of fields
      */
-    public VesselInstance(ControllerInterface controller, List<String> fields) {
+    public Vessel(ControllerInterface controller, List<String> fields) {
         this(controller,
                 Long.parseLong(fields.get(1)),
                 fields.get(2),
@@ -266,7 +266,7 @@ public class VesselInstance extends KSPObject implements KSPObjectListener {
         }
 
         // Concept deleted
-        if (event.getSource() instanceof VesselConcept) {
+        if (event.getSource() instanceof Concept) {
             concept = "[REDACTED]";
             conceptObj = null;
         }

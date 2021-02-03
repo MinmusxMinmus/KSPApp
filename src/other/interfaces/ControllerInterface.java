@@ -2,10 +2,9 @@ package other.interfaces;
 
 import kerbals.Kerbal;
 import missions.Mission;
-import vessels.VesselConcept;
-import vessels.VesselInstance;
+import vessels.Concept;
+import vessels.Vessel;
 
-import java.util.List;
 import java.util.Set;
 
 public interface ControllerInterface {
@@ -15,23 +14,23 @@ public interface ControllerInterface {
     Mission getMission(String name);
     Set<Mission> getMissions();
 
-    VesselConcept getConcept(String name);
-    Set<VesselConcept> getConcepts();
+    Concept getConcept(String name);
+    Set<Concept> getConcepts();
 
-    VesselInstance getInstance(long id);
-    Set<VesselInstance> getInstances();
+    Vessel getInstance(long id);
+    Set<Vessel> getInstances();
 
-    VesselInstance getCrashedInstance(long id);
-    Set<VesselInstance> getCrashedInstances();
+    Vessel getCrashedInstance(long id);
+    Set<Vessel> getCrashedInstances();
 
     void addKerbal(Kerbal kerbal);
     void addMission(Mission mission);
-    void addConcept(VesselConcept concept);
-    void addInstance(VesselInstance instance);
+    void addConcept(Concept concept);
+    void addInstance(Vessel instance);
 
     // Special case: recovered instances get deleted from memory
-    void instanceRecovered(VesselInstance instance);
+    void instanceRecovered(Vessel instance);
 
     // Special case: crashed instances get moved to their own list
-    void instanceCrashed(VesselInstance vesselInstance);
+    void instanceCrashed(Vessel vessel);
 }

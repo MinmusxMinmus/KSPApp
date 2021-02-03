@@ -9,8 +9,8 @@ import other.interfaces.KSPObjectListener;
 import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
-import vessels.VesselConcept;
-import vessels.VesselInstance;
+import vessels.Concept;
+import vessels.Vessel;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +29,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
     private boolean active = true;
 
     // Dynamic fields
-    private VesselInstance vesselObj;
+    private Vessel vesselObj;
     private Set<Kerbal> crewObjs;
 
     // Constructors
@@ -39,14 +39,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
      * @param crew A map corresponding to the crew and their roles
      * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, VesselConcept concept, Map<Kerbal, String> crew, KSPDate start) {
+    public Mission(ControllerInterface controller, String name, Concept concept, Map<Kerbal, String> crew, KSPDate start) {
         super(controller);
         this.name = name;
         this.vesselId = new Random(this.hashCode()).nextLong();
         // Creating the vessel
         Kerbal[] crew2 = new Kerbal[crew.keySet().size()];
         crew.keySet().toArray(crew2);
-        controller.addInstance(new VesselInstance(controller, concept, vesselId, this, crew2)); // TODO this might break, since VesselInstance accesses mission.getName()
+        controller.addInstance(new Vessel(controller, concept, vesselId, this, crew2)); // TODO this might break, since VesselInstance accesses mission.getName()
         // Formatting crew map
         TreeMap<String, CrewDetails> crew3 = new TreeMap<>();
         crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
@@ -277,7 +277,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         }
 
         // Vessel deleted
-        if (event.getSource() instanceof VesselInstance vi) {
+        if (event.getSource() instanceof Vessel vi) {
             System.err.println("WARNING: Vessel " + vi.getName() + "#" + vi.getId() + " deleted from mission " + name + " unexpectedly. A crash will most likely happen soon!");
             vesselObj = null;
             vesselId = 0;

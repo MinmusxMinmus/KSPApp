@@ -6,8 +6,8 @@ import other.util.KSPDate;
 import other.display.MainSearchCellRenderer;
 import other.display.MissionAssignedTableModel;
 import other.display.MissionTableModel;
-import vessels.VesselConcept;
-import vessels.VesselInstance;
+import vessels.Concept;
+import vessels.Vessel;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -29,7 +29,7 @@ public class MissionCreator extends KSPGUI {
     private JTextArea descriptionTextArea;
     private JPanel vesselPanel;
     private JLabel activeVesselsLabel;
-    private JComboBox<VesselInstance> activeVesselsComboBox;
+    private JComboBox<Vessel> activeVesselsComboBox;
     private JPanel crewPanel;
     private JPanel crewSelectionPanel;
     private JScrollPane availableCrewPane;
@@ -47,7 +47,7 @@ public class MissionCreator extends KSPGUI {
     private JButton OKButton;
     private JButton cancelButton;
     private JPanel descriptionAreaPanel;
-    private JComboBox<VesselConcept> vesselDesignsComboBox;
+    private JComboBox<Concept> vesselDesignsComboBox;
     private JLabel vesselDesignsLabel;
     private JCheckBox newVesselCheckBox;
     private JPanel creationDatePanel;
@@ -82,8 +82,8 @@ public class MissionCreator extends KSPGUI {
         crewSelectedTable.setModel(assignedModel);
 
         // Vessel combo box reset
-        for (VesselInstance vi : controller.getInstances()) activeVesselsComboBox.addItem(vi);
-        for (VesselConcept vc : controller.getConcepts()) vesselDesignsComboBox.addItem(vc);
+        for (Vessel vi : controller.getInstances()) activeVesselsComboBox.addItem(vi);
+        for (Concept vc : controller.getConcepts()) vesselDesignsComboBox.addItem(vc);
 
         // Good luck charm
         revalidate();
@@ -155,8 +155,8 @@ public class MissionCreator extends KSPGUI {
             // Read values from text fields and combo boxes
             String name = nameTextField.getText();
             String description = descriptionTextArea.getText();
-            VesselConcept vessel = (VesselConcept) vesselDesignsComboBox.getSelectedItem();
-            VesselInstance instance = (VesselInstance) activeVesselsComboBox.getSelectedItem();
+            Concept vessel = (Concept) vesselDesignsComboBox.getSelectedItem();
+            Vessel instance = (Vessel) activeVesselsComboBox.getSelectedItem();
             String year = yearTextField.getText();
             String day = dayTextField.getText();
             String hour = hourTextField.getText();
