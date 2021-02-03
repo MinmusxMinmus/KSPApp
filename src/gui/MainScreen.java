@@ -145,7 +145,9 @@ public class MainScreen extends KSPGUI {
                     return;
                 }
                 // TODO Add new item: edit here
-                default -> window = new MainScreen(controller);
+                default -> {
+                    return;
+                }
             }
 
             window.appear(name);
