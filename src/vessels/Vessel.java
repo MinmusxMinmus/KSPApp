@@ -17,16 +17,16 @@ import java.util.stream.Collectors;
 
 public class Vessel extends KSPObject implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 9; // ALWAYS ACCOUNT FOR DESCRIPTION (IN THIS CASE, FOR TYPE AND ITERATION AS WELL)
+    public static final int ENCODE_FIELD_AMOUNT = 10; // ALWAYS ACCOUNT FOR DESCRIPTION (IN THIS CASE, FOR TYPE AND ITERATION AS WELL)
     public static final String DELIMITER = ":VI:";
 
     // Persistent fields
     private final long id;
     private String concept;
     private final int iteration;
-    private Location location; // replace with Location object
+    private Location location;
     private final Set<String> crew;
-    // vessels
+    private final Set<Long> vessels;
     // stranded
     private boolean crashed;
     private String crashDetails;
@@ -35,6 +35,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     // Dynamic fields
     private Mission missionObj; // replace with missionObjs
     private final Set<Kerbal> crewObjs = new HashSet<>();
+    private final Set<Vessel> vesselObjs = new HashSet<>();
     private Concept conceptObj;
 
     // Constructors
@@ -43,13 +44,14 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * @param concept Vessel design
      * @param location Location of the craft.
      */
-    public Vessel(ControllerInterface controller, long id, Concept concept, Location location, Mission mission, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, long id, Concept concept, Location location, Mission mission, Set<Vessel> vessels, Kerbal... crew) {
         this(controller,
                 id,
                 concept.getName(),
                 concept.getIteration(),
                 location,
                 Arrays.stream(crew).filter(Objects::nonNull).map(Kerbal::getName).collect(Collectors.toSet()),
+                vessels.stream().map(Vessel::getId).collect(Collectors.toSet()),
                 false,
                 null,
                 mission.getName());
@@ -60,18 +62,19 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * @param concept Vessel design
      * @param id Vessel identifier
      */
-    public Vessel(ControllerInterface controller, Concept concept, long id, Mission mission, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, Concept concept, long id, Mission mission, Set<Vessel> vessels, Kerbal... crew) {
         this(controller,
                 id,
                 concept,
                 new Location(false, CelestialBody.KERBIN),
                 mission,
+                vessels,
                 crew);
     }
 
     /** Private implementation. Add params later
      */
-    private Vessel(ControllerInterface controller, long id, String concept, int iteration, Location location, Set<String> crew, boolean crashed, String crashDetails, String missionName) {
+    private Vessel(ControllerInterface controller, long id, String concept, int iteration, Location location, Set<String> crew, Set<Long> vessels, boolean crashed, String crashDetails, String missionName) {
         super(controller);
         this.id = id;
         this.concept = concept;
@@ -81,6 +84,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.crashed = crashed;
         this.crashDetails = crashDetails;
         this.missionName = missionName;
+        this.vessels = vessels;
     }
 
     /** Generates a new vessel instance from a list of fields stored in persistence.
@@ -93,16 +97,22 @@ public class Vessel extends KSPObject implements KSPObjectListener {
                 Integer.parseInt(fields.get(3)),
                 Location.fromString(fields.get(4)),
                 crewMembersFromString(fields.get(5)),
-                Boolean.parseBoolean(fields.get(6)),
-                fields.get(7).equals("(none)") ? null : fields.get(7),
-                fields.get(8)
+                vesselsFromString(fields.get(6)),
+                Boolean.parseBoolean(fields.get(7)),
+                fields.get(8).equals("(none)") ? null : fields.get(8),
+                fields.get(9)
         );
         setDescription(fields.get(0));
+    }
+
+    private static Set<Long> vesselsFromString(String s) {
+        return s.equals("(none)") ? new HashSet<>() : Arrays.stream(s.split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
     }
 
     private static Set<String> crewMembersFromString(String s) {
         return s.equals("(none)") ? new HashSet<>(): Arrays.stream(s.split(DELIMITER)).collect(Collectors.toSet());
     }
+
 
     // Logic methods
     /** Executed whenever a vessel is recovered. This method assumes that the vessel is already in Kerbin surface, and
@@ -147,7 +157,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         if (missionObj != null) missionName = missionObj.getName();
 
         getController().vesselCrashed(this);
-    } // Kerbal... victims
+    } // Kerbal... victims, Vessel... survivors
 
     // updateLocation()
 
@@ -157,9 +167,19 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     // removeMission()
 
-    // addVessel()
+    public void addVessel(Vessel v) {
+        vesselObjs.add(v);
+        vessels.add(v.id);
+    }
 
-    // removeVessel()
+    public void removeVessel(Vessel v) {
+        vesselObjs.remove(v);
+        vessels.remove(v.id);
+    }
+
+    // addCrew()
+
+    // removeCrew()
 
     // Getter/Setter methods
     public String getName() {
@@ -193,6 +213,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         return new HashSet<>(crew);
     }
 
+    public Set<Long> getVessels() {
+        return new HashSet<>(vessels);
+    }
+
     // Overrides
     @Override
     public void ready() {
@@ -212,6 +236,12 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         // Get concept
         conceptObj = getController().getConcept(concept);
         if (conceptObj != null) conceptObj.addEventListener(this);
+
+        // Get connected vessels
+        for (long l : vessels) {
+            Vessel v = getController().getInstance(l);
+            if (v != null) vesselObjs.add(v);
+        }
     }
 
     @Override
@@ -222,10 +252,16 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         ret.add(concept);
         ret.add(Integer.toString(iteration));
         ret.add(Location.toString(location));
+
         StringJoiner joiner = new StringJoiner(DELIMITER);
         crew.forEach(joiner::add);
         if (joiner.toString().equals("")) joiner.add("(none)");
         ret.add(joiner.toString());
+
+        StringJoiner joiner2 = new StringJoiner(DELIMITER);
+        vessels.forEach(l -> joiner.add(Long.toString(l)));
+        if (joiner.toString().equals("")) joiner.add("(none)");
+        ret.add(joiner2.toString());
         ret.add(Boolean.toString(crashed));
         ret.add(crashDetails == null ? "(none)" : crashDetails);
         ret.add(missionName);
@@ -235,7 +271,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     @Override
     public String getTextRepresentation() {
-        return concept + " Mk" + getIteration() + ":" + location.toString();
+        return concept + " Mk" + getIteration() + ": " + location.toString();
     }
 
     @Override
@@ -246,6 +282,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Iteration", "Mk" + getIteration()));
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
+        for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
         if (crashed) {
             fields.add(new Field("Last mission", missionName == null ? "None" : missionName));
             fields.add(new Field("Crash location", location.toString()));

@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -198,7 +199,8 @@ public class MissionCreator extends KSPGUI {
                     description,
                     vessel,
                     assignedModel.getCrew2(),
-                    date);
+                    date,
+                    new HashSet<>());
             else controller.createMission(name,
                     description,
                     instance,
