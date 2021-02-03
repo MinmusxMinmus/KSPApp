@@ -141,7 +141,7 @@ public class MainScreen extends KSPGUI {
                     name = VESSEL_CREATOR;
                 }
                 case VESSEL_INSTANCE_LIST, CRASHED_INSTANCE_LIST -> {
-                    say("To make a physical vessel, create a mission for it");
+                    say("To make a physical vessel, create a mission for it"); // TODO allow to create vessels without mission
                     return;
                 }
                 // TODO Add new item: edit here
