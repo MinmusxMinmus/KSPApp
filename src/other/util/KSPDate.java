@@ -1,7 +1,7 @@
 package other.util;
 
 import other.KSPObject;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;

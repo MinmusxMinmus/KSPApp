@@ -3,7 +3,7 @@ package vessels;
 import kerbals.Kerbal;
 import missions.Mission;
 import other.KSPObject;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.CelestialBody;
@@ -40,13 +40,12 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     // Constructors
     /** Defines a new instance of the vessel concept, at the rough location specified.
-     * @param id Vessel identifier
      * @param concept Vessel design
      * @param location Location of the craft.
      */
-    public Vessel(ControllerInterface controller, long id, Concept concept, Location location, Mission mission, Set<Vessel> vessels, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, Concept concept, Location location, Set<Vessel> vessels, Kerbal... crew) {
         this(controller,
-                id,
+                controller.rng(),
                 concept.getName(),
                 concept.getIteration(),
                 location,
@@ -54,22 +53,8 @@ public class Vessel extends KSPObject implements KSPObjectListener {
                 vessels.stream().map(Vessel::getId).collect(Collectors.toSet()),
                 false,
                 null,
-                mission.getName());
-        this.missionObj = mission;
-    }
-
-    /** Defines a new instance of the vessel concept, as a craft launching from one of Kerbin's launch sites.
-     * @param concept Vessel design
-     * @param id Vessel identifier
-     */
-    public Vessel(ControllerInterface controller, Concept concept, long id, Mission mission, Set<Vessel> vessels, Kerbal... crew) {
-        this(controller,
-                id,
-                concept,
-                new Location(false, CelestialBody.KERBIN),
-                mission,
-                vessels,
-                crew);
+                null);
+        this.missionObj = null;
     }
 
     /** Private implementation. Add params later
@@ -265,7 +250,6 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         ret.add(Boolean.toString(crashed));
         ret.add(crashDetails == null ? "(none)" : crashDetails);
         ret.add(missionName);
-
         return ret;
     }
 

@@ -3,9 +3,10 @@ package missions;
 import controller.GUIController;
 import kerbals.Kerbal;
 import other.KSPObject;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
@@ -44,13 +45,13 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public Mission(ControllerInterface controller, String name, Concept concept, Map<Kerbal, String> crew, KSPDate start, Set<Vessel> vessels) {
         super(controller);
         this.name = name;
-        this.vesselId = new Random(this.hashCode()).nextLong();
         // Creating the vessel
         Kerbal[] crew2 = new Kerbal[crew.keySet().size()];
         crew.keySet().toArray(crew2);
-        Vessel vessel = new Vessel(controller, concept, vesselId, this, vessels, crew2);
+        Vessel vessel = new Vessel(controller, concept, new Location(false, CelestialBody.KERBIN), vessels, crew2);
         vessel.setDescription("Created for " + name);
         controller.addVessel(vessel);
+        this.vesselId = vessel.getId();
         // Formatting crew map
         TreeMap<String, CrewDetails> crew3 = new TreeMap<>();
         crew.keySet().forEach(k -> crew3.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
@@ -95,7 +96,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.start = KSPDate.fromString(controller, fields.get(4));
 
         List<MissionEvent> result;
-        String s = fields.get(6);
+        String s = fields.get(5);
         if (s.equals("(none)")) {
             result = new LinkedList<>();
         } else {
@@ -105,7 +106,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
             result = ret1;
         }
         this.events = result;
-        this.active = Boolean.parseBoolean(fields.get(7));
+        this.active = Boolean.parseBoolean(fields.get(6));
         setDescription(fields.get(0));
     }
 

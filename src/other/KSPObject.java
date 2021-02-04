@@ -1,6 +1,6 @@
 package other;
 
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.Displayable;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;

@@ -1,4 +1,4 @@
-package other.interfaces;
+package controller;
 
 import kerbals.Kerbal;
 import missions.Mission;
@@ -35,4 +35,5 @@ public interface ControllerInterface {
     void vesselCrashed(Vessel vessel);
 
     void ready();
+    long rng();
 }
