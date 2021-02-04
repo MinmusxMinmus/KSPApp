@@ -2,22 +2,15 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.util.CelestialBody;
 import other.util.KSPDate;
-import other.display.MainSearchCellRenderer;
 import other.display.MissionAssignedTableModel;
 import other.display.MissionTableModel;
-import other.util.Location;
-import vessels.Concept;
-import vessels.Vessel;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
