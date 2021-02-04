@@ -14,12 +14,17 @@ import java.util.stream.Collectors;
 
 /**
  * The Vessel class represents a {@link Concept} instance in the Kerbol system. Vessels are used to keep track of actual
- * crafts flying around in KSP, crashed vessels that no longer exist, etc. <br>
- * A vessel is defined by a {@code long} identifier. This identifier is decided during vessel creation, and is generated
- * using the current real life time as the {@link Random} generator object's seed. This should pretty much guarantee a
- * different identifier for every vessel ever created.<br>
- * Vessels keep track of their {@link Location}, their {@link Kerbal} crew, the different {@link Mission} instances they participate in, and a list of vessels
- * they are attached/docked to.
+ * crafts flying around in KSP, crashed vessels that no longer exist, etc.
+ * <p>
+ *     A vessel is defined by a {@code long} identifier. This identifier is decided during vessel creation, and is generated
+ *     using the current real life time as the {@link Random} generator object's seed. This should pretty much guarantee a
+ *     different identifier for every vessel ever created.
+ * </p>
+ *
+ * <p>
+ *     Vessels keep track of their {@link Location}, their {@link Kerbal} crew, the different {@link Mission} instances
+ *     they participate in, and a list of vessels they are attached/docked to.
+ * </p>
  */
 public class Vessel extends KSPObject implements KSPObjectListener {
 

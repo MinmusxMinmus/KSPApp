@@ -12,6 +12,15 @@ import other.util.Location;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Kerbals represent the living organisms that decided to pay a visit to the rest of the Kerbol system and its celestial
+ * bodies.
+ * <p>
+ *     Kerbals keep a record of their hiring/rescue date, as well as their origin and a series of lists containing the
+ *     kerbal's {@link Condecoration} collection, a list of missions ({@link Mission}) the kerbal is part of, and a list
+ *     of previous missions ({@link FlightLog}). Finally, a KIA marker indicates whether the kerbal passed away.
+ * </p>
+ */
 public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
