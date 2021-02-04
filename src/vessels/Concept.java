@@ -59,15 +59,15 @@ public class Concept extends KSPObject implements KSPObjectListener {
      * @param properties List with various optional properties the vessel might have.
      */
     public Concept(ControllerInterface controller, String name, VesselType type, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
-        this(controller,
-                type,
-                0,
-                name,
-                "None",
-                new LinkedList<>(),
-                Arrays.stream(properties).collect(Collectors.toUnmodifiableSet()),
-                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()),
-                creationDate);
+        super(controller);
+        this.type = type;
+        this.iteration = 1;
+        this.name = name;
+        this.concept = "None";
+        this.iterations = new LinkedList<>();
+        this.properties = Arrays.stream(properties).collect(Collectors.toSet());
+        this.destinations = Arrays.stream(destinations).collect(Collectors.toSet());
+        this.creationDate = creationDate;
     }
 
     /** Generates a new concept based on an existing model.
@@ -76,41 +76,14 @@ public class Concept extends KSPObject implements KSPObjectListener {
      * @param properties List with various optional properties the vessel might have.
      */
     public Concept(ControllerInterface controller, String name, Concept vessel, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
-        this(controller,
-                vessel.getType(),
-                1,
-                name,
-                vessel.getName(),
-                new LinkedList<>(),
-                Arrays.stream(properties).collect(Collectors.toUnmodifiableSet()),
-                Arrays.stream(destinations).collect(Collectors.toUnmodifiableSet()),
-                creationDate);
-    }
-
-    /** Private constructor implementation.
-     * @param name The name of the new vessel family.
-     * @param type The general purpose of the vessel.
-     * @param concept The vessel family it will be based on.
-     * @param destinations Vessel's designed itinerary.
-     * @param properties List with various optional properties the vessel might have.
-     */
-    private Concept(ControllerInterface controller,
-                    VesselType type,
-                    int iteration,
-                    String name,
-                    String concept,
-                    List<IterationChange> iterations,
-                    Set<VesselProperty> properties,
-                    Set<Destination> destinations,
-                    KSPDate creationDate) {
         super(controller);
+        this.type = vessel.getType();
+        this.iteration = 1;
         this.name = name;
-        this.iteration = iteration;
-        this.type = type;
-        this.concept = concept.equals("(none)") ? null : concept;
-        this.iterations = iterations;
-        this.properties = properties;
-        this.destinations = destinations;
+        this.concept = vessel.getName();
+        this.iterations = new LinkedList<>();
+        this.properties = Arrays.stream(properties).collect(Collectors.toSet());
+        this.destinations = Arrays.stream(destinations).collect(Collectors.toSet());
         this.creationDate = creationDate;
     }
 
@@ -118,17 +91,16 @@ public class Concept extends KSPObject implements KSPObjectListener {
      * @param fields List of the vessel's fields
      */
     public Concept(ControllerInterface controller, LinkedList<String> fields) {
-        this(controller,
-                VesselType.valueOf(fields.get(1)),
-                Integer.parseInt(fields.get(2)),
-                fields.get(3),
-                fields.get(4),
-                changesFromString(controller, fields.get(5)),
-                propertiesFromString(fields.get(6)),
-                destinationsFromString(fields.get(7)),
-                KSPDate.fromString(controller, fields.get(8))
-        );
+        super(controller);
         setDescription(fields.get(0));
+        this.type = VesselType.valueOf(fields.get(1));
+        this.iteration = Integer.parseInt(fields.get(2));
+        this.name = fields.get(3);
+        this.concept = fields.get(4);
+        this.iterations = changesFromString(controller, fields.get(5));
+        this.properties = propertiesFromString(fields.get(6));
+        this.destinations = destinationsFromString(fields.get(7));
+        this.creationDate = KSPDate.fromString(controller, fields.get(8));
     }
 
     private static List<IterationChange> changesFromString(ControllerInterface controller, String s) {

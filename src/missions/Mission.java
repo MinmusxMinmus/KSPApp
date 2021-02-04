@@ -30,8 +30,6 @@ public class Mission extends KSPObject implements KSPObjectListener {
     private Set<Vessel> vesselObjs;
     private Set<Kerbal> crewObjs;
 
-    // TODO remove constructors, replace with constructor w.o. vessel/s.
-
     /** Generates a mission from scratch.
      * @param name Mission name
      * @param crew A map corresponding to the crew and their roles
@@ -41,7 +39,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         super(controller);
         this.name = name;
         this.vessels = new HashSet<>();
-        TreeMap<String, CrewDetails> crew2 = new TreeMap<>();
+        Map<String, CrewDetails> crew2 = new HashMap<>();
         crew.keySet().forEach(k -> crew2.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
         this.crew = crew2;
         this.start = start;

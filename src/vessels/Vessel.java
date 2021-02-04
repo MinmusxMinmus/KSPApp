@@ -44,50 +44,34 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * @param location Location of the craft.
      */
     public Vessel(ControllerInterface controller, Concept concept, Location location, Set<Vessel> vessels, Kerbal... crew) {
-        this(controller,
-                controller.rng(),
-                concept.getName(),
-                concept.getIteration(),
-                location,
-                Arrays.stream(crew).filter(Objects::nonNull).map(Kerbal::getName).collect(Collectors.toSet()),
-                vessels.stream().map(Vessel::getId).collect(Collectors.toSet()),
-                false,
-                null,
-                new HashSet<>());
-        this.missionObjs = null;
-    }
-
-    /** Private implementation. Add params later
-     */
-    private Vessel(ControllerInterface controller, long id, String concept, int iteration, Location location, Set<String> crew, Set<Long> vessels, boolean crashed, String crashDetails, Set<String> missions) {
         super(controller);
-        this.id = id;
-        this.concept = concept;
-        this.iteration = iteration;
+        this.id = controller.rng();
+        this.concept = concept.getName();
+        this.iteration = concept.getIteration();
         this.location = location;
-        this.crew = crew;
-        this.crashed = crashed;
-        this.crashDetails = crashDetails;
-        this.missions = missions;
-        this.vessels = vessels;
+        this.crew = Arrays.stream(crew).map(Kerbal::getName).collect(Collectors.toSet());
+        this.vessels = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
+        this.crashed = false;
+        this.crashDetails = null;
+        this.missions = new HashSet<>();
+        this.missionObjs = null;
     }
 
     /** Generates a new vessel instance from a list of fields stored in persistence.
      * @param fields List of fields
      */
     public Vessel(ControllerInterface controller, List<String> fields) {
-        this(controller,
-                Long.parseLong(fields.get(1)),
-                fields.get(2),
-                Integer.parseInt(fields.get(3)),
-                Location.fromString(fields.get(4)),
-                fields.get(5).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(5).split(DELIMITER)).collect(Collectors.toSet()),
-                fields.get(6).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(6).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet()),
-                Boolean.parseBoolean(fields.get(7)),
-                fields.get(8).equals("(none)") ? null : fields.get(8),
-                fields.get(9).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)))
-        );
+        super(controller);
         setDescription(fields.get(0));
+        this.id = Long.parseLong(fields.get(1));
+        this.concept = fields.get(2);
+        this.iteration = Integer.parseInt(fields.get(3));
+        this.location = Location.fromString(fields.get(4));
+        this.crew = fields.get(5).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(5).split(DELIMITER)).collect(Collectors.toSet());
+        this.vessels = fields.get(6).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(6).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
+        this.crashed = Boolean.parseBoolean(fields.get(7));
+        this.crashDetails = fields.get(8).equals("(none)") ? null : fields.get(8);
+        this.missions = fields.get(9).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)));
     }
 
 
