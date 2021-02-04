@@ -63,6 +63,7 @@ public class MissionCreator extends KSPGUI {
     private JPanel secondPanel;
     private JLabel secondLabel;
     private JCheckBox preciseTimeCheckBox;
+    private JCheckBox startWithAVesselCheckBox;
 
     // Custom components
     private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals().stream()
@@ -103,6 +104,16 @@ public class MissionCreator extends KSPGUI {
             hourLabel.setEnabled(preciseTimeCheckBox.isSelected());
             minuteLabel.setEnabled(preciseTimeCheckBox.isSelected());
             secondLabel.setEnabled(preciseTimeCheckBox.isSelected());
+        });
+
+        // Use vessel listener
+
+        startWithAVesselCheckBox.addActionListener(e -> {
+            activeVesselsLabel.setEnabled(startWithAVesselCheckBox.isSelected() && !newVesselCheckBox.isSelected());
+            activeVesselsComboBox.setEnabled(startWithAVesselCheckBox.isSelected() && !newVesselCheckBox.isSelected());
+            newVesselCheckBox.setEnabled(startWithAVesselCheckBox.isSelected());
+            vesselDesignsLabel.setEnabled(startWithAVesselCheckBox.isSelected() && newVesselCheckBox.isSelected());
+            vesselDesignsComboBox.setEnabled(startWithAVesselCheckBox.isSelected() && newVesselCheckBox.isSelected());
         });
 
         // New vessel listener
@@ -193,6 +204,8 @@ public class MissionCreator extends KSPGUI {
                     parseInt(minute),
                     parseInt(second),
                     OffsetDateTime.now());
+
+            // TODO mission without vessel check
 
             // Mission creation
             if (newVesselCheckBox.isSelected()) controller.createMission(name,
