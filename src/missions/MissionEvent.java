@@ -1,10 +1,9 @@
 package missions;
 
 import other.*;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
-import other.util.CelestialBody;
 import other.util.Field;
 import other.util.Location;
 

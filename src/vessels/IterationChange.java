@@ -1,6 +1,6 @@
 package vessels;
 
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.util.Field;
 import other.util.KSPDate;
 import other.KSPObject;

@@ -126,7 +126,7 @@ public class KerbalCreator extends KSPGUI {
                     OffsetDateTime.now());
 
             // Kerbal creation
-            controller.createKerbalHired(name, male, badass, job, date);
+            controller.createKerbalHired(name, male, badass, job, date, description);
 
             // Form end
             dispose();

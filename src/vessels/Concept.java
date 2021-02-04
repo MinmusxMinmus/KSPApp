@@ -1,7 +1,7 @@
 package vessels;
 
 import other.KSPObject;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Destination;

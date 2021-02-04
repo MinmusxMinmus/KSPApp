@@ -2,7 +2,7 @@ package missions;
 
 import kerbals.Kerbal;
 import other.*;
-import other.interfaces.ControllerInterface;
+import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;

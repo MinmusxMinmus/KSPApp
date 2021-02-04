@@ -4,9 +4,9 @@ import kerbals.Job;
 import kerbals.Kerbal;
 import missions.Mission;
 import other.*;
-import other.interfaces.ControllerInterface;
 import other.util.Destination;
 import other.util.KSPDate;
+import other.util.Location;
 import persistencelib.Atom;
 import persistencelib.Key;
 import persistencelib.StorageManager;
@@ -14,6 +14,7 @@ import persistencelib.Version;
 import vessels.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 public class GUIController implements ControllerInterface {
@@ -29,12 +30,14 @@ public class GUIController implements ControllerInterface {
     private final List<Concept> concepts;
     private final List<Vessel> vessels;
     private final List<Vessel> crashedVessels = new LinkedList<>();
+    private final Random random;
 
     // Persistence
 
     private final StorageManager manager;
 
     public GUIController() throws IOException {
+        this.random = new Random(LocalDate.now().hashCode());
         this.kerbals = new LinkedList<>();
         this.missions = new LinkedList<>();
         this.concepts = new LinkedList<>();
@@ -130,8 +133,9 @@ public class GUIController implements ControllerInterface {
     }
 
 
-    public void createKerbalHired(String name, boolean isMale, boolean badass, Job job, KSPDate hiringDate) {
+    public void createKerbalHired(String name, boolean isMale, boolean badass, Job job, KSPDate hiringDate, String description) {
         Kerbal k = new Kerbal(this, name, isMale, badass, job, "Hired", hiringDate);
+        k.setDescription(description);
         addKerbal(k);
         k.ready();
     }
@@ -173,8 +177,8 @@ public class GUIController implements ControllerInterface {
         }
     }
 
-    public long createInstance(Concept concept, int rng, Mission mission, Vessel... vessels) {
-        Vessel vi = new Vessel(this, concept, new Random(rng).nextLong(), mission, new HashSet<>(Arrays.asList(vessels)));
+    public long createVessel(Concept concept, Location location, Vessel... vessels) {
+        Vessel vi = new Vessel(this, concept, location, new HashSet<>(Arrays.asList(vessels)));
         addVessel(vi);
         vi.ready();
         return vi.getId();
@@ -375,5 +379,10 @@ public class GUIController implements ControllerInterface {
         for (Concept v : concepts) v.ready();
         for (Vessel v : vessels) v.ready();
         for (Vessel v : crashedVessels) v.ready();
+    }
+
+    @Override
+    public long rng() {
+        return random.nextLong();
     }
 }
