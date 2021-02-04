@@ -169,21 +169,16 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return name;
-    }
-
-    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Name", name));
-        fields.add(new Field("Mission start", start.getTextRepresentation(true)));
-        for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.getTextRepresentation()));
+        fields.add(new Field("Mission start", start.toString(true, true)));
+        for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.toString()));
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
         for (Map.Entry<String, CrewDetails> e : crew.entrySet())
-            fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().getTextRepresentation(false, false)));
-        for (MissionEvent ev : events) fields.add(new Field("Milestone", ev.getTextRepresentation()));
+            fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().toString(false, true)));
+        for (MissionEvent ev : events) fields.add(new Field("Milestone", ev.toString()));
 
         return fields;
     }
@@ -231,5 +226,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
             vesselObjs.remove(vi);
             vessels.remove(vi.getId());
         }
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

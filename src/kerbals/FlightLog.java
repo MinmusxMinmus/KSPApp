@@ -74,16 +74,16 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return missionName + " (+" + expGained + "xp)";
-    }
-
-    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Mission deletion
         if (event.getSource() instanceof Mission) {
             mission = null;
             missionName = "[REDACTED]";
         }
+    }
+
+    @Override
+    public String toString() {
+        return missionName + " (+" + expGained + "xp)";
     }
 }

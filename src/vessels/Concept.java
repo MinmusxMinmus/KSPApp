@@ -11,6 +11,16 @@ import other.util.KSPDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Concepts represent different vessel designs from the VAB/SPH. These designs will eventually (hopefully) be consumated
+ * into new {@link Vessel} objects.
+ * <p>
+ *     Concept fields include the vessel family name, the current iteration, the creation date of the original concept,
+ *     the original concept that the current one was originally based on, and collections of properties
+ *     ({@link VesselProperty}), approved destinations ({@link Destination}), and iteration changes
+ *     ({@link IterationChange}).
+ * </p>
+ */
 public class Concept extends KSPObject implements KSPObjectListener {
 
     public static final int ENCODE_FIELD_AMOUNT = 9; // ALWAYS ACCOUNT FOR DESCRIPTION, IN THIS CASE PARENT CLASS TOO
@@ -164,11 +174,6 @@ public class Concept extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return name + " Mk" + iteration;
-    }
-
-    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
@@ -204,11 +209,6 @@ public class Concept extends KSPObject implements KSPObjectListener {
         return ret;
     }
 
-    @Override // I put this so I didn't have to make a new class for VesselCreator.designModel. Fix later NEVER AHAHASHAHAAHAHAHAHAHAHAHA
-    public String toString() {
-        return getTextRepresentation();
-    }
-
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Deleted parent concept
@@ -216,5 +216,10 @@ public class Concept extends KSPObject implements KSPObjectListener {
             conceptObj = null;
             concept = "[REDACTED]";
         }
+    }
+
+    @Override
+    public String toString() {
+        return name + " Mk" + iteration;
     }
 }

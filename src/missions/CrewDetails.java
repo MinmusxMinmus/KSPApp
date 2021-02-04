@@ -81,20 +81,10 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
 
         fields.add(new Field("Name", name + " Kerman" + (kerbal.isKIA() ? " (KIA)" : "")));
         fields.add(new Field("Position", position));
-        fields.add(new Field("Board time", boardTime.getTextRepresentation(false)));
+        fields.add(new Field("Board time", boardTime.toString(false, true)));
         fields.add(new Field("Experience gained", Float.toString(expGained)));
 
         return fields;
-    }
-
-    @Override
-    public String getTextRepresentation() {
-        return name + " Kerman" +
-                (kerbal != null && kerbal.isKIA() ? " (KIA)" : "") +
-                position +
-                ", boarded at " +
-                boardTime.getTextRepresentation(false) +
-                " (+" + expGained + "xp)" ;
     }
 
     @Override
@@ -115,5 +105,15 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
             kerbal = null;
             name = "[REDACTED]";
         }
+    }
+
+    @Override
+    public String toString() {
+        return name + " Kerman" +
+                (kerbal != null && kerbal.isKIA() ? " (KIA)" : "") +
+                position +
+                ", boarded at " +
+                boardTime.toString(false, true) +
+                " (+" + expGained + "xp)" ;
     }
 }

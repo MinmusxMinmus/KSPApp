@@ -64,26 +64,11 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Mission name", missionName + (mission != null ? "" : classifiedReason)));
-        fields.add(new Field("Date", date.getTextRepresentation()));
+        fields.add(new Field("Date", date.toString(true, true)));
         fields.add(new Field("Subject", kerbalName + " Kerman" + (kerbal == null ? "" : "(" + inactiveReason + ")")));
         fields.add(new Field("Mention", mention));
 
         return fields;
-    }
-
-    @Override
-    public String getTextRepresentation() {
-        return "(" +
-                date.getTextRepresentation() +
-                ") " +
-                missionName +
-                (mission != null ? "" :"(" + classifiedReason + ")") +
-                ", to " +
-                kerbalName +
-                " Kerman" +
-                (inactiveReason == null ? "" : "(" + inactiveReason + ")") +
-                ":\n" +
-                mention;
     }
 
     @Override
@@ -108,5 +93,20 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
             kerbalName = "[REDACTED]";
             inactiveReason = event.getStatus();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "(" +
+                date.toString(false, true) +
+                ") " +
+                missionName +
+                (mission != null ? "" :"(" + classifiedReason + ")") +
+                ", to " +
+                kerbalName +
+                " Kerman" +
+                (inactiveReason == null ? "" : "(" + inactiveReason + ")") +
+                ":\n" +
+                mention;
     }
 }

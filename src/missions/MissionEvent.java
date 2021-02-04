@@ -18,7 +18,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     // Persistent details
     private String missionName;
-    private final Location oldLocation; // TODO replace with Location object
+    private final Location oldLocation;
     private final String details;
 
     // Dynamic details
@@ -69,11 +69,6 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return null;
-    }
-
-    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Mission deletion
         if (event.getSource() instanceof Mission) {
@@ -81,4 +76,9 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
             mission = null;
         }
     }
+
+    @Override
+    public String toString() {
+        return null;
+    } // TODO
 }

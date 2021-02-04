@@ -112,7 +112,7 @@ public class KSPDate extends KSPObject {
     }
 
     @Override
-    public String getTextRepresentation() {
+    public String toString() {
         return   "Y" + year +
                 " D" + day +
                 " H" + hour +
@@ -121,20 +121,24 @@ public class KSPDate extends KSPObject {
                 " (" + realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss")) + ")";
     }
 
-    public String getTextRepresentation(boolean realDate) {
-        return realDate ? getTextRepresentation() :
-                 "Y" + year +
-                " D" + day +
-                " H" + hour +
-                " M" + minute +
-                " S" + second;
-    }
-
-    public String getTextRepresentation(boolean realDate, boolean simpleDate) {
-        if (!simpleDate) return realDate ?
-                "Y" + year + " D" + day +  " (" + this.realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss")) + ")"
-                : "Y" + year + " D" + day;
-        return getTextRepresentation(realDate);
+    public String toString(boolean realDate, boolean fullDate) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Y")
+                .append(year)
+                .append(" D")
+                .append(day);
+        if (fullDate)
+            sb.append(" H")
+                    .append(hour)
+                    .append(" M")
+                    .append(minute)
+                    .append(" S")
+                    .append(second);
+        if (realDate)
+            sb.append(" (")
+                    .append(this.realDate.format(DateTimeFormatter.ofPattern("MM/dd/uuuu, hh:mm:ss")) )
+                    .append(")");
+        return sb.toString();
     }
 
 }

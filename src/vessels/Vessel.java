@@ -355,11 +355,6 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return concept + " Mk" + getIteration() + ": " + status.toString() + ", " + location.toString();
-    }
-
-    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
@@ -371,7 +366,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Status", status.toString()));
         fields.add(new Field("Location", location.toString()));
         if (status.equals(VesselStatus.CRASHED)) fields.add(new Field("Crash details", crashDetails));
-        for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.getTextRepresentation()));
+        for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.toString()));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
         for (Mission m : missionObjs) fields.add(new Field("Mission", m.getName()));
 
@@ -401,5 +396,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         if (event.getSource() instanceof Vessel vessel) {
             removeVessel(vessel);
         }
+    }
+
+    @Override
+    public String toString() {
+        return concept + " Mk" + getIteration() + ": " + status.toString() + ", " + location.toString();
     }
 }

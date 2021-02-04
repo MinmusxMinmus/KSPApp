@@ -1,10 +1,9 @@
 package gui;
 
 import controller.GUIController;
-import other.interfaces.Editable;
 import other.KSPObject;
-import other.display.MainSearchCellRenderer;
 import other.display.KSPObjectTableModel;
+import other.interfaces.Editable;
 
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
@@ -77,7 +76,6 @@ public class MainScreen extends KSPGUI {
 
         // Search result list requires a model to insert and remove data
         searchList.setModel(searchModel);
-        searchList.setCellRenderer(new MainSearchCellRenderer());
 
         // Table requires a specialized model to display all types of data
         valuesTable.setModel(tableModel);

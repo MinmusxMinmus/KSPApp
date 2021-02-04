@@ -62,15 +62,15 @@ public class IterationChange extends KSPObject {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Iteration", "Mk" + iteration));
-        fields.add(new Field("Date", changeDate.getTextRepresentation()));
+        fields.add(new Field("Date", changeDate.toString(true, false)));
         fields.add(new Field("Changes", changes));
 
         return fields;
     }
 
     @Override
-    public String getTextRepresentation() {
-        return "(" + changeDate.getTextRepresentation() + ") Mk" + iteration + ": " + changes;
+    public String toString() {
+        return "(" + changeDate.toString(true, true) + ") Mk" + iteration + ": " + changes;
     }
 
 

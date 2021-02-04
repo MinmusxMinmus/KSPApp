@@ -305,18 +305,13 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Badass?", badass ? "Yes" : "No"));
         fields.add(new Field("Level", Integer.toString(getLevel())));
         fields.add(new Field("Recruitment", origin));
-        fields.add(new Field("Recruitment date", hiringDate.getTextRepresentation(false)));
+        fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
         fields.add(new Field("Deployed?", mission == null ? "No" : "Yes"));
         if (mission != null) fields.add(new Field("Current mission", mission));
-        for (FlightLog l : log) fields.add(new Field("Mission", l.getTextRepresentation()));
-        for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.getTextRepresentation()));
+        for (FlightLog l : log) fields.add(new Field("Mission", l.toString()));
+        for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.toString()));
 
         return fields;
-    }
-
-    @Override
-    public String getTextRepresentation() {
-        return name + " Kerman (" + job.toString() + (mission == null ? ", available)" : ", deployed on " + mission + ")");
     }
 
     @Override
@@ -335,5 +330,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
                 originObj = null;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return name + " Kerman (" + job.toString() + (mission == null ? ", available)" : ", deployed on " + mission + ")");
     }
 }
