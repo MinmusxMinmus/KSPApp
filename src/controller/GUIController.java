@@ -141,11 +141,9 @@ public class GUIController implements ControllerInterface {
         k.ready();
     }
 
-    public void createMission(String name, String description, Set<Vessel> vessels, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Set<Long> v = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
-        Mission m = new Mission(this, name, crew, v, missionStart);
+    public void createMission(String name, String description, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Mission m = new Mission(this, name, crew, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
-        for (Vessel v1 : vessels) v1.addMission(m);
         m.setDescription(description);
         addMission(m);
         m.ready();

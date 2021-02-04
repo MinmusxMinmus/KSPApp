@@ -31,9 +31,6 @@ public class MissionCreator extends KSPGUI {
     private JTextField nameTextField;
     private JPanel descriptionPanel;
     private JTextArea descriptionTextArea;
-    private JPanel vesselPanel;
-    private JLabel activeVesselsLabel;
-    private JComboBox<Vessel> activeVesselsComboBox;
     private JPanel crewPanel;
     private JPanel crewSelectionPanel;
     private JScrollPane availableCrewPane;
@@ -51,9 +48,6 @@ public class MissionCreator extends KSPGUI {
     private JButton OKButton;
     private JButton cancelButton;
     private JPanel descriptionAreaPanel;
-    private JComboBox<Concept> vesselDesignsComboBox;
-    private JLabel vesselDesignsLabel;
-    private JCheckBox newVesselCheckBox;
     private JPanel creationDatePanel;
     private JPanel yearPanel;
     private JLabel yearLabel;
@@ -66,7 +60,6 @@ public class MissionCreator extends KSPGUI {
     private JPanel secondPanel;
     private JLabel secondLabel;
     private JCheckBox preciseTimeCheckBox;
-    private JCheckBox startWithAVesselCheckBox;
 
     // Custom components
     private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals().stream()
@@ -79,16 +72,9 @@ public class MissionCreator extends KSPGUI {
         setContentPane(mainPanel);
 
         // Initializing
-        activeVesselsComboBox.setRenderer(new MainSearchCellRenderer());
-        vesselDesignsComboBox.setRenderer(new MainSearchCellRenderer());
-
         // Define table contents
         crewFreeTable.setModel(freeModel);
         crewSelectedTable.setModel(assignedModel);
-
-        // Vessel combo box reset
-        for (Vessel vi : controller.getVessels()) activeVesselsComboBox.addItem(vi);
-        for (Concept vc : controller.getConcepts()) vesselDesignsComboBox.addItem(vc);
 
         // Good luck charm
         revalidate();
@@ -110,22 +96,6 @@ public class MissionCreator extends KSPGUI {
         });
 
         // Use vessel listener
-
-        startWithAVesselCheckBox.addActionListener(e -> {
-            activeVesselsLabel.setEnabled(startWithAVesselCheckBox.isSelected() && !newVesselCheckBox.isSelected());
-            activeVesselsComboBox.setEnabled(startWithAVesselCheckBox.isSelected() && !newVesselCheckBox.isSelected());
-            newVesselCheckBox.setEnabled(startWithAVesselCheckBox.isSelected());
-            vesselDesignsLabel.setEnabled(startWithAVesselCheckBox.isSelected() && newVesselCheckBox.isSelected());
-            vesselDesignsComboBox.setEnabled(startWithAVesselCheckBox.isSelected() && newVesselCheckBox.isSelected());
-        });
-
-        // New vessel listener
-        newVesselCheckBox.addItemListener(e -> {
-            vesselDesignsComboBox.setEnabled(newVesselCheckBox.isSelected());
-            vesselDesignsLabel.setEnabled(newVesselCheckBox.isSelected());
-            activeVesselsComboBox.setEnabled(!newVesselCheckBox.isSelected());
-            activeVesselsLabel.setEnabled(!newVesselCheckBox.isSelected());
-        });
 
         // Available table listener
         crewFreeTable.addMouseListener(new MouseAdapter() {
@@ -170,14 +140,11 @@ public class MissionCreator extends KSPGUI {
             // Read values from text fields and combo boxes
             String name = nameTextField.getText();
             String description = descriptionTextArea.getText();
-            Concept concept = (Concept) vesselDesignsComboBox.getSelectedItem();
-            Vessel vessel = (Vessel) activeVesselsComboBox.getSelectedItem();
             String year = yearTextField.getText();
             String day = dayTextField.getText();
             String hour = hourTextField.getText();
             String minute = minuteTextField.getText();
             String second = secondTextField.getText();
-            Set<Vessel> vessels = new HashSet<>();
 
             // Error checking
             if (name.strip().equals("")
@@ -189,12 +156,6 @@ public class MissionCreator extends KSPGUI {
                             || minute.strip().equals("")
                             || second.strip().equals(""))) {
                 say("Please fill out all text fields!");
-                return;
-            }
-
-            if (startWithAVesselCheckBox.isSelected() && (
-                    newVesselCheckBox.isSelected() && concept == null) || (!newVesselCheckBox.isSelected() && vessel == null)) {
-                say("Please select a vessel/concept!");
                 return;
             }
 
@@ -214,18 +175,9 @@ public class MissionCreator extends KSPGUI {
                     parseInt(second),
                     OffsetDateTime.now());
 
-            // Vessels check
-            if (startWithAVesselCheckBox.isSelected()) {
-                if (newVesselCheckBox.isSelected()) {
-                    long id = controller.createVessel(concept, new Location(false, CelestialBody.KERBIN));
-                    vessels.add(controller.getInstance(id));
-                } else vessels.add(vessel);
-            }
-
             // Mission creation
             controller.createMission(name,
                     description,
-                    vessels,
                     assignedModel.getCrew2(),
                     date);
 

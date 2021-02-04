@@ -35,13 +35,12 @@ public class Mission extends KSPObject implements KSPObjectListener {
     /** Generates a mission from scratch.
      * @param name Mission name
      * @param crew A map corresponding to the crew and their roles
-     * @param vessels Set containing all the involved vessels.
      * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, Set<Long> vessels, KSPDate start) {
+    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, KSPDate start) {
         super(controller);
         this.name = name;
-        this.vessels = vessels;
+        this.vessels = new HashSet<>();
         TreeMap<String, CrewDetails> crew2 = new TreeMap<>();
         crew.keySet().forEach(k -> crew2.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
         this.crew = crew2;
@@ -57,7 +56,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.name = fields.get(1);
 
         Set<Long> ret1 = new HashSet<>();
-        for (String s : fields.get(2).split(DELIMITER)) ret1.add(Long.parseLong(s));
+        if (!fields.get(2).equals("(none)")) for (String s : fields.get(2).split(DELIMITER)) ret1.add(Long.parseLong(s));
         this.vessels = ret1;
 
         Map<String, CrewDetails> ret = new HashMap<>();
@@ -148,6 +147,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
         StringJoiner sj1 = new StringJoiner(DELIMITER);
         for (long l : vessels) sj1.add(Long.toString(l));
+        if (sj1.toString().equals("")) sj1.add("(none)");
         ret.add(sj1.toString());
 
         StringJoiner joiner = new StringJoiner(DELIMITER);
