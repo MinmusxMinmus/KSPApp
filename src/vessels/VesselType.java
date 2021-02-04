@@ -3,7 +3,7 @@ package vessels;
 import java.util.Locale;
 
 public enum VesselType {
-    STATION, LANDER, ROVER, SPACECRAFT, WATERCRAFT;
+    STATION, LANDER, ROVER, SPACECRAFT, WATERCRAFT, OTHER, UNKNOWN;
 
     @Override
     public String toString() {
