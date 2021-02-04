@@ -12,26 +12,41 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringJoiner;
 
+/**
+ * Condecorations are simple "badges" given to brave kerbals who have gained an honorable mention in the space program.
+ */
 public class Condecoration extends KSPObject implements KSPObjectListener {
 
     private static final String DELIMITER = ":C:";
     private static final int ENCODE_FIELD_AMOUNT = 5;
 
+    // Persistent fields
+    /**
+     * The name of the {@link Mission} where the condecoration was granted.
+     */
     private String missionName;
+    /**
+     * The name of the {@link Kerbal} who received the award.
+     */
     private String kerbalName;
+    /**
+     * The {@link KSPDate} at which the condecoration was handed out.
+     */
     private final KSPDate date;
+    /**
+     * The condecoration's description.
+     */
     private final String mention;
 
+    // Dynamic fields
     /**
      * The instance of the mission where this condecoration was given
      */
-    private Mission mission; // Might be null, if the mission is deleted
-    private String classifiedReason;
+    private Mission mission;
     /**
      * The instance of the kerbal that received this condecoration
      */
-    private Kerbal kerbal; // Might be null, if the kerbal is deleted
-    private String inactiveReason;
+    private Kerbal kerbal;
 
 
     public Condecoration(ControllerInterface c, String kerbalName, String missionName, KSPDate date, String mention) {
@@ -59,13 +74,14 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
         return new Condecoration(c, split[0], split[1], KSPDate.fromString(c, split[2]), split[3]);
     }
 
+    // Overrides
     @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
-        fields.add(new Field("Mission name", missionName + (mission != null ? "" : classifiedReason)));
+        fields.add(new Field("Mission name", missionName));
         fields.add(new Field("Date", date.toString(true, true)));
-        fields.add(new Field("Subject", kerbalName + " Kerman" + (kerbal == null ? "" : "(" + inactiveReason + ")")));
+        fields.add(new Field("Subject", kerbalName + " Kerman"));
         fields.add(new Field("Mention", mention));
 
         return fields;
@@ -82,31 +98,14 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Mission deletion
-        if (event.getSource() instanceof Mission m) {
-            mission = null;
-            missionName = "[REDACTED]";
-            classifiedReason = event.getStatus();
-        }
+        if (event.getSource() instanceof Mission m) missionName = "[REDACTED]";
         // Kerbal deletion
-        if (event.getSource() instanceof Kerbal k) {
-            kerbal = null;
-            kerbalName = "[REDACTED]";
-            inactiveReason = event.getStatus();
-        }
+        if (event.getSource() instanceof Kerbal k) kerbalName = "[REDACTED]";
     }
 
     @Override
     public String toString() {
-        return "(" +
-                date.toString(false, true) +
-                ") " +
-                missionName +
-                (mission != null ? "" :"(" + classifiedReason + ")") +
-                ", to " +
-                kerbalName +
-                " Kerman" +
-                (inactiveReason == null ? "" : "(" + inactiveReason + ")") +
-                ":\n" +
-                mention;
+        return "(" + date.toString(false, true) + ") Awarded to "
+                + kerbalName + " Kerman during " + missionName + ":\n" + mention;
     }
 }
