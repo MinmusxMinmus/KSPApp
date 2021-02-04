@@ -3,13 +3,10 @@ package gui;
 import controller.GUIController;
 import other.KSPObject;
 import other.display.KSPObjectTableModel;
-import other.interfaces.Editable;
 
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Locale;
 
 public class MainScreen extends KSPGUI {
@@ -156,13 +153,7 @@ public class MainScreen extends KSPGUI {
             KSPObject object = searchList.getSelectedValue();
             String s = (String) selectionComboBox.getSelectedItem();
             if (object != null && s != null) {
-                EditWindow edit = new EditWindow("Editing " + s.toLowerCase(Locale.ROOT).substring(0, s.length()), (Editable) object, this);
-                edit.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        reset();
-                    }
-                });
+                // TODO
             }
         });
 
