@@ -27,8 +27,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     private Location location;
     private final Set<String> crew;
     private final Set<Long> vessels;
-    // stranded
-    private boolean crashed;
+    private VesselStatus status;
     private String crashDetails;
     private final Set<String> missions; // replace with missions
 
@@ -51,7 +50,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.location = location;
         this.crew = Arrays.stream(crew).map(Kerbal::getName).collect(Collectors.toSet());
         this.vessels = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
-        this.crashed = false;
+        this.status = VesselStatus.NOMINAL;
         this.crashDetails = null;
         this.missions = new HashSet<>();
         this.missionObjs = null;
@@ -69,9 +68,9 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.location = Location.fromString(fields.get(4));
         this.crew = fields.get(5).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(5).split(DELIMITER)).collect(Collectors.toSet());
         this.vessels = fields.get(6).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(6).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
-        this.crashed = Boolean.parseBoolean(fields.get(7));
-        this.crashDetails = fields.get(8).equals("(none)") ? null : fields.get(8);
-        this.missions = fields.get(9).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)));
+        this.status = VesselStatus.valueOf(fields.get(7));
+        this.crashDetails = fields.get(9).equals("(none)") ? null : fields.get(9);
+        this.missions = fields.get(10).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
     }
 
 
@@ -137,12 +136,20 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.location = location;
     }
 
-    public Set<String> getCrew() {
-        return new HashSet<>(crew);
+    public Set<Kerbal> getCrew() {
+        return new HashSet<>(crewObjs);
     }
 
-    public Set<Long> getVessels() {
-        return new HashSet<>(vessels);
+    public Set<Vessel> getVessels() {
+        return new HashSet<>(vesselObjs);
+    }
+
+    public VesselStatus getStatus() {
+        return status;
+    }
+
+    public Set<Mission> getMissions() {
+        return new HashSet<>(missionObjs);
     }
 
     // Overrides
@@ -197,7 +204,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         if (joiner2.toString().equals("")) joiner2.add("(none)");
         ret.add(joiner2.toString());
 
-        ret.add(Boolean.toString(crashed));
+        ret.add(status.name());
         ret.add(crashDetails == null ? "(none)" : crashDetails);
 
         StringJoiner joiner3 = new StringJoiner(DELIMITER);
@@ -210,7 +217,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     @Override
     public String getTextRepresentation() {
-        return concept + " Mk" + getIteration() + ": " + location.toString();
+        return concept + " Mk" + getIteration() + ": " + status.toString() + " " + location.toString();
     }
 
     @Override
@@ -219,18 +226,15 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
         fields.add(new Field("Name", concept));
         fields.add(new Field("Iteration", "Mk" + getIteration()));
+        fields.add(new Field("Type", getType().toString()));
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
+        fields.add(new Field("Status", status.toString()));
+        fields.add(new Field("Location", location.toString()));
+        if (status.equals(VesselStatus.CRASHED)) fields.add(new Field("Crash details", crashDetails));
+        for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.getTextRepresentation()));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
         for (Mission m : missionObjs) fields.add(new Field("Mission", m.getName()));
-        if (crashed) {
-            fields.add(new Field("Crash location", location.toString()));
-            fields.add(new Field("Crash details", crashDetails));
-        } else {
-            fields.add(new Field("Type", getType().toString()));
-            fields.add(new Field("Location", location.toString()));
-        }
-        for (String s : crew) fields.add(new Field("Crew member", s + " Kerman" + (crashed ? " (KIA)" : "")));
 
 
         return fields;
