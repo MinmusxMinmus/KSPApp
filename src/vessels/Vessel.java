@@ -30,16 +30,16 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     // stranded
     private boolean crashed;
     private String crashDetails;
-    private String missionName; // replace with missions
+    private final Set<String> missions; // replace with missions
 
     // Dynamic fields
-    private Mission missionObj; // replace with missionObjs
-    private final Set<Kerbal> crewObjs = new HashSet<>();
-    private final Set<Vessel> vesselObjs = new HashSet<>();
+    private Set<Mission> missionObjs; // replace with missionObjs
+    private Set<Kerbal> crewObjs = new HashSet<>();
+    private Set<Vessel> vesselObjs = new HashSet<>();
     private Concept conceptObj;
 
     // Constructors
-    /** Defines a new instance of the vessel concept, at the rough location specified.
+    /** Creates a new instance of the vessel concept, at the rough location specified.
      * @param concept Vessel design
      * @param location Location of the craft.
      */
@@ -53,13 +53,13 @@ public class Vessel extends KSPObject implements KSPObjectListener {
                 vessels.stream().map(Vessel::getId).collect(Collectors.toSet()),
                 false,
                 null,
-                null);
-        this.missionObj = null;
+                new HashSet<>());
+        this.missionObjs = null;
     }
 
     /** Private implementation. Add params later
      */
-    private Vessel(ControllerInterface controller, long id, String concept, int iteration, Location location, Set<String> crew, Set<Long> vessels, boolean crashed, String crashDetails, String missionName) {
+    private Vessel(ControllerInterface controller, long id, String concept, int iteration, Location location, Set<String> crew, Set<Long> vessels, boolean crashed, String crashDetails, Set<String> missions) {
         super(controller);
         this.id = id;
         this.concept = concept;
@@ -68,7 +68,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.crew = crew;
         this.crashed = crashed;
         this.crashDetails = crashDetails;
-        this.missionName = missionName;
+        this.missions = missions;
         this.vessels = vessels;
     }
 
@@ -81,76 +81,35 @@ public class Vessel extends KSPObject implements KSPObjectListener {
                 fields.get(2),
                 Integer.parseInt(fields.get(3)),
                 Location.fromString(fields.get(4)),
-                crewMembersFromString(fields.get(5)),
-                vesselsFromString(fields.get(6)),
+                fields.get(5).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(5).split(DELIMITER)).collect(Collectors.toSet()),
+                fields.get(6).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(6).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet()),
                 Boolean.parseBoolean(fields.get(7)),
                 fields.get(8).equals("(none)") ? null : fields.get(8),
-                fields.get(9)
+                fields.get(9).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)))
         );
         setDescription(fields.get(0));
     }
 
-    private static Set<Long> vesselsFromString(String s) {
-        return s.equals("(none)") ? new HashSet<>() : Arrays.stream(s.split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
-    }
-
-    private static Set<String> crewMembersFromString(String s) {
-        return s.equals("(none)") ? new HashSet<>(): Arrays.stream(s.split(DELIMITER)).collect(Collectors.toSet());
-    }
-
 
     // Logic methods
-    /** Executed whenever a vessel is recovered. This method assumes that the vessel is already in Kerbin surface, and
-     * recovers all kerbals inside it.
-     */
-    public void recover() {
-        // Mission end
-        this.missionObj = null;
-        if (!location.landedAt(CelestialBody.KERBIN)) System.err.println("WARNING: Recovering vessel while not in Kerbin surface! Vessel: " + getName() + ", location " + location.toString());
 
-        // Crew recovery
-        for (Kerbal k : crewObjs) {
-            k.recover();
-            crew.remove(k.getName());
-        }
+    // recover()
 
-        // Recovery double check
-        if (!crewObjs.isEmpty()) System.err.println("WARNING: Vessel was unable to recover all members! Remaining members: " + crewObjs.size());
-        if (!crew.isEmpty()) System.err.println("WARNING: Vessel was unable to recover all member names! Remaining member names: " + crew.size());
-
-        // Recover the current vessel
-        getController().vesselRecovered(this);
-    }
-
-    /** Indicates that the vessel has been destroyed, either by crash or by Tracking Station. Kills all crew inside it.
-     * Since only {@link Mission} can call it, it guarantees that the vessel has a mission.
-     * @param details Destruction details
-     */
-    public void crash(String details) {
-        // Crew deaths
-        for (Kerbal k : crewObjs) {
-            float expGained = k.getExpGainedFromCurrentMission();
-            k.KIA(k.getMission(), location, expGained, "Died on " + k.getMission().getName() + ", during destruction of " + getName());
-        }
-        crewObjs.clear();
-
-        // Vessel destruction
-        crashed = true;
-        crashDetails = details;
-
-        // Last mission
-        if (missionObj != null) missionName = missionObj.getName();
-
-        getController().vesselCrashed(this);
-    } // Kerbal... victims, Vessel... survivors
+    // crash(Kerbal... victims, Vessel... survivors)
 
     // updateLocation()
 
     // completeMission()
 
-    // addMission()
+    public void addMission(Mission m) {
+        missions.add(m.getName());
+        missionObjs.add(m);
+    }
 
-    // removeMission()
+    public void removeMission(Mission m) {
+        missionObjs.remove(m);
+        missions.remove(m.getName());
+    }
 
     public void addVessel(Vessel v) {
         vesselObjs.add(v);
@@ -205,9 +164,12 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     // Overrides
     @Override
     public void ready() {
-        // Get vessel mission
-        missionObj = getController().getMission(missionName);
-        if (missionObj != null) missionObj.addEventListener(this);
+        // Get vessel missions
+        missionObjs = new HashSet<>();
+        for (Mission m : getController().getMissions()) if (missions.contains(m.getName())) {
+            missionObjs.add(m);
+            m.addEventListener(this);
+        }
 
         // Get crew
         for (String s : crew) {
@@ -244,12 +206,21 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         ret.add(joiner.toString());
 
         StringJoiner joiner2 = new StringJoiner(DELIMITER);
-        vessels.forEach(l -> joiner.add(Long.toString(l)));
-        if (joiner.toString().equals("")) joiner.add("(none)");
+        vessels.forEach(l -> {
+            joiner2.add(Long.toString(l));
+            System.out.println("Long: " + l);
+        });
+        if (joiner2.toString().equals("")) joiner2.add("(none)");
         ret.add(joiner2.toString());
+
         ret.add(Boolean.toString(crashed));
         ret.add(crashDetails == null ? "(none)" : crashDetails);
-        ret.add(missionName);
+
+        StringJoiner joiner3 = new StringJoiner(DELIMITER);
+        for (String name : missions) joiner3.add(name);
+        if (joiner3.toString().equals("")) joiner3.add("(none)");
+        ret.add(joiner3.toString());
+
         return ret;
     }
 
@@ -267,12 +238,11 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
+        for (Mission m : missionObjs) fields.add(new Field("Mission", m.getName()));
         if (crashed) {
-            fields.add(new Field("Last mission", missionName == null ? "None" : missionName));
             fields.add(new Field("Crash location", location.toString()));
             fields.add(new Field("Crash details", crashDetails));
         } else {
-            fields.add(new Field("Mission", missionObj == null ? "None" : missionObj.getName()));
             fields.add(new Field("Type", getType().toString()));
             fields.add(new Field("Location", location.toString()));
         }
@@ -298,8 +268,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
         // Mission deleted
         if (event.getSource() instanceof Mission m) {
-            missionObj = null;
-            missionName = "[REDACTED]";
+            removeMission(m);
         }
     }
 }

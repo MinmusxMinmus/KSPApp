@@ -16,6 +16,7 @@ import vessels.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GUIController implements ControllerInterface {
 
@@ -48,13 +49,13 @@ public class GUIController implements ControllerInterface {
         getPersistenceKerbals();
         getPersistenceMissions();
         getPersistenceConcepts();
-        getPersistenceInstances();
-        getPersistenceCrashedInstances();
+        getPersistenceVessels();
+        getPersistenceCrashedVessels();
 
         ready();
     }
 
-    private void getPersistenceCrashedInstances() {
+    private void getPersistenceCrashedVessels() {
         if (manager.getRegion(CRASHED_REGION) == null) manager.addRegion(CRASHED_REGION);
         Atom atom = manager.getRegion(CRASHED_REGION);
         atom.getItems().stream()
@@ -70,7 +71,7 @@ public class GUIController implements ControllerInterface {
                 });
     }
 
-    private void getPersistenceInstances() {
+    private void getPersistenceVessels() {
         if (manager.getRegion(VESSEL_REGION) == null) manager.addRegion(VESSEL_REGION);
         Atom atom = manager.getRegion(VESSEL_REGION);
         atom.getItems().stream()
@@ -140,17 +141,11 @@ public class GUIController implements ControllerInterface {
         k.ready();
     }
 
-    public void createMission(String name, String description, Vessel vessel, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, vessel.getId(), crew, missionStart);
+    public void createMission(String name, String description, Set<Vessel> vessels, Map<Kerbal, String> crew, KSPDate missionStart) {
+        Set<Long> v = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
+        Mission m = new Mission(this, name, crew, v, missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
-        m.setDescription(description);
-        addMission(m);
-        m.ready();
-    }
-
-    public void createMission(String name, String description, Concept vessel, Map<Kerbal, String> crew, KSPDate missionStart, Set<Vessel> vessels) {
-        Mission m = new Mission(this, name, vessel, crew, missionStart, vessels);
-        for (Kerbal k : crew.keySet()) k.missionStart(m);
+        for (Vessel v1 : vessels) v1.addMission(m);
         m.setDescription(description);
         addMission(m);
         m.ready();
@@ -264,8 +259,8 @@ public class GUIController implements ControllerInterface {
         getPersistenceKerbals();
         getPersistenceMissions();
         getPersistenceConcepts();
-        getPersistenceInstances();
-        getPersistenceCrashedInstances();
+        getPersistenceVessels();
+        getPersistenceCrashedVessels();
     }
 
     @Override
@@ -355,9 +350,10 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
-    public void addVessel(Vessel instance) {
+    public long addVessel(Vessel instance) {
         instance.ready();
         vessels.add(instance);
+        return instance.getId();
     }
 
     @Override

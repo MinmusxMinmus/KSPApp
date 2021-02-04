@@ -2,10 +2,12 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
+import other.util.CelestialBody;
 import other.util.KSPDate;
 import other.display.MainSearchCellRenderer;
 import other.display.MissionAssignedTableModel;
 import other.display.MissionTableModel;
+import other.util.Location;
 import vessels.Concept;
 import vessels.Vessel;
 
@@ -15,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
@@ -167,18 +170,18 @@ public class MissionCreator extends KSPGUI {
             // Read values from text fields and combo boxes
             String name = nameTextField.getText();
             String description = descriptionTextArea.getText();
-            Concept vessel = (Concept) vesselDesignsComboBox.getSelectedItem();
-            Vessel instance = (Vessel) activeVesselsComboBox.getSelectedItem();
+            Concept concept = (Concept) vesselDesignsComboBox.getSelectedItem();
+            Vessel vessel = (Vessel) activeVesselsComboBox.getSelectedItem();
             String year = yearTextField.getText();
             String day = dayTextField.getText();
             String hour = hourTextField.getText();
             String minute = minuteTextField.getText();
             String second = secondTextField.getText();
+            Set<Vessel> vessels = new HashSet<>();
 
             // Error checking
             if (name.strip().equals("")
                     || description.strip().equals("")
-                    || vessel == null
                     || year.strip().equals("")
                     || day.strip().equals("")
                     || preciseTimeCheckBox.isSelected() && (
@@ -186,6 +189,12 @@ public class MissionCreator extends KSPGUI {
                             || minute.strip().equals("")
                             || second.strip().equals(""))) {
                 say("Please fill out all text fields!");
+                return;
+            }
+
+            if (startWithAVesselCheckBox.isSelected() && (
+                    newVesselCheckBox.isSelected() && concept == null) || (!newVesselCheckBox.isSelected() && vessel == null)) {
+                say("Please select a vessel/concept!");
                 return;
             }
 
@@ -205,18 +214,18 @@ public class MissionCreator extends KSPGUI {
                     parseInt(second),
                     OffsetDateTime.now());
 
-            // TODO mission without vessel check
+            // Vessels check
+            if (startWithAVesselCheckBox.isSelected()) {
+                if (newVesselCheckBox.isSelected()) {
+                    long id = controller.createVessel(concept, new Location(false, CelestialBody.KERBIN));
+                    vessels.add(controller.getInstance(id));
+                } else vessels.add(vessel);
+            }
 
             // Mission creation
-            if (newVesselCheckBox.isSelected()) controller.createMission(name,
+            controller.createMission(name,
                     description,
-                    vessel,
-                    assignedModel.getCrew2(),
-                    date,
-                    new HashSet<>());
-            else controller.createMission(name,
-                    description,
-                    instance,
+                    vessels,
                     assignedModel.getCrew2(),
                     date);
 

@@ -26,7 +26,7 @@ public interface ControllerInterface {
     void addKerbal(Kerbal kerbal);
     void addMission(Mission mission);
     void addConcept(Concept concept);
-    void addVessel(Vessel vessel);
+    long addVessel(Vessel vessel);
 
     // Special case: recovered instances get deleted from memory
     void vesselRecovered(Vessel vessel);
