@@ -2,9 +2,7 @@ package other.display;
 
 import kerbals.Kerbal;
 
-import javax.swing.table.AbstractTableModel;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MissionAssignedTableModel extends MissionTableModel {
 
@@ -32,7 +30,7 @@ public class MissionAssignedTableModel extends MissionTableModel {
     public Map<Kerbal, String> getCrew2() {
         Map<Kerbal, String> ret = new HashMap<>();
         for (int i = 0; i != getKerbalList().size(); i++)
-            ret.put(getKerbalList().get(i), (String) getValueAt(i, 4));
+            ret.put(getKerbalList().get(i), (String) getValueAt(i, super.getColumnCount() + 1));
         return Collections.unmodifiableMap(ret);
     }
 

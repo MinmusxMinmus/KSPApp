@@ -49,7 +49,7 @@ public class MissionTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 3;
     }
 
     @Override
@@ -59,7 +59,6 @@ public class MissionTableModel extends AbstractTableModel {
             case 0 -> k.getName() + " Kerman";
             case 1 -> k.isMale() ? "Male" : "Female";
             case 2 -> k.getJob().toString();
-            case 3 -> k.getLevel();
             default -> "???";
         };
     }
