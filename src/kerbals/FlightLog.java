@@ -14,23 +14,20 @@ import java.util.StringJoiner;
 public class FlightLog extends KSPObject implements KSPObjectListener {
 
     private static final String DELIMITER = ":fl:";
-    private static final int ENCODE_FIELD_AMOUNT = 2;
+    private static final int ENCODE_FIELD_AMOUNT = 1;
 
     private String missionName;
-    private final float expGained;
 
     private Mission mission;
 
     public FlightLog(ControllerInterface controller, String mission, float expGained) {
         super(controller);
         this.missionName = mission;
-        this.expGained = expGained;
     }
 
     public FlightLog(ControllerInterface controller, String[] fields) {
         super(controller);
         this.missionName = fields[0];
-        this.expGained = Float.parseFloat(fields[1]);
     }
 
     public static FlightLog fromString(ControllerInterface controller, String s) {
@@ -43,7 +40,6 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
         StringJoiner joiner = new StringJoiner(DELIMITER);
 
         joiner.add(log.missionName);
-        joiner.add(Float.toString(log.expGained));
 
         return joiner.toString();
     }
@@ -51,10 +47,6 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
 
     public String getMissionName() {
         return missionName;
-    }
-
-    public float getExpGained() {
-        return expGained;
     }
 
     @Override
@@ -68,7 +60,6 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Mission", missionName));
-        fields.add(new Field("Experience gained", Float.toString(expGained)));
 
         return fields;
     }
@@ -84,6 +75,6 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
 
     @Override
     public String toString() {
-        return missionName + " (+" + expGained + "xp)";
+        return "Participated in " + missionName;
     }
 }
