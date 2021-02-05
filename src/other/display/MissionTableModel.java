@@ -23,6 +23,11 @@ public class MissionTableModel extends AbstractTableModel {
         return kerbalList;
     }
 
+    public void clear() {
+        kerbalList.clear();
+        fireTableDataChanged();
+    }
+
     public void addKerbal(Kerbal kerbal) {
         kerbalList.add(kerbal);
         kerbalList.sort(Comparator.comparing(Kerbal::getName));
