@@ -1,8 +1,8 @@
 package kerbals;
 
+import controller.ControllerInterface;
 import missions.Mission;
 import other.KSPObject;
-import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
-    public static final int ENCODE_FIELD_AMOUNT = 11; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 12; // ALWAYS ACCOUNT FOR DESCRIPTION
 
     // Persistent fields
     /**
@@ -56,6 +56,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      */
     private boolean KIA;
     /**
+     * The kerbal's current {@link Location}.
+     */
+    private Location location;
+    /**
      * The kerbal's flight log. Contains information regarding all of the past missions.
      */
     private final List<FlightLog> log;
@@ -67,7 +71,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      * Honorable mentions that speak to the kerbal's achievements.
      */
     private final List<Condecoration> condecorations;
-    // location
 
     // Dynamic fields
     private Mission originObj;
@@ -80,7 +83,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      * @param job The kerbal's job.
      * @param hiringDate The date the kerbal was hired / rescued.
      */
-    public Kerbal(ControllerInterface controller, String name, boolean isMale, boolean badass, Job job, String origin, KSPDate hiringDate) {
+    public Kerbal(ControllerInterface controller, String name, boolean isMale, boolean badass, Job job, String origin, KSPDate hiringDate, Location location) {
         super(controller);
         this.name = name;
         this.male = isMale;
@@ -89,6 +92,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.origin = origin;
         this.hiringDate = hiringDate;
         this.KIA = false;
+        this.location = location;
 
         this.log = new LinkedList<>();
         this.missions = new HashSet<>();
@@ -108,15 +112,16 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.origin = fields.get(5);
         this.hiringDate = KSPDate.fromString(controller, fields.get(6));
         this.KIA = Boolean.parseBoolean(fields.get(7));
-        this.log = fields.get(8).equals("(none)")
+        this.location = Location.fromString(fields.get(8));
+        this.log = fields.get(9).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(8).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
-        this.missions = fields.get(9).equals("(none)")
+                : Arrays.stream(fields.get(9).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
+        this.missions = fields.get(10).equals("(none)")
                 ? null
-                : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)));
-        this.condecorations = fields.get(10).equals("(none)")
+                : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
+        this.condecorations = fields.get(11).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(10).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
+                : Arrays.stream(fields.get(11).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
     }
 
     // Logic methods
@@ -204,16 +209,23 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         return hiringDate;
     }
 
+    public boolean isKIA() {
+        return KIA;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     public List<FlightLog> getLog() {
         return Collections.unmodifiableList(log);
     }
 
     public List<Condecoration> getCondecorations() {
         return condecorations;
-    }
-
-    public boolean isKIA() {
-        return KIA;
     }
 
     // Overrides
@@ -257,6 +269,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         ret.add(origin);
         ret.add(hiringDate.toStorableString());
         ret.add(Boolean.toString(KIA));
+        ret.add(Location.toString(location));
 
         ret.add(logJoiner.toString());
         ret.add(missionJoiner.toString());
@@ -270,12 +283,12 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Name", name + " Kerman" + (KIA ? " (KIA)" : "")));
-        if (KIA) fields.add(new Field("Last mission", log.get(log.size() - 1).getMissionName()));
         fields.add(new Field("Job", job.toString()));
         fields.add(new Field("Gender", male ? "Male" : "Female"));
         fields.add(new Field("Badass?", badass ? "Yes" : "No"));
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
+        fields.add(new Field("Location", location.toString()));
         for (Mission m : missionObjs) fields.add(new Field("Deployed in:", m.getName()));
         for (FlightLog l : log) fields.add(new Field("Participated in:", l.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.toString()));
@@ -302,6 +315,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     @Override
     public String toString() {
-        return name + " Kerman (" + job.toString() + ")";
+        return name + " Kerman (" + job.toString() + "): " + location.toString();
     }
 }
