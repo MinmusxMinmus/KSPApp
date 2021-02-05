@@ -135,8 +135,12 @@ public class MainScreen extends KSPGUI {
                     window = new ConceptCreator(controller);
                     name = VESSEL_CREATOR;
                 }
-                case VESSEL_INSTANCE_LIST, CRASHED_INSTANCE_LIST -> {
-                    say("To make a physical vessel, create a mission for it"); // TODO allow to create vessels without mission
+                case VESSEL_INSTANCE_LIST -> {
+                    window = new VesselCreator(controller);
+                    name = VESSEL_CREATOR;
+                }
+                case CRASHED_INSTANCE_LIST -> {
+                    say("You can't create a crashed vessel!");
                     return;
                 }
                 // TODO Add new item: edit here

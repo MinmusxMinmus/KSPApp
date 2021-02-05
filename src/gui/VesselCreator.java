@@ -68,8 +68,8 @@ public class VesselCreator extends KSPGUI {
                     .collect(Collectors.toSet()));
     private final MissionTableModel assignedModel = new MissionTableModel(new LinkedList<>());
 
-    public VesselCreator(GUIController controller, String title) {
-        super(controller, title);
+    public VesselCreator(GUIController controller) {
+        super(controller, VESSEL_CREATOR);
         setContentPane(mainPanel);
 
         conceptComboBox.setModel(conceptModel);
