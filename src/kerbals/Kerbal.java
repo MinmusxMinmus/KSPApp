@@ -119,7 +119,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
                 ? new LinkedList<>()
                 : Arrays.stream(fields.get(9).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
         this.missions = fields.get(10).equals("(none)")
-                ? null
+                ? new HashSet<>()
                 : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
         this.condecorations = fields.get(11).equals("(none)")
                 ? new LinkedList<>()
