@@ -141,7 +141,6 @@ public class GUIController implements ControllerInterface {
         Kerbal k = new Kerbal(this, name, isMale, badass, job, hiringReason, hiringDate, new Location(false, CelestialBody.KERBIN), null); // Astronaut Complex
         k.setDescription(description);
         addKerbal(k);
-        k.ready();
     }
 
     public void createMission(String name, String description, Map<Kerbal, String> crew, KSPDate missionStart) {
@@ -149,7 +148,6 @@ public class GUIController implements ControllerInterface {
         for (Kerbal k : crew.keySet()) k.missionStart(m);
         m.setDescription(description);
         addMission(m);
-        m.ready();
     }
 
     public void createConcept(String name, VesselType type, Concept redesign, KSPDate creationDate, Destination[] destinations, VesselProperty... properties) {
@@ -159,7 +157,6 @@ public class GUIController implements ControllerInterface {
         // Inspired, type == null;
         else vc = new Concept(this, name, redesign, creationDate, destinations, properties);
         addConcept(vc);
-        vc.ready();
     }
 
     public void delete(KSPObject object, String status) {
@@ -176,8 +173,10 @@ public class GUIController implements ControllerInterface {
     public long createVessel(Concept concept, Location location, KSPDate creationDate, Set<Kerbal> crew, Vessel... vessels) {
         Vessel vi = new Vessel(this, concept, creationDate, location, new HashSet<>(Arrays.asList(vessels)));
         addVessel(vi);
-        for (Kerbal k : crew) vi.addCrew(k);
-        vi.ready();
+        for (Kerbal k : crew) {
+            vi.addCrew(k);
+            k.enterVessel(vi);
+        }
         return vi.getId();
     }
 
