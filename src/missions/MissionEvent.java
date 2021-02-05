@@ -5,6 +5,7 @@ import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;
+import other.util.KSPDate;
 import other.util.Location;
 
 import java.util.LinkedList;
@@ -14,11 +15,12 @@ import java.util.StringJoiner;
 public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":ME:";
-    public static final int ENCODE_FIELD_AMOUNT = 3;
+    public static final int ENCODE_FIELD_AMOUNT = 4;
 
     // Persistent details
     private String missionName;
-    private final Location oldLocation;
+    private final KSPDate date;
+    private final Location location;
     private final String details;
 
     // Dynamic details
@@ -26,13 +28,14 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
 
     private MissionEvent(ControllerInterface controller, String[] fields) {
-        this(controller, fields[0], Location.fromString(fields[1]), fields[2]);
+        this(controller, fields[0], KSPDate.fromString(controller, fields[1]), Location.fromString(fields[2]), fields[3]);
     }
 
-    public MissionEvent(ControllerInterface controller, String missionName, Location oldLocation, String details) {
+    public MissionEvent(ControllerInterface controller, String missionName, KSPDate date, Location location, String details) {
         super(controller);
         this.missionName = missionName;
-        this.oldLocation = oldLocation;
+        this.date = date;
+        this.location = location;
         this.details = details;
     }
 
@@ -45,10 +48,26 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         StringJoiner joiner = new StringJoiner(DELIMITER);
 
         joiner.add(me.missionName);
-        joiner.add(Location.toString(me.oldLocation));
+        joiner.add(Location.toString(me.location));
         joiner.add(me.details);
 
         return joiner.toString();
+    }
+
+    public String getMissionName() {
+        return missionName;
+    }
+
+    public KSPDate getDate() {
+        return date;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public String getDetails() {
+        return details;
     }
 
     @Override
@@ -62,7 +81,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         List<Field> fields = new LinkedList<>();
 
         fields.add(new Field("Mission", missionName));
-        fields.add(new Field("Previous location", oldLocation == null ? "Unknown" : oldLocation.toString()));
+        fields.add(new Field("Previous location", location == null ? "Unknown" : location.toString()));
         fields.add(new Field("Details", details));
 
         return fields;

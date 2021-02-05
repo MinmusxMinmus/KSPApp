@@ -9,6 +9,7 @@ import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;
 import other.util.KSPDate;
+import other.util.Location;
 import vessels.Vessel;
 
 import java.util.*;
@@ -95,13 +96,38 @@ public class Mission extends KSPObject implements KSPObjectListener {
         setDescription(getDescription() + "\n\nMISSION END\n" + comment);
     }
 
-    public void kerbalRescued(Kerbal kerbal, KSPDate dateRescued) {
-        this.crew.put(kerbal.getName(), new CrewDetails(getController(), kerbal.getName(), "Rescued subject", dateRescued));
-        logEvent(new MissionEvent(getController(), getName(), null, "Rescued " + kerbal.getName())); // TODO replace null with kerbal location
+    public void logEvent(Location location, KSPDate date,  String details) {
+        events.add(new MissionEvent(getController(), getName(), date, location, details));
     }
 
-    public void logEvent(MissionEvent event) {
-        events.add(event);
+    public boolean addCrew(Kerbal k, String position, KSPDate date) {
+        logEvent(k.getLocation(), date, k.getName() + " Kerman joined the mission as " + position);
+        crewObjs.add(k);
+        crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
+        k.addEventListener(this);
+        return true;
+    }
+    public boolean removeCrew(Kerbal k, KSPDate date) {
+        logEvent(k.getLocation(), date, k.getName() + " Kerman (" + getCrewDetails(k).getPosition() + ") dismissed from the mission");
+        crewObjs.remove(k);
+        crew.remove(k.getName());
+        k.removeEventListener(this);
+        return true;
+    }
+
+    public boolean addVessel(Vessel v, KSPDate date) {
+        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel joined the mission");
+        vesselObjs.add(v);
+        vessels.add(v.getId());
+        v.addEventListener(this);
+        return true;
+    }
+    public boolean removeVessel(Vessel v, KSPDate date) {
+        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel dismissed from the mission");
+        vesselObjs.remove(v);
+        vessels.remove(v.getId());
+        v.removeEventListener(this);
+        return true;
     }
 
     // Getter/Setter methods
@@ -119,33 +145,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public Set<Long> getVessels() {
         return new HashSet<>(vessels);
     }
-    public boolean addVessel(Vessel v) {
-        vesselObjs.add(v);
-        vessels.add(v.getId());
-        v.addEventListener(this);
-        return true;
-    }
-    public boolean removeVessel(Vessel v) {
-        vesselObjs.remove(v);
-        vessels.remove(v.getId());
-        v.removeEventListener(this);
-        return true;
-    }
 
     public Set<String> getCrew() {
         return Collections.unmodifiableSet(crew.keySet());
-    }
-    public boolean addCrew(Kerbal k, String position, KSPDate date) {
-        crewObjs.add(k);
-        crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
-        k.addEventListener(this);
-        return true;
-    }
-    public boolean removeCrew(Kerbal k) {
-        crewObjs.remove(k);
-        crew.remove(k.getName());
-        k.removeEventListener(this);
-        return true;
     }
 
     public CrewDetails getCrewDetails(Kerbal kerbal) {
@@ -240,10 +242,18 @@ public class Mission extends KSPObject implements KSPObjectListener {
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Kerbal deleted
-        if (event.getSource() instanceof Kerbal k) removeCrew(k);
+        if (event.getSource() instanceof Kerbal k) {
+            crewObjs.remove(k);
+            crew.remove(k.getName());
+            k.removeEventListener(this);
+        }
 
         // Vessel deleted
-        if (event.getSource() instanceof Vessel v) removeVessel(v);
+        if (event.getSource() instanceof Vessel v) {
+            vesselObjs.remove(v);
+            vessels.remove(v.getId());
+            v.removeEventListener(this);
+        }
     }
 
     @Override
