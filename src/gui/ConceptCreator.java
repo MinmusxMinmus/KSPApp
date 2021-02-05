@@ -19,7 +19,7 @@ import static java.lang.Integer.parseInt;
 
 public class ConceptCreator extends KSPGUI {
     private JPanel mainPanel;
-    private JLabel vesselCreatorLabel;
+    private JLabel conceptCreatorLabel;
     private JPanel buttonsPanel;
     private JPanel dataPanel;
     private JButton OKButton;

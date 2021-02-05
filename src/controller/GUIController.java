@@ -173,9 +173,10 @@ public class GUIController implements ControllerInterface {
         }
     }
 
-    public long createVessel(Concept concept, Location location, Vessel... vessels) {
-        Vessel vi = new Vessel(this, concept, location, new HashSet<>(Arrays.asList(vessels)));
+    public long createVessel(Concept concept, Location location, KSPDate creationDate, Set<Kerbal> crew, Vessel... vessels) {
+        Vessel vi = new Vessel(this, concept, creationDate, location, new HashSet<>(Arrays.asList(vessels)));
         addVessel(vi);
+        for (Kerbal k : crew) vi.addCrew(k);
         vi.ready();
         return vi.getId();
     }
