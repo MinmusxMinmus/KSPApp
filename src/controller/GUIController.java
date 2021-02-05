@@ -3,7 +3,8 @@ package controller;
 import kerbals.Job;
 import kerbals.Kerbal;
 import missions.Mission;
-import other.*;
+import other.KSPObject;
+import other.util.CelestialBody;
 import other.util.Destination;
 import other.util.KSPDate;
 import other.util.Location;
@@ -11,12 +12,14 @@ import persistencelib.Atom;
 import persistencelib.Key;
 import persistencelib.StorageManager;
 import persistencelib.Version;
-import vessels.*;
+import vessels.Concept;
+import vessels.Vessel;
+import vessels.VesselProperty;
+import vessels.VesselType;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GUIController implements ControllerInterface {
 
@@ -135,7 +138,7 @@ public class GUIController implements ControllerInterface {
 
 
     public void createKerbalHired(String name, boolean isMale, boolean badass, Job job, KSPDate hiringDate, String description) {
-        Kerbal k = new Kerbal(this, name, isMale, badass, job, "Hired", hiringDate);
+        Kerbal k = new Kerbal(this, name, isMale, badass, job, "Hired", hiringDate, new Location(false, CelestialBody.KERBIN)); // Astronaut Complex
         k.setDescription(description);
         addKerbal(k);
         k.ready();

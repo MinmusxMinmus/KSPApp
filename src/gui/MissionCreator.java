@@ -2,16 +2,15 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.util.KSPDate;
 import other.display.MissionAssignedTableModel;
 import other.display.MissionTableModel;
+import other.util.KSPDate;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
@@ -55,9 +54,7 @@ public class MissionCreator extends KSPGUI {
     private JCheckBox preciseTimeCheckBox;
 
     // Custom components
-    private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals().stream()
-            .filter(Kerbal::isAvailable)
-            .collect(Collectors.toSet()));
+    private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals());
     private final MissionAssignedTableModel assignedModel = new MissionAssignedTableModel(new LinkedList<>());
 
     public MissionCreator(GUIController controller) {
