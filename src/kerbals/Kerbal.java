@@ -218,9 +218,23 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     public List<FlightLog> getLog() {
         return Collections.unmodifiableList(log);
     }
+    public boolean addLog(FlightLog log) {
+        this.log.add(log);
+        return true;
+    }
+    public boolean removeLog(FlightLog log) {
+        return this.log.remove(log);
+    }
 
     public List<Condecoration> getCondecorations() {
         return condecorations;
+    }
+    public boolean addCondecoration(Condecoration condecoration) {
+        condecorations.add(condecoration);
+        return true;
+    }
+    public boolean removeCondecoration(Condecoration condecoration) {
+        return condecorations.remove(condecoration);
     }
 
     // Overrides
