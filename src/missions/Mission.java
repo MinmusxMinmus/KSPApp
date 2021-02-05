@@ -37,10 +37,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
      * @param crew A map corresponding to the crew and their roles
      * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, KSPDate start) {
+    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, Set<Long> vessels, KSPDate start) {
         super(controller);
         this.name = name;
-        this.vessels = new HashSet<>();
+        this.vessels = vessels;
         Map<String, CrewDetails> crew2 = new HashMap<>();
         crew.keySet().forEach(k -> crew2.put(k.getName(), new CrewDetails(controller, k.getName(), crew.get(k), start)));
         this.crew = crew2;

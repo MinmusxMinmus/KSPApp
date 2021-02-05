@@ -4,11 +4,11 @@ import kerbals.Kerbal;
 
 import java.util.*;
 
-public class MissionAssignedTableModel extends MissionTableModel {
+public class MissionAssignedKerbalTableModel extends MissionKerbalTableModel {
 
     private final List<String> positionList;
 
-    public MissionAssignedTableModel(Collection<Kerbal> kerbals) {
+    public MissionAssignedKerbalTableModel(Collection<Kerbal> kerbals) {
         super(kerbals);
         this.positionList = new LinkedList<>();
         for (int i = 0; i != getKerbalList().size(); i++) positionList.add("Undecided");

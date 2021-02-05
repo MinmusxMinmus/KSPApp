@@ -20,6 +20,7 @@ import vessels.VesselType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GUIController implements ControllerInterface {
 
@@ -143,9 +144,10 @@ public class GUIController implements ControllerInterface {
         addKerbal(k);
     }
 
-    public void createMission(String name, String description, Map<Kerbal, String> crew, KSPDate missionStart) {
-        Mission m = new Mission(this, name, crew, missionStart);
+    public void createMission(String name, String description, Map<Kerbal, String> crew, List<Vessel> vessels, KSPDate missionStart) {
+        Mission m = new Mission(this, name, crew, vessels.stream().map(Vessel::getId).collect(Collectors.toSet()), missionStart);
         for (Kerbal k : crew.keySet()) k.missionStart(m);
+        for (Vessel v : vessels) v.addMission(m);
         m.setDescription(description);
         addMission(m);
     }

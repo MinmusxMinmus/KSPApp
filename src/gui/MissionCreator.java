@@ -2,9 +2,11 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.display.MissionAssignedTableModel;
-import other.display.MissionTableModel;
+import other.display.MissionAssignedKerbalTableModel;
+import other.display.MissionKerbalTableModel;
+import other.display.MissionVesselTableModel;
 import other.util.KSPDate;
+import vessels.Vessel;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -52,10 +54,21 @@ public class MissionCreator extends KSPGUI {
     private JPanel secondPanel;
     private JLabel secondLabel;
     private JCheckBox preciseTimeCheckBox;
+    private JPanel vesselPanel;
+    private JPanel vesselSelectionPanel;
+    private JLabel availableVesselsLabel;
+    private JLabel assignedVesselsLabel;
+    private JScrollPane availableVesselsPane;
+    private JScrollPane assignedVesselsPane;
+    private JTable availableVesselsTable;
+    private JTable assignedVesselsTable;
 
     // Custom components
-    private final MissionTableModel freeModel = new MissionTableModel(controller.getKerbals());
-    private final MissionAssignedTableModel assignedModel = new MissionAssignedTableModel(new LinkedList<>());
+    private final MissionKerbalTableModel freeModel = new MissionKerbalTableModel(controller.getKerbals());
+    private final MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(new LinkedList<>());
+
+    private final MissionVesselTableModel freeVModel = new MissionVesselTableModel(controller.getVessels());
+    private final MissionVesselTableModel assignedVModel = new MissionVesselTableModel(new LinkedList<>());
 
     public MissionCreator(GUIController controller) {
         super(controller, MISSION_CREATOR);
@@ -65,6 +78,9 @@ public class MissionCreator extends KSPGUI {
         // Define table contents
         crewFreeTable.setModel(freeModel);
         crewSelectedTable.setModel(assignedModel);
+
+        availableVesselsTable.setModel(freeVModel);
+        assignedVesselsTable.setModel(assignedVModel);
 
         // Good luck charm
         revalidate();
@@ -87,7 +103,7 @@ public class MissionCreator extends KSPGUI {
 
         // Use vessel listener
 
-        // Available table listener
+        // Available kerbal table listener
         crewFreeTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -100,7 +116,7 @@ public class MissionCreator extends KSPGUI {
             }
         });
 
-        // Selected table listener
+        // Selected kerbal table listener
         crewSelectedTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -114,6 +130,32 @@ public class MissionCreator extends KSPGUI {
                         assignedModel.removeKerbal(k);
                         freeModel.addKerbal(k);
                     }
+            }
+        });
+
+        // Available vessel table listener
+        availableVesselsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = availableVesselsTable.rowAtPoint(e.getPoint());
+                if (row >= 0 && row < freeVModel.getRowCount()) {
+                    Vessel v = freeVModel.getVessel(row);
+                    freeVModel.removeVessel(v);
+                    assignedVModel.addVessel(v);
+                }
+            }
+        });
+
+        // Selected vessel table listener
+        assignedVesselsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = assignedVesselsTable.rowAtPoint(e.getPoint());
+                if (row >= 0 && row < assignedVModel.getRowCount()) {
+                    Vessel v = assignedVModel.getVessel(row);
+                    assignedVModel.removeVessel(v);
+                    freeVModel.addVessel(v);
+                }
             }
         });
 
@@ -169,6 +211,7 @@ public class MissionCreator extends KSPGUI {
             controller.createMission(name,
                     description,
                     assignedModel.getCrew2(),
+                    assignedVModel.getVessels(),
                     date);
 
             // Form end

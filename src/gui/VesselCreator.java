@@ -2,7 +2,7 @@ package gui;
 
 import controller.GUIController;
 import kerbals.Kerbal;
-import other.display.MissionTableModel;
+import other.display.MissionKerbalTableModel;
 import other.util.CelestialBody;
 import other.util.KSPDate;
 import other.util.Location;
@@ -62,11 +62,11 @@ public class VesselCreator extends KSPGUI {
 
     private final DefaultComboBoxModel<CelestialBody> locationModel = new DefaultComboBoxModel<>();
     private final DefaultComboBoxModel<Concept> conceptModel = new DefaultComboBoxModel<>();
-    private final MissionTableModel freeModel = new MissionTableModel(
+    private final MissionKerbalTableModel freeModel = new MissionKerbalTableModel(
             controller.getKerbals().stream()
                     .filter(k -> k.getLocation().landedAt(CelestialBody.KERBIN))
                     .collect(Collectors.toSet()));
-    private final MissionTableModel assignedModel = new MissionTableModel(new LinkedList<>());
+    private final MissionKerbalTableModel assignedModel = new MissionKerbalTableModel(new LinkedList<>());
 
     public VesselCreator(GUIController controller) {
         super(controller, VESSEL_CREATOR);

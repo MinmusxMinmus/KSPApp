@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MissionTableModel extends AbstractTableModel {
+public class MissionKerbalTableModel extends AbstractTableModel {
 
     private final List<Kerbal> kerbalList;
 
-    public MissionTableModel(Collection<Kerbal> kerbals) {
+    public MissionKerbalTableModel(Collection<Kerbal> kerbals) {
         this.kerbalList = kerbals.stream()
                 .sorted(Comparator.comparing(Kerbal::getName))
                 .collect(Collectors.toList());
