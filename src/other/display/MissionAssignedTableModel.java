@@ -16,7 +16,7 @@ public class MissionAssignedTableModel extends MissionTableModel {
 
     public void addKerbal(Kerbal kerbal) {
         super.addKerbal(kerbal);
-        positionList.add(getKerbalList().indexOf(kerbal), "Unknown position");
+        positionList.add(getKerbalList().indexOf(kerbal), "Unknown");
         fireTableDataChanged();
     }
 
@@ -30,7 +30,7 @@ public class MissionAssignedTableModel extends MissionTableModel {
     public Map<Kerbal, String> getCrew2() {
         Map<Kerbal, String> ret = new HashMap<>();
         for (int i = 0; i != getKerbalList().size(); i++)
-            ret.put(getKerbalList().get(i), (String) getValueAt(i, super.getColumnCount() + 1));
+            ret.put(getKerbalList().get(i), (String) getValueAt(i, super.getColumnCount()));
         return Collections.unmodifiableMap(ret);
     }
 
