@@ -88,6 +88,20 @@ public class VesselCreator extends KSPGUI {
 
     private void listenerSetup() {
 
+        // Selected celestial body listener
+        locationComboBox.addActionListener(e -> {
+            CelestialBody celestialBody = (CelestialBody) locationComboBox.getSelectedItem();
+            boolean inSpace = inSpaceCheckBox.isSelected();
+            updateKerbalTables(inSpace, celestialBody);
+        });
+
+        // In space listener
+        inSpaceCheckBox.addActionListener(e -> {
+            CelestialBody celestialBody = (CelestialBody) locationComboBox.getSelectedItem();
+            boolean inSpace = inSpaceCheckBox.isSelected();
+            updateKerbalTables(inSpace, celestialBody);
+        });
+
         // Available table listener
         crewFreeTable.addMouseListener(new MouseAdapter() {
             @Override
@@ -154,7 +168,7 @@ public class VesselCreator extends KSPGUI {
             }
 
             // Confirmation
-            if (!ask("Create mission", "Are you sure you want to create this mission?")) return;
+            if (!ask("Create vessel", "Are you sure you want to create this vessel?")) return;
 
             // Date creation
             KSPDate date = (!preciseTimeCheckBox.isSelected())
@@ -178,5 +192,13 @@ public class VesselCreator extends KSPGUI {
             // Form end
             dispose();
         });
+    }
+
+    private void updateKerbalTables(boolean inSpace, CelestialBody celestialBody) {
+        freeModel.clear();
+        assignedModel.clear();
+        for (Kerbal k : controller.getKerbals().stream()
+                .filter(k -> k.getLocation().getCelestialBody().equals(celestialBody) && k.getLocation().isInSpace() == inSpace)
+                .collect(Collectors.toSet())) freeModel.addKerbal(k);
     }
 }
