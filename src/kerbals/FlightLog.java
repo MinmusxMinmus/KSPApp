@@ -20,7 +20,7 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
 
     private Mission mission;
 
-    public FlightLog(ControllerInterface controller, String mission, float expGained) {
+    public FlightLog(ControllerInterface controller, String mission) {
         super(controller);
         this.missionName = mission;
     }
