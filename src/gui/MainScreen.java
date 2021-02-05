@@ -132,7 +132,7 @@ public class MainScreen extends KSPGUI {
                     name = MISSION_CREATOR;
                 }
                 case VESSEL_CONCEPT_LIST -> {
-                    window = new VesselCreator(controller);
+                    window = new ConceptCreator(controller);
                     name = VESSEL_CREATOR;
                 }
                 case VESSEL_INSTANCE_LIST, CRASHED_INSTANCE_LIST -> {
