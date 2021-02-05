@@ -52,6 +52,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      */
     private final KSPDate hiringDate;
     /**
+     * Indicates whether the kerbal is dead or not.
+     */
+    private boolean KIA;
+    /**
      * The kerbal's flight log. Contains information regarding all of the past missions.
      */
     private final List<FlightLog> log;
@@ -63,7 +67,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      * Honorable mentions that speak to the kerbal's achievements.
      */
     private final List<Condecoration> condecorations;
-    private boolean KIA;
     // location
 
     // Dynamic fields
@@ -85,11 +88,11 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.job = job;
         this.origin = origin;
         this.hiringDate = hiringDate;
+        this.KIA = false;
 
         this.log = new LinkedList<>();
         this.missions = new HashSet<>();
         this.condecorations = new LinkedList<>();
-        this.KIA = false;
     }
 
     /** Generates a kerbal from a list of fields stores in persistence.
@@ -104,16 +107,16 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.job = Job.fromString(fields.get(4));
         this.origin = fields.get(5);
         this.hiringDate = KSPDate.fromString(controller, fields.get(6));
-        this.log = fields.get(7).equals("(none)")
+        this.KIA = Boolean.parseBoolean(fields.get(7));
+        this.log = fields.get(8).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(7).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
-        this.missions = fields.get(8).equals("(none)")
+                : Arrays.stream(fields.get(8).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
+        this.missions = fields.get(9).equals("(none)")
                 ? null
-                : new HashSet<>(Arrays.asList(fields.get(8).split(DELIMITER)));
-        this.condecorations = fields.get(9).equals("(none)")
+                : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)));
+        this.condecorations = fields.get(10).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(9).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
-        this.KIA = Boolean.parseBoolean(fields.get(10));
+                : Arrays.stream(fields.get(10).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
     }
 
     // Logic methods
@@ -238,7 +241,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         StringJoiner logJoiner = new StringJoiner(DELIMITER);
         for (FlightLog log1 : log) logJoiner.add(FlightLog.toString(log1));
         if (logJoiner.toString().equals("")) logJoiner.add("(none)");
-        ret.add(logJoiner.toString().equals("") ? "(none)" : logJoiner.toString());
 
         StringJoiner missionJoiner = new StringJoiner(DELIMITER);
         for (String name : missions) missionJoiner.add(name);
@@ -254,10 +256,11 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         ret.add(job.toString());
         ret.add(origin);
         ret.add(hiringDate.toStorableString());
+        ret.add(Boolean.toString(KIA));
+
         ret.add(logJoiner.toString());
         ret.add(missionJoiner.toString());
         ret.add(condecorationJoiner.toString());
-        ret.add(Boolean.toString(KIA));
 
         return ret;
     }
