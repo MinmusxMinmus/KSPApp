@@ -13,12 +13,11 @@ import java.util.*;
 public class CrewDetails extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":cd:";
-    public static final int ENCODE_FIELD_AMOUNT = 5;
+    public static final int ENCODE_FIELD_AMOUNT = 4;
 
     private String name;
     private final String position;
     private final KSPDate boardTime;
-    private float expGained;
 
     private Kerbal kerbal;
 
@@ -27,13 +26,14 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
         this.name = name;
         this.position = position;
         this.boardTime = boardTime;
-        this.expGained = 0.0f;
     }
 
     public CrewDetails(ControllerInterface controller, List<String> fields) {
-        this(controller, fields.get(1), fields.get(2), new KSPDate(controller, fields.get(3)));
-        setExpGain(Float.parseFloat(fields.get(4)));
+        super(controller);
         setDescription(fields.get(0));
+        this.name = fields.get(1);
+        this.position = fields.get(2);
+        this.boardTime = KSPDate.fromString(controller, fields.get(3));
     }
 
     public static CrewDetails fromString(ControllerInterface controller, String s) {
@@ -48,7 +48,6 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
         joiner.add(crewDetails.getDescription() == null ? "(None)" : crewDetails.getDescription());
         joiner.add(crewDetails.position);
         joiner.add(crewDetails.boardTime.toStorableString());
-        joiner.add(Float.toString(crewDetails.expGained));
 
         return joiner.toString();
     }
@@ -59,14 +58,6 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
 
     public KSPDate getBoardTime() {
         return boardTime;
-    }
-
-    public float getExpGained() {
-        return expGained;
-    }
-
-    public void setExpGain(float expGained) {
-        this.expGained = expGained;
     }
 
     @Override
@@ -82,7 +73,6 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Name", name + " Kerman" + (kerbal.isKIA() ? " (KIA)" : "")));
         fields.add(new Field("Position", position));
         fields.add(new Field("Board time", boardTime.toString(false, true)));
-        fields.add(new Field("Experience gained", Float.toString(expGained)));
 
         return fields;
     }
@@ -91,9 +81,9 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     public Collection<String> toStorableCollection() {
         List<String> ret = new LinkedList<>(super.toStorableCollection());
 
+        ret.add(name);
         ret.add(position);
         ret.add(boardTime.toStorableString());
-        ret.add(Float.toString(expGained));
 
         return ret;
     }
@@ -113,7 +103,6 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
                 (kerbal != null && kerbal.isKIA() ? " (KIA)" : "") +
                 position +
                 ", boarded at " +
-                boardTime.toString(false, true) +
-                " (+" + expGained + "xp)" ;
+                boardTime.toString(false, true);
     }
 }
