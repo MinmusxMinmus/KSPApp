@@ -137,7 +137,17 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         m.addEventListener(this);
     }
 
-    // missionEnd()
+    /**
+     * Executed whenever a kerbal succesfully ends a mission.
+     * @param m Mission in question.
+     */
+    public void missionEnd(Mission m, String comment) {
+        missionObjs.remove(m);
+        missions.remove(m.getName());
+        FlightLog flightLog = new FlightLog(getController(), m.getName());
+        flightLog.setDescription(comment);
+        log.add(flightLog);
+    }
 
     /**
      * Executed whenever the kerbal unfortunately goes KIA.
@@ -160,9 +170,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     // leaveVessel()
 
-    // updateLocation()
-
-    // addCondecoration()
 
     // Getter/Setter methods
     public String getName() {
