@@ -144,7 +144,17 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     // updateLocation()
 
-    // completeMission()
+    public void missionStart(Mission m) {
+        missions.add(m.getName());
+        missionObjs.add(m);
+        m.addEventListener(this);
+    }
+
+    public void missionEnd(Mission m) {
+        missionObjs.remove(m);
+        missions.remove(m.getName());
+        m.removeEventListener(this);
+    }
 
 
     // Getter/Setter methods

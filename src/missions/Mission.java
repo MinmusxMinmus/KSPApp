@@ -85,12 +85,21 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     // Logic methods
+
+    public void missionEnd(String comment) {
+        // Finish mission for all kerbals involved
+        for (Kerbal k : crewObjs) k.missionEnd(this, comment);
+        // Finish mission for all vessels involved
+        for (Vessel v : vesselObjs) v.missionEnd(this);
+        // End mission
+        this.active = false;
+        setDescription(getDescription() + "\n\nMISSION END\n" + comment);
+    }
+
     public void kerbalRescued(Kerbal kerbal, KSPDate dateRescued) {
         this.crew.put(kerbal.getName(), new CrewDetails(getController(), kerbal.getName(), "Rescued subject", dateRescued));
         logEvent(new MissionEvent(getController(), getName(), null, "Rescued " + kerbal.getName())); // TODO replace null with kerbal location
     }
-
-    // missionEnd()
 
     public void logEvent(MissionEvent event) {
         events.add(event);

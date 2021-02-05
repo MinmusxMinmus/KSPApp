@@ -168,6 +168,8 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         // Set KIA
         KIA = true;
 
+        // If the kerbal died while inside of a vessel, remain inside of it.
+
         // Final log entries
         for (Mission m : missionObjs) {
             FlightLog fl = new FlightLog(getController(), m.getName());
