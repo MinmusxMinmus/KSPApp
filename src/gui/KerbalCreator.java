@@ -44,6 +44,7 @@ public class KerbalCreator extends KSPGUI {
     private JCheckBox preciseTimeCheckBox;
     private JPanel descriptionPanel;
     private JTextArea descriptionTextArea;
+    private JTextField hiringReasonTextField;
 
     // Custom components
     private final DefaultComboBoxModel<Job> jobModel = new DefaultComboBoxModel<>();
@@ -84,6 +85,7 @@ public class KerbalCreator extends KSPGUI {
         OKButton.addActionListener(e -> {
             // Read values
             String name = nameTextField.getText().strip();
+            String hiringReason = hiringReasonTextField.getText().strip();
             boolean male = maleCheckBox.isSelected();
             boolean badass = badassCheckBox.isSelected();
             Job job = (Job) jobModel.getSelectedItem();
@@ -98,6 +100,7 @@ public class KerbalCreator extends KSPGUI {
 
             // Error checking
             if (name.equals("")
+                    || hiringReason.equals("")
                     || year.equals("")
                     || day.equals("")
                     || (preciseTimeCheckBox.isSelected() && (hour.equals("") || minute.equals("") || second.equals("")))) {
@@ -126,7 +129,7 @@ public class KerbalCreator extends KSPGUI {
                     OffsetDateTime.now());
 
             // Kerbal creation
-            controller.createKerbalHired(name, male, badass, job, date, description);
+            controller.createKerbalHired(name, male, badass, job, date, hiringReason, description);
 
             // Form end
             dispose();
