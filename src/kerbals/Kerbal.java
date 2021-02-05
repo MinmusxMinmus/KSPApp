@@ -221,6 +221,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         if (originObj != null) originObj.addEventListener(this);
 
         // Set current missions
+        missionObjs = new HashSet<>();
         for (String name : missions) {
             Mission m = getController().getMission(name);
             if (m != null) {
