@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
-    public static final int ENCODE_FIELD_AMOUNT = 12; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 11; // ALWAYS ACCOUNT FOR DESCRIPTION
 
     // Persistent fields
     /**
@@ -63,11 +63,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      * Honorable mentions that speak to the kerbal's achievements.
      */
     private final List<Condecoration> condecorations;
-    /**
-     * The kerbal's total experience
-     */
-    private float experience; // replace with milestones
-    private boolean KIA = false;
+    private boolean KIA;
     // location
 
     // Dynamic fields
@@ -93,8 +89,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.log = new LinkedList<>();
         this.mission = null;
         this.condecorations = new LinkedList<>();
-        this.experience = 0;
-
+        this.KIA = false;
     }
 
     /** Generates a kerbal from a list of fields stores in persistence.
@@ -102,6 +97,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      */
     public Kerbal(ControllerInterface controller, List<String> fields) {
         super(controller);
+        setDescription((fields.get(0)));
         this.name = fields.get(1);
         this.male = Boolean.parseBoolean(fields.get(2));
         this.badass = Boolean.parseBoolean(fields.get(3));
@@ -122,9 +118,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         else
             result1 = Arrays.stream(fields1.split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
         this.condecorations = result1;
-        this.experience = Float.parseFloat(fields.get(10));
-        this.KIA = Boolean.parseBoolean(fields.get(11));
-        setDescription((fields.get(0)));
+        this.KIA = Boolean.parseBoolean(fields.get(10));
     }
 
     // Logic methods
@@ -147,8 +141,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fl.setDescription("Succesfully recovered from " + mission);
         log.add(fl);
         missionObj.addEventListener(fl);
-        experience += missionObj.getExperienceGained(this);
-
         mission = null;
         // No longer interested in this mission
         missionObj.removeEventListener(this);
@@ -236,21 +228,8 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         return missionObj.getExperienceGained(this);
     }
 
-    public int getLevel() {
-        if (experience > 64.0) return 5;
-        if (experience > 32.0) return 4;
-        if (experience > 16.0) return 3;
-        if (experience > 8.0) return 2;
-        if (experience > 2.0) return 1;
-        return 0;
-    }
-
     public List<Condecoration> getCondecorations() {
         return condecorations;
-    }
-
-    public float getExperience() {
-        return experience;
     }
 
     public boolean isKIA() {
@@ -288,7 +267,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         StringJoiner joiner1 = new StringJoiner(DELIMITER);
         for (Condecoration c : condecorations) joiner1.add(Condecoration.toString(c));
         ret.add(joiner1.toString().equals("") ? "(none)" : joiner1.toString());
-        ret.add(Float.toString(experience));
         ret.add(Boolean.toString(KIA));
 
         return ret;
@@ -303,7 +281,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Job", job.toString()));
         fields.add(new Field("Gender", male ? "Male" : "Female"));
         fields.add(new Field("Badass?", badass ? "Yes" : "No"));
-        fields.add(new Field("Level", Integer.toString(getLevel())));
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
         fields.add(new Field("Deployed?", mission == null ? "No" : "Yes"));

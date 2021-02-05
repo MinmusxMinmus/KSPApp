@@ -49,7 +49,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.condecorations = new HashSet<>();
     }
 
-    /** Generate a mission from a list of fields stored in persistence. =
+    /** Generate a mission from a list of fields stored in persistence.
      * @param fields List of fields
      */
     public Mission(GUIController controller, LinkedList<String> fields) {
