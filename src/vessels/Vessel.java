@@ -7,6 +7,7 @@ import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;
+import other.util.KSPDate;
 import other.util.Location;
 
 import java.util.*;
@@ -142,13 +143,18 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * before calling this method
      * @param details Details regarding the crash
      */
-    public void setCrashed(String details) {
+    public void setCrashed(KSPDate date, String details) {
         // Set crash status
         setStatus(VesselStatus.CRASHED);
         // Kill all crew members
         for (Kerbal k : crewObjs) k.KIA();
         // Destroy all vessels. Makes sure to not be recursive.
-        for (Vessel v : vesselObjs) if (v.status != VesselStatus.CRASHED) v.setCrashed(details);
+        for (Vessel v : vesselObjs) if (v.status != VesselStatus.CRASHED) v.setCrashed(date, details);
+        // Remove all missions, log the vessel crash of course
+        for (Mission m : getMissions()) {
+            m.logEvent(location, date, "\"" + getName() + "\" vessel crashed: " + details);
+            removeMission(m);
+        }
         // Set details
         setStatusDetails(details);
     }
@@ -269,6 +275,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean addCrew(Kerbal k) {
         crewObjs.add(k);
         crew.add(k.getName());
+        k.addEventListener(this);
         return true;
     }
     /**
@@ -277,6 +284,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean removeKerbal(Kerbal k) {
         crewObjs.remove(k);
         crew.remove(k.getName());
+        k.removeEventListener(this);
         return true;
     }
 
@@ -289,6 +297,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean addVessel(Vessel v) {
         vesselObjs.add(v);
         vessels.add(v.id);
+        v.addEventListener(this);
         return true;
     }
     /**
@@ -297,6 +306,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean removeVessel(Vessel v) {
         vesselObjs.remove(v);
         vessels.remove(v.id);
+        v.removeEventListener(this);
         return true;
     }
 
@@ -309,6 +319,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean addMission(Mission m) {
         missions.add(m.getName());
         missionObjs.add(m);
+        m.addEventListener(this);
         return true;
     }
     /**
@@ -317,6 +328,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public boolean removeMission(Mission m) {
         missionObjs.remove(m);
         missions.remove(m.getName());
+        m.removeEventListener(this);
         return true;
     }
 
