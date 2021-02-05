@@ -1,6 +1,7 @@
 package gui;
 
 import controller.GUIController;
+import missions.Mission;
 import other.KSPObject;
 import other.display.KSPObjectTableModel;
 
@@ -42,6 +43,7 @@ public class MainScreen extends KSPGUI {
     private JButton saveChangesButton;
     private JButton discardChangesButton;
     private JButton updateButton;
+    private JButton missionEditorButton;
 
 
     // Custom main components
@@ -97,13 +99,17 @@ public class MainScreen extends KSPGUI {
             String edit = (String) selectionComboBox.getSelectedItem();
             if (edit == null) return;
 
+            missionEditorButton.setEnabled(false);
             currentSelection = edit;
             searchModel.removeAllElements();
             switch (edit) {
                 case KERBAL_LIST -> // Add astronauts to list
                         searchModel.addAll(controller.getKerbals());
                 case MISSION_LIST -> // Add missions to list
-                        searchModel.addAll(controller.getMissions());
+                        {
+                            searchModel.addAll(controller.getMissions());
+                            missionEditorButton.setEnabled(true);
+                        }
                 case VESSEL_CONCEPT_LIST -> // Add vessel concepts to list
                         searchModel.addAll(controller.getConcepts());
                 case VESSEL_INSTANCE_LIST -> // Add vessel instances to list
@@ -159,6 +165,16 @@ public class MainScreen extends KSPGUI {
             if (object != null && s != null) {
                 // TODO
             }
+        });
+
+        missionEditorButton.addActionListener(e -> {
+            Mission m = (Mission) searchList.getSelectedValue();
+            if (m == null) {
+                say("Please select a mission");
+                return;
+            }
+            KSPGUI editor = new MissionUpdater(controller, "Mission editor", m);
+            editor.appear("Mission editor");
         });
 
         // Delete button listener
