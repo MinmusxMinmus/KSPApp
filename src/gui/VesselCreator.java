@@ -52,8 +52,6 @@ public class VesselCreator extends KSPGUI {
     private JPanel crewSelectionPanel;
     private JScrollPane availableCrewPane;
     private JTable crewFreeTable;
-    private JLabel availableCrewLabel;
-    private JLabel assignedCrewLabel;
     private JScrollPane assignedCrewPane;
     private JTable crewSelectedTable;
     private JLabel conceptLabel;

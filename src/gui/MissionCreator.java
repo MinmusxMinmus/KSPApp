@@ -29,8 +29,6 @@ public class MissionCreator extends KSPGUI {
     private JPanel crewSelectionPanel;
     private JScrollPane availableCrewPane;
     private JTable crewFreeTable;
-    private JLabel availableCrewLabel;
-    private JLabel assignedCrewLabel;
     private JScrollPane assignedCrewPane;
     private JTable crewSelectedTable;
     private JTextField yearTextField;
@@ -56,8 +54,6 @@ public class MissionCreator extends KSPGUI {
     private JCheckBox preciseTimeCheckBox;
     private JPanel vesselPanel;
     private JPanel vesselSelectionPanel;
-    private JLabel availableVesselsLabel;
-    private JLabel assignedVesselsLabel;
     private JScrollPane availableVesselsPane;
     private JScrollPane assignedVesselsPane;
     private JTable availableVesselsTable;
