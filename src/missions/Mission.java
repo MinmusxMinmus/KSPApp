@@ -9,7 +9,6 @@ import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 import other.util.Field;
 import other.util.KSPDate;
-import other.util.Location;
 import vessels.Vessel;
 
 import java.util.*;
@@ -89,15 +88,6 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public void kerbalRescued(Kerbal kerbal, KSPDate dateRescued) {
         this.crew.put(kerbal.getName(), new CrewDetails(getController(), kerbal.getName(), "Rescued subject", dateRescued));
         logEvent(new MissionEvent(getController(), getName(), null, "Rescued " + kerbal.getName())); // TODO replace null with kerbal location
-    }
-
-    /** Executed whenever a kerbal unfortunately goes KIA. This method assumes the cause of death to not be vessel crash.
-     * @param kerbal The unfortunate victim
-     * @param location Location where the kerbal went KIA
-     * @param details Additional KIA details
-     */
-    public void kerbalKIA(Kerbal kerbal, Location location, String details) {
-        kerbal.KIA(this, location, crew.get(kerbal.getName()).getExpGained(), details);
     }
 
     // missionEnd()

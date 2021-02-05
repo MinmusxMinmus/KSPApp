@@ -77,7 +77,8 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     private Set<Mission> missionObjs;
 
     // Constructors
-    /** Generates a new kerbal.
+    /**
+     * Generates a new kerbal.
      * @param name The kerbal's name.
      * @param isMale The kerbal's gender.
      * @param job The kerbal's job.
@@ -99,7 +100,8 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.condecorations = new LinkedList<>();
     }
 
-    /** Generates a kerbal from a list of fields stores in persistence.
+    /**
+     * Generates a kerbal from a list of fields stores in persistence.
      * @param fields List of fields
      */
     public Kerbal(ControllerInterface controller, List<String> fields) {
@@ -125,36 +127,29 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     // Logic methods
-    /** Executed whenever a kerbal embarks on a new mission
+    /**
+     * Executed whenever a kerbal embarks on a new mission
      * @param m Current mission
      */
     public void missionStart(Mission m) {
         missions.add(m.getName());
         missionObjs.add(m);
         m.addEventListener(this);
-    } // edit for multiple missions
+    }
 
     // missionEnd()
 
-    /** Executed whenever a kerbal is succesfully recovered.
+    /**
+     * Executed whenever the kerbal unfortunately goes KIA.
      */
-    public void recover() {
-        // TODO new location?
-    }
-
-    /** Executed whenever the kerbal unfortunately goes KIA.
-     * @param mission The mission that caused their death
-     * @param location Location where the kerbal went KIA
-     * @param details Additional KIA details
-     */
-    public void KIA(Mission mission, Location location, float expGained, String details) {
+    public void KIA() {
         // Set KIA
         KIA = true;
 
         // Final log entries
         for (Mission m : missionObjs) {
-            FlightLog fl = new FlightLog(getController(), m.getName(), 0); // TODO update flight log
-            fl.setDescription("Went KIA during the development of the mission"); // TODO include location?
+            FlightLog fl = new FlightLog(getController(), m.getName());
+            fl.setDescription("Went KIA during the development of " + m.getName() + ", while " + location.toString());
             log.add(fl);
         }
         missionObjs.clear();
