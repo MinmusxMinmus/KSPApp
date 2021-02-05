@@ -21,7 +21,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
     // Persistent fields
     private String name;
     private final KSPDate start;
-    private Set<Long> vessels;
+    private final Set<Long> vessels;
     private boolean active = true;
     private final Map<String, CrewDetails> crew; // perhaps replace with a new object?
     private final List<MissionEvent> events;
@@ -85,7 +85,6 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     // Logic methods
-
     public void missionEnd(String comment) {
         // Finish mission for all kerbals involved
         for (Kerbal k : crewObjs) k.missionEnd(this, comment);
@@ -105,37 +104,56 @@ public class Mission extends KSPObject implements KSPObjectListener {
         events.add(event);
     }
 
-    // addKerbals()
-
-    // addVessels()
-
     // Getter/Setter methods
     public String getName() {
         return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public KSPDate getStart() {
+        return start;
     }
 
     public Set<Long> getVessels() {
         return new HashSet<>(vessels);
     }
+    public boolean addVessel(Vessel v) {
+        vesselObjs.add(v);
+        vessels.add(v.getId());
+        v.addEventListener(this);
+        return true;
+    }
+    public boolean removeVessel(Vessel v) {
+        vesselObjs.remove(v);
+        vessels.remove(v.getId());
+        v.removeEventListener(this);
+        return true;
+    }
 
     public Set<String> getCrew() {
         return Collections.unmodifiableSet(crew.keySet());
+    }
+    public boolean addCrew(Kerbal k, String position, KSPDate date) {
+        crewObjs.add(k);
+        crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
+        k.addEventListener(this);
+        return true;
+    }
+    public boolean removeCrew(Kerbal k) {
+        crewObjs.remove(k);
+        crew.remove(k.getName());
+        k.removeEventListener(this);
+        return true;
     }
 
     public CrewDetails getCrewDetails(Kerbal kerbal) {
         return crew.get(kerbal.getName());
     }
 
-    public float getExperienceGained(Kerbal kerbal) {
-        return crew.get(kerbal.getName()).getExpGained();
-    }
-
     public List<MissionEvent> getEvents() {
         return Collections.unmodifiableList(events);
-    }
-
-    public KSPDate getStart() {
-        return start;
     }
 
     // Overrides
@@ -222,19 +240,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Kerbal deleted
-        if (event.getSource() instanceof Kerbal k) {
-            System.err.println("WARNING: Expect a crash, kerbal" + k.getName() + " deleted while on active mission " + name);
-            crewObjs.remove(k);
-            CrewDetails details = crew.get(k.getName());
-            crew.remove(k.getName());
-            crew.put("[REDACTED#" + k.hashCode() + "]", details);
-        }
+        if (event.getSource() instanceof Kerbal k) removeCrew(k);
 
         // Vessel deleted
-        if (event.getSource() instanceof Vessel vi) {
-            vesselObjs.remove(vi);
-            vessels.remove(vi.getId());
-        }
+        if (event.getSource() instanceof Vessel v) removeVessel(v);
     }
 
     @Override
