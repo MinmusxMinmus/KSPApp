@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class Vessel extends KSPObject implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 10; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 11; // ALWAYS ACCOUNT FOR DESCRIPTION
     public static final String DELIMITER = ":VI:";
 
     // Persistent fields
@@ -57,6 +57,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * Contains information regarding the vessel's status.
      */
     private String statusDetails;
+    /**
+     * The vessel's creation date.
+     */
+    private final KSPDate creationDate;
 
     /**
      * Contains all of the vessel's crew members' names.
@@ -102,7 +106,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * @param vessels List of connected vessels
      * @param crew The vessel's crew members
      */
-    public Vessel(ControllerInterface controller, Concept concept, Location location, Set<Vessel> vessels, Kerbal... crew) {
+    public Vessel(ControllerInterface controller, Concept concept, KSPDate creationDate, Location location, Set<Vessel> vessels, Kerbal... crew) {
         super(controller);
         this.id = controller.rng();
         this.concept = concept.getName();
@@ -110,6 +114,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.location = location;
         this.status = VesselStatus.NOMINAL;
         this.statusDetails = null;
+        this.creationDate = creationDate;
         this.crew = Arrays.stream(crew).map(Kerbal::getName).collect(Collectors.toSet());
         this.vessels = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
         this.missions = new HashSet<>();
@@ -130,9 +135,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.location = Location.fromString(fields.get(4));
         this.status = VesselStatus.valueOf(fields.get(5));
         this.statusDetails = fields.get(6).equals("(none)") ? null : fields.get(6);
-        this.crew = fields.get(7).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(7).split(DELIMITER)).collect(Collectors.toSet());
-        this.vessels = fields.get(8).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(8).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
-        this.missions = fields.get(9).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(9).split(DELIMITER)));
+        this.creationDate = KSPDate.fromString(controller, fields.get(7));
+        this.crew = fields.get(8).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(8).split(DELIMITER)).collect(Collectors.toSet());
+        this.vessels = fields.get(9).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(9).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
+        this.missions = fields.get(10).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
     }
 
 
@@ -395,6 +401,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         ret.add(Location.toString(location));
         ret.add(status.name());
         ret.add(statusDetails == null ? "(none)" : statusDetails);
+        ret.add(creationDate.toStorableString());
         ret.add(crewJoiner.toString());
         ret.add(vesselJoiner.toString());
         ret.add(missionJoiner.toString());
