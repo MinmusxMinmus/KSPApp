@@ -8,6 +8,7 @@ import other.interfaces.KSPObjectListener;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
+import vessels.Vessel;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
-    public static final int ENCODE_FIELD_AMOUNT = 12; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 13; // ALWAYS ACCOUNT FOR DESCRIPTION
 
     // Persistent fields
     /**
@@ -60,13 +61,17 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
      */
     private Location location;
     /**
+     * The identifier of the {@link Vessel} the kerbal is currently in. A value of 0 indicates no vessel.
+     */
+    private long vessel;
+    /**
      * The kerbal's flight log. Contains information regarding all of the past missions.
      */
     private final List<FlightLog> log;
     /**
      * Indicates the mission the kerbal is currently on
      */
-    private Set<String> missions;
+    private final Set<String> missions;
     /**
      * Honorable mentions that speak to the kerbal's achievements.
      */
@@ -74,17 +79,22 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     // Dynamic fields
     private Mission originObj;
+    private Vessel vesselObj;
     private Set<Mission> missionObjs;
 
     // Constructors
     /**
      * Generates a new kerbal.
-     * @param name The kerbal's name.
-     * @param isMale The kerbal's gender.
-     * @param job The kerbal's job.
-     * @param hiringDate The date the kerbal was hired / rescued.
+     * @param name The kerbal's name
+     * @param isMale Whether the kerbal is male or female
+     * @param badass Whether the kerbal is badass or not
+     * @param job The kerbal's {@link Job}
+     * @param origin The mission the kerbal originates from. Alternatively, the reason behind the hiring.
+     * @param hiringDate The {@link KSPDate} at which the kerbal was hired.
+     * @param location The {@link Location} of the kerbal.
+     * @param vessel The {@link Vessel} the kerbal is currently on.
      */
-    public Kerbal(ControllerInterface controller, String name, boolean isMale, boolean badass, Job job, String origin, KSPDate hiringDate, Location location) {
+    public Kerbal(ControllerInterface controller, String name, boolean isMale, boolean badass, Job job, String origin, KSPDate hiringDate, Location location, Vessel vessel) {
         super(controller);
         this.name = name;
         this.male = isMale;
@@ -94,6 +104,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.hiringDate = hiringDate;
         this.KIA = false;
         this.location = location;
+        this.vessel = vessel == null ? 0 : vessel.getId();
 
         this.log = new LinkedList<>();
         this.missions = new HashSet<>();
@@ -115,15 +126,16 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.hiringDate = KSPDate.fromString(controller, fields.get(6));
         this.KIA = Boolean.parseBoolean(fields.get(7));
         this.location = Location.fromString(fields.get(8));
-        this.log = fields.get(9).equals("(none)")
+        this.vessel = Long.parseLong(fields.get(9));
+        this.log = fields.get(10).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(9).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
-        this.missions = fields.get(10).equals("(none)")
+                : Arrays.stream(fields.get(10).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
+        this.missions = fields.get(11).equals("(none)")
                 ? new HashSet<>()
-                : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
-        this.condecorations = fields.get(11).equals("(none)")
+                : new HashSet<>(Arrays.asList(fields.get(11).split(DELIMITER)));
+        this.condecorations = fields.get(12).equals("(none)")
                 ? new LinkedList<>()
-                : Arrays.stream(fields.get(11).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
+                : Arrays.stream(fields.get(12).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
     }
 
     // Logic methods
@@ -166,9 +178,18 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         missions.clear();
     }
 
-    // switchVessel(old, new)
+    public void enterVessel(Vessel v) {
+        vessel = v.getId();
+        vesselObj = v;
+        v.addEventListener(this);
+    }
 
-    // leaveVessel()
+    public void leaveVessel(Vessel v) {
+        if (vessel != v.getId()) return;
+        vessel = 0;
+        vesselObj = null;
+        v.removeEventListener(this);
+    }
 
 
     // Getter/Setter methods
@@ -222,6 +243,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.location = location;
     }
 
+    public long getVessel() {
+        return vessel;
+    }
+
     public List<FlightLog> getLog() {
         return Collections.unmodifiableList(log);
     }
@@ -260,6 +285,13 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
                 missionObjs.add(m);
             } else if (!name.equals("[REDACTED]")) System.err.println("WARNING: Mission not found! Kerbal: " + name + ", mission name: " + name);
         }
+
+        // Set current vessel
+        vesselObj = getController().getInstance(vessel);
+        if (vesselObj == null) vesselObj = getController().getCrashedInstance(vessel);
+        if (vesselObj != null) {
+            vesselObj.addEventListener(this);
+        } else System.err.println("WARNING: Kerbal aboard an unknown vessel! Kerbal: " + name + ", vessel ID = " + vessel);
     }
 
     @Override
@@ -286,6 +318,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         ret.add(hiringDate.toStorableString());
         ret.add(Boolean.toString(KIA));
         ret.add(Location.toString(location));
+        ret.add(Long.toString(vessel));
 
         ret.add(logJoiner.toString());
         ret.add(missionJoiner.toString());
@@ -305,6 +338,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
         fields.add(new Field("Location", location.toString()));
+        if (vessel != 0) fields.add(new Field("Currently on:", vesselObj.getName()));
         for (Mission m : missionObjs) fields.add(new Field("Deployed in:", m.getName()));
         for (FlightLog l : log) fields.add(new Field("Participated in:", l.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.toString()));
@@ -314,9 +348,9 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
-        // Mission deleted
+        // Mission deleted: either an active mission, or the origin one
         if (event.getSource() instanceof Mission m) {
-            // Active mission
+            // Active missions
             if (missionObjs.contains(m)) {
                 missionObjs.remove(m);
                 missions.remove(m.getName());
@@ -326,6 +360,11 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
                 origin = "[REDACTED]";
                 originObj = null;
             }
+        }
+
+        // Vessel deleted: leave vessel
+        if (event.getSource() instanceof Vessel v) {
+            leaveVessel(v);
         }
     }
 

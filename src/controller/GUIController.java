@@ -138,7 +138,7 @@ public class GUIController implements ControllerInterface {
 
 
     public void createKerbalHired(String name, boolean isMale, boolean badass, Job job, KSPDate hiringDate, String hiringReason, String description) {
-        Kerbal k = new Kerbal(this, name, isMale, badass, job, hiringReason, hiringDate, new Location(false, CelestialBody.KERBIN)); // Astronaut Complex
+        Kerbal k = new Kerbal(this, name, isMale, badass, job, hiringReason, hiringDate, new Location(false, CelestialBody.KERBIN), null); // Astronaut Complex
         k.setDescription(description);
         addKerbal(k);
         k.ready();
