@@ -138,7 +138,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public void kerbalRescued(String name, boolean male, boolean badass, Job job, KSPDate date, Vessel rescuer, String position, String details) {
         Kerbal rescuee = new Kerbal(getController(), name, male, badass, job, this.name, date, rescuer.getLocation(), rescuer);
         logEvent(rescuer.getLocation(), date, "Rescued " + name + " Kerman " + rescuer.getLocation() + ": " + details);
-        addCrew(rescuee, position, date);
+        addCrew(rescuee, position, date, details);
     }
     public void KIA(Kerbal k, KSPDate date, String details) {
         k.KIA();
