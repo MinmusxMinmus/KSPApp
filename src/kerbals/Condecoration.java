@@ -18,7 +18,7 @@ import java.util.StringJoiner;
 public class Condecoration extends KSPObject implements KSPObjectListener {
 
     private static final String DELIMITER = ":C:";
-    private static final int ENCODE_FIELD_AMOUNT = 5;
+    private static final int ENCODE_FIELD_AMOUNT = 6;
 
     // Persistent fields
     /**
@@ -29,6 +29,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
      * The name of the {@link Kerbal} who received the award.
      */
     private String kerbalName;
+    private final String title;
     /**
      * The {@link KSPDate} at which the condecoration was handed out.
      */
@@ -49,11 +50,12 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     private Kerbal kerbal;
 
 
-    public Condecoration(ControllerInterface c, String kerbalName, String missionName, KSPDate date, String mention) {
+    public Condecoration(ControllerInterface c, String kerbalName, String missionName, KSPDate date, String title, String mention) {
         super(c);
         this.kerbalName = kerbalName;
         this.missionName = missionName;
         this.date = date;
+        this.title = title;
         this.mention = mention;
     }
 
@@ -63,6 +65,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
         joiner.add(c.kerbalName);
         joiner.add(c.missionName);
         joiner.add(c.date.toStorableString());
+        joiner.add(c.title);
         joiner.add(c.mention);
 
         return joiner.toString();
@@ -71,7 +74,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     public static Condecoration fromString(ControllerInterface c, String s) {
         if (s.split(DELIMITER).length != ENCODE_FIELD_AMOUNT) return null;
         String[] split = s.split(DELIMITER);
-        return new Condecoration(c, split[0], split[1], KSPDate.fromString(c, split[2]), split[3]);
+        return new Condecoration(c, split[0], split[1], KSPDate.fromString(c, split[2]), split[3], split[4]);
     }
 
     // Overrides
@@ -82,6 +85,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Mission name", missionName));
         fields.add(new Field("Date", date.toString(true, true)));
         fields.add(new Field("Subject", kerbalName + " Kerman"));
+        fields.add(new Field("Title", title));
         fields.add(new Field("Mention", mention));
 
         return fields;
@@ -106,6 +110,6 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     @Override
     public String toString() {
         return "(" + date.toString(false, true) + ") Awarded to "
-                + kerbalName + " Kerman during " + missionName + ":\n" + mention;
+                + kerbalName + " Kerman during " + missionName + ".\n" + title + ": " + mention;
     }
 }

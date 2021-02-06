@@ -116,6 +116,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
         k.removeEventListener(this);
         return true;
     }
+    public void moveCrew(Kerbal k, Location location, KSPDate date, String details) {
+        k.setLocation(location);
+        logEvent(location, date, k.getName() + " Kerman changed location to " + location + ": " + details);
+    }
+    public void KIA(Kerbal k, KSPDate date, String details) {
+        k.KIA();
+        logEvent(k.getLocation(), date, k.getName() + " Kerman went KIA: " + details);
+    }
 
     public boolean addVessel(Vessel v, KSPDate date) {
         logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel joined the mission");
@@ -132,9 +140,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
         return true;
     }
 
-    public void awardCondecoration(Kerbal k, String condecoration, KSPDate date, boolean log) {
+    public void awardCondecoration(Kerbal k, String title, String condecoration, KSPDate date, boolean log) {
         if (!crewObjs.contains(k)) System.err.println("WARNING: Awarding condecoration to non-mission member! Mission: " + name + ", kerbal name: " + k.getName());
-        Condecoration c = new Condecoration(getController(), k.getName(), name, date, condecoration);
+        Condecoration c = new Condecoration(getController(), k.getName(), name, date, title, condecoration);
         condecorations.add(c);
         k.addCondecoration(c);
         if (log) logEvent(k.getLocation(), date, "Awarded condecoration to " + k.getName() + " Kerman");
