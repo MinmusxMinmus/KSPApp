@@ -99,6 +99,7 @@ public class MainScreen extends KSPGUI {
             String edit = (String) selectionComboBox.getSelectedItem();
             if (edit == null) return;
 
+            descriptionArea.setText("Notes about the item will be shown here...");
             missionEditorButton.setEnabled(false);
             currentSelection = edit;
             searchModel.removeAllElements();
