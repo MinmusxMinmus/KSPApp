@@ -54,6 +54,10 @@ public class GoodListModel<T> implements ListModel<T> {
                         index + 1));
     }
 
+    public List<T> getItems() {
+        return new LinkedList<>(items);
+    }
+
     @Override
     public int getSize() {
         return items.size();
