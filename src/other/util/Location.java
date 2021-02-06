@@ -91,6 +91,10 @@ public class Location {
         return !inSpace && celestialBody.hasAtmosphere();
     }
 
+    public boolean closeTo(Location location) {
+        return inSpace == location.inSpace && celestialBody.equals(location.celestialBody);
+    }
+
     @Override
     public String toString() {
         return (inSpace ? "Orbiting " : "Landed on ") + celestialBody.toString();
