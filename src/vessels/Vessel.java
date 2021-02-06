@@ -338,6 +338,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         return true;
     }
 
+    public boolean inMission(Mission m) {
+        return missionObjs.contains(m);
+    }
+
     // Overrides
     @Override
     public void ready() {
