@@ -12,6 +12,15 @@ import static java.lang.Integer.parseInt;
 
 public class MissionUpdater extends KSPGUI {
 
+    private static final String LOG_PANEL = "Log";
+    private static final String VESSEL_PANEL = "Vessels";
+    private static final String CREW_PANEL = "Crew";
+    private static final String RESCUE_PANEL = "Rescue";
+    private static final String UPDATE_VESSEL_PANEL = "UpdateVessels";
+    private static final String UPDATE_CREW_PANEL = "UpdateCrew";
+    private static final String MOVE_CREW_PANEL = "MoveCrew";
+    private static final String CONDECORATION_PANEL = "Condecoration";
+
     private JPanel mainPanel;
     private JPanel cardPanel;
     private JPanel choosingPanel;
@@ -125,8 +134,14 @@ public class MissionUpdater extends KSPGUI {
         cardLayout.show(mainPanel, "Choices");
 
         // Default date: last event's date
-
-
+        KSPDate defaultDate = m.getEvents().get(m.getEvents().size()).getDate();
+        if (defaultDate != null) {
+            yearTextField.setText(Integer.toString(defaultDate.getYear()));
+            dayTextField.setText(Integer.toString(defaultDate.getDay()));
+            hourTextField.setText(Integer.toString(defaultDate.getHour()));
+            minuteTextField.setText(Integer.toString(defaultDate.getMinute()));
+            secondTextField.setText(Integer.toString(defaultDate.getSecond()));
+        }
 
         listenerSetup();
     }
@@ -135,36 +150,36 @@ public class MissionUpdater extends KSPGUI {
 
         // Different card button listeners
         newLogEntryButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Log");
-            currentCard = "Log";
+            cardLayout.show(mainPanel, LOG_PANEL);
+            currentCard = LOG_PANEL;
         });
         addRemoveCrewButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Crew");
-            currentCard = "Crew";
+            cardLayout.show(mainPanel, CREW_PANEL);
+            currentCard = CREW_PANEL;
         });
         updateCrewButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "UpdateCrew");
-            currentCard = "UpdateCrew";
+            cardLayout.show(mainPanel, UPDATE_CREW_PANEL);
+            currentCard = UPDATE_CREW_PANEL;
         });
         addRemoveVesselsButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Vessels");
-            currentCard = "Vessels";
+            cardLayout.show(mainPanel, VESSEL_PANEL);
+            currentCard = VESSEL_PANEL;
         });
         newRescuedKerbalButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Rescue");
-            currentCard = "Rescue";
+            cardLayout.show(mainPanel, RESCUE_PANEL);
+            currentCard = RESCUE_PANEL;
         });
         updateVesselButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "UpdateVessels");
-            currentCard = "UpdateVessels";
+            cardLayout.show(mainPanel, UPDATE_VESSEL_PANEL);
+            currentCard = UPDATE_VESSEL_PANEL;
         });
         condecorationsButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Condecorations");
-            currentCard = "Condecorations";
+            cardLayout.show(mainPanel, CONDECORATION_PANEL);
+            currentCard = CONDECORATION_PANEL;
         });
         moveCrewAroundButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "MoveCrew");
-            currentCard = "MoveCrew";
+            cardLayout.show(mainPanel, MOVE_CREW_PANEL);
+            currentCard = MOVE_CREW_PANEL;
         });
 
         // Cancel listener
