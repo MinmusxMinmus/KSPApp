@@ -146,6 +146,8 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public void kerbalRescued(String name, boolean male, boolean badass, Job job, KSPDate date, Vessel rescuer, String position, String details) {
         Kerbal rescuee = new Kerbal(getController(), name, male, badass, job, this.name, date, rescuer.getLocation(), rescuer);
         logEvent(rescuer.getLocation(), date, "Rescued " + name + " Kerman " + rescuer.getLocation() + ": " + details);
+        getController().addKerbal(rescuee);
+        rescuee.missionStart(this);
         addCrew(rescuee, position, date, details);
     }
     public void KIA(Kerbal k, KSPDate date, String details) {
@@ -238,14 +240,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
             crewJoiner.add(e.getKey() + "<>" + CrewDetails.toString(e.getValue()));
         if (crewJoiner.toString().equals("")) crewJoiner.add("(none)");
 
-        StringJoiner missionJoiner = new StringJoiner(DELIMITER);
-        for (MissionEvent event : events) {
-            Collection<String> det = event.toStorableCollection();
-            StringJoiner subj = new StringJoiner(MissionEvent.DELIMITER);
-            for (String s : det) subj.add(s);
-            missionJoiner.add(subj.toString());
-        }
-        if (missionJoiner.toString().equals("")) missionJoiner.add("(none)");
+        StringJoiner eventJoiner = new StringJoiner(DELIMITER);
+        for (MissionEvent event : events) eventJoiner.add(MissionEvent.toString(event));
+        if (eventJoiner.toString().equals("")) eventJoiner.add("(none)");
 
         StringJoiner condecorationJoiner = new StringJoiner(DELIMITER);
         for (Condecoration c : condecorations) condecorationJoiner.add(Condecoration.toString(c));
@@ -256,7 +253,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         ret.add(Boolean.toString(active));
         ret.add(vesselJoiner.toString());
         ret.add(crewJoiner.toString());
-        ret.add(missionJoiner.toString());
+        ret.add(eventJoiner.toString());
         ret.add(condecorationJoiner.toString());
 
         return ret;
@@ -272,7 +269,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
         for (Map.Entry<String, CrewDetails> e : crew.entrySet())
             fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().toString(false, true)));
-        for (MissionEvent ev : events) fields.add(new Field("Milestone", ev.toString()));
+        for (MissionEvent ev : events) fields.add(new Field("Event", ev.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Condecoration", c.toString()));
 
         return fields;
