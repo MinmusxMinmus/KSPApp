@@ -11,8 +11,10 @@ import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
 import vessels.Vessel;
+import vessels.VesselStatus;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Mission extends KSPObject implements KSPObjectListener {
 
@@ -144,6 +146,12 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
     public Set<Vessel> getVessels() {
         return new HashSet<>(vesselObjs);
+    }
+
+    public Set<Vessel> getVessels(VesselStatus status) {
+        return vesselObjs.stream()
+                .filter(v -> v.getStatus().equals(status))
+                .collect(Collectors.toSet());
     }
 
     public Set<Kerbal> getCrew() {
