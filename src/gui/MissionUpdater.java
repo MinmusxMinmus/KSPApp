@@ -20,6 +20,8 @@ import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -144,6 +146,18 @@ public class MissionUpdater extends KSPGUI {
     private JLabel missionPositionLabel;
     private JList<Vessel> availableVesselsList;
     private JList<Vessel> assignedVesselsList;
+    private JPanel updateVesselDetailsPanel;
+    private JTextField updateVesselDetailsTextField;
+    private JPanel moveCrewDetailsPanel;
+    private JTextField moveCrewDetailsTextField;
+    private JPanel rescueDetailsPanel;
+    private JTextField rescueDetailsTextField;
+    private JPanel crewDetailsPanel;
+    private JTextField crewDetailsTextField;
+    private JPanel vesselDetailsPanel;
+    private JTextField vesselDetailsTextField;
+    private JPanel condecorationTitlePanel;
+    private JTextField condecorationTitleTextField;
 
     private final CardLayout cardLayout;
     private final Mission mission;
@@ -261,15 +275,267 @@ public class MissionUpdater extends KSPGUI {
                     OffsetDateTime.now());
 
             switch (currentCard) {
-                // TODO implement specific confirmation checks and messages
+                case CHOICES_PANEL -> dispose();
+
+                case LOG_PANEL -> {
+                    // Get celestial body
+                    CelestialBody body = (CelestialBody) celestialBodyComboBox.getSelectedItem();
+                    if (body == null) {
+                        say("Please select a celestial body!");
+                        return;
+                    }
+
+                    // Get in space
+                    boolean inSpace = inSpaceCheckBox.isSelected();
+
+                    // Get briefing
+                    String briefing = briefingTextArea.getText().strip();
+                    if (briefing.equals("")) {
+                        say("Please add some event details!");
+                        return;
+                    }
+
+                    if (!ask("Add event", "Are you sure you want to add this event to the mission logs?")) return;;
+
+                    mission.logEvent(new Location(inSpace, body), date, briefing);
+                }
+
+                case VESSEL_PANEL -> {
+                    // Get vessels to add
+                    List<Vessel> newMissionVessels = ((GoodListModel<Vessel>)assignedVesselsList.getModel()).getItems();
+
+                    // Get vessels to remove
+                    List<Vessel> newNotInMissionVessels = ((GoodListModel<Vessel>)availableVesselsList.getModel()).getItems();
+
+                    // Get details
+                    String details = vesselDetailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the added/deleted vessels!");
+                        return;
+                    }
+
+                    if (!ask("Change vessels", "Are you sure you want to change the vessels as indicated?")) return;
+
+                    mission.updateVessels(newNotInMissionVessels, newMissionVessels, date, details);
+                }
+
+                case CREW_PANEL -> {
+                    // Get crew to remove
+                    Set<Kerbal> newNotInMissionCrew = ((MissionKerbalTableModel)crewAssignedTable.getModel()).getCrew();
+
+                    // Get crew to add
+                    Map<Kerbal, String> newMissionCrew = ((MissionAssignedKerbalTableModel)crewFreeTable.getModel()).getCrew2();
+
+                    // Get details
+                    String details = crewDetailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the added/deleted crew members!");
+                        return;
+                    }
+
+                    if (!ask("Change crew", "Are you sure you want to change the crew as indicated?")) return;
+
+                    mission.updateCrew(newNotInMissionCrew, newMissionCrew, date, details);
+                }
+
+                case RESCUE_PANEL -> {
+                    // Get name
+                    String name = nameTextField.getText().strip();
+                    if (name.equals("")) {
+                        say("Please insert the kerbal's name!");
+                        return;
+                    }
+
+                    // Get male
+                    boolean male = maleCheckBox.isSelected();
+
+                    // Get badass
+                    boolean badass = badassCheckBox.isSelected();
+
+                    // Get job
+                    Job job = (Job) jobComboBox.getSelectedItem();
+                    if (job == null) {
+                        say("Please select the kerbal's job!");
+                        return;
+                    }
+
+                    // Get rescuer
+                    Vessel rescuer = (Vessel) rescueVesselComboBox.getSelectedItem();
+                    if (rescuer == null) {
+                        say("Please select the rescuing vessel!");
+                        return;
+                    }
+
+                    // Get mission position
+                    String position = missionPositionTextField.getText().strip();
+                    if (position.equals("")) {
+                        say("Please insert the kerbal's position on the mission!");
+                        return;
+                    }
+
+                    // Get details
+                    String details = rescueDetailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the kerbal's rescue!");
+                        return;
+                    }
+
+                    if (!ask("Rescue kerbal", "Are you sure you want to rescue this kerbal?")) return;
+
+                    mission.kerbalRescued(name, male, badass, job, date, rescuer, position, details);
+                }
+
+                case UPDATE_VESSEL_PANEL -> {
+                    // Get vessel
+                    Vessel v = (Vessel) updateVesselComboBox.getSelectedItem();
+                    if (v == null) {
+                        say("Please select a vessel!");
+                        return;
+                    }
+
+                    // Get status
+                    VesselStatus status = (VesselStatus) updateStatusComboBox.getSelectedItem();
+                    if (status == null) {
+                        say("Please select a status!");
+                        return;
+                    }
+
+                    // Get celestial body
+                    CelestialBody body = (CelestialBody) updateVesselBodyComboBox.getSelectedItem();
+                    if (body == null) {
+                        say("Please select a celestial body!");
+                        return;
+                    }
+
+                    // Get in space
+                    boolean inSpace = updateVesselInSpaceCheckBox.isSelected();
+
+                    // Get details
+                    String details = updateVesselDetailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the vessel update!");
+                        return;
+                    }
+
+                    if (!ask("Update vessel", "Are you sure you want to update the vessel?")) return;
+
+
+                    mission.updateVessel(v, status, new Location(inSpace, body), date, details);
+                }
+
+                case UPDATE_CREW_PANEL -> {
+                    // Get kerbal
+                    Kerbal k = (Kerbal) updateCrewComboBox.getSelectedItem();
+                    if (k == null) {
+                        say("Please select a crew member!");
+                        return;
+                    }
+
+                    // Get celestial body
+                    CelestialBody body = (CelestialBody) updateCrewBodyComboBox.getSelectedItem();
+                    if (body == null) {
+                        say("Please select a celestial body!");
+                        return;
+                    }
+
+                    // Get in space
+                    boolean inSpace = updateCrewInSpaceCheckBox.isSelected();
+
+                    // Get details
+                    String details = detailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the crew update!");
+                        return;
+                    }
+
+                    if (!ask("Update crew", "Are you sure you want to update this crew member?")) return;
+
+                    // Location
+                    Location location = new Location(inSpace, body);
+
+                    // Apply changes
+                    if (KIACheckBox.isSelected()) mission.KIA(k, date, details);
+                    else mission.moveCrew(k, location, date, details);
+
+                }
+
+                case MOVE_CREW_PANEL -> {
+                    // Get kerbal
+                    Kerbal k = (Kerbal) crewMoveComboBox.getSelectedItem();
+                    if (k == null) {
+                        say("Please select a crew member!");
+                        return;
+                    }
+
+                    // Get vessels
+                    Vessel v = newVesselList.getSelectedValue();
+                    Vessel v2 = controller.getInstance(k.getVessel());
+
+                    // Get details
+                    String details = moveCrewDetailsTextField.getText().strip();
+                    if (details.equals("")) {
+                        say("Please add some details regarding the transfer!");
+                        return;
+                    }
+
+                    if (v == null) { // Leaving vessel
+                        if (!ask("Exit vessel", k.getName() + " Kerman will leave " + v2.getName() + ". Are you sure?")) return;
+                        mission.leftVessel(k, v2, date, details);
+                    } else if (v2 == null) { // Entering vessel
+                        if (!ask("Enter vessel", k.getName() + " Kerman will board" + v.getName() + ". Are you sure?")) return;
+                        mission.enteredVessel(k, v, date, details);
+                    } else // What the fuck?
+                        say("Something went extremely wrong, please delete your life");
+                }
+
+                case CONDECORATION_PANEL -> {
+                    // Get kerbal
+                    Kerbal k = (Kerbal) condecorationCrewComboBox.getSelectedItem();
+                    if (k == null) {
+                        say("Please select a crew member!");
+                        return;
+                    }
+
+                    // Get title
+                    String title = condecorationTitleTextField.getText().strip();
+                    if (title.equals("")) {
+                        say("Please add a title!");
+                        return;
+                    }
+
+                    // Get condecoration
+                    String condecorationText = condecorationTextArea.getText().strip();
+                    if (condecorationText == null || condecorationText.equals("")) {
+                        say("Please add a condecoration!");
+                        return;
+                    }
+
+                    if (!ask("Award condecoration", "Are you sure you want to award this condecoration?")) return;;
+
+                    // Award condecoration
+                    mission.awardCondecoration(k, title, condecorationText, date);
+                }
+
                 default -> {
-                    boolean confirm = ask("No edits", "No changes will be applied. Are you sure?");
+                    boolean confirm = ask("What window are you even at?", "No changes will be applied. Are you sure?");
                     if (!confirm) return;
                 }
             }
 
-            // Form end
-            dispose();
+            // Back to beginning
+            cardLayout.show(cardPanel, CHOICES_PANEL);
+            currentCard = CHOICES_PANEL;
+
+            // Update every window again, since things might have changed.
+            logPanelSetup();
+            vesselPanelSetup();
+            crewPanelSetup();
+            rescuePanelSetup();
+            updateVesselSetup();
+            updateCrewSetup();
+            moveCrewSetup();
+            condecorationSetup();
+            listenerSetup();
         });
     }
 
@@ -390,12 +656,12 @@ public class MissionUpdater extends KSPGUI {
 
     private void crewPanelSetup() {
         // Crew tables
-        Set<Kerbal> availableKerbals = controller.getKerbals().stream()
-                .filter(k -> k.getMissions().contains(mission))
+        Set<Kerbal> crewNotInMission = controller.getKerbals().stream()
+                .filter(k -> !k.getMissions().contains(mission))
                 .collect(Collectors.toSet());
-        Set<Kerbal> assignedKerbals = mission.getCrew();
-        MissionKerbalTableModel availableModel = new MissionKerbalTableModel(availableKerbals);
-        MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(assignedKerbals);
+        Set<Kerbal> crewInMission = mission.getCrew();
+        MissionKerbalTableModel availableModel = new MissionKerbalTableModel(crewNotInMission);
+        MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(crewInMission);
         crewFreeTable.setModel(availableModel);
         crewAssignedTable.setModel(assignedModel);
 
