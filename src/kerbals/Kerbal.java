@@ -187,7 +187,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     public void leaveVessel(Vessel v) {
-        if (vessel != v.getId()) System.err.println("WARNING: Kerbal leaving a vessel he's not in! Kerbal: " + name + ", vessel ID: " + v.getId());;
+        if (vessel != v.getId()) System.err.println("WARNING: Kerbal leaving a vessel he's not in! Kerbal: " + name + ", vessel ID: " + v.getId());
         vessel = 0;
         vesselObj = null;
         v.removeEventListener(this);
