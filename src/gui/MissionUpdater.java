@@ -539,14 +539,18 @@ public class MissionUpdater extends KSPGUI {
                         return;
                     }
 
+                    if (v == null && v2 == null) {
+                        say("This member doesn't seem to be in a vessel. Select a vessel to join, or try with a different member!");
+                        return;
+                    }
+
                     if (v == null) { // Leaving vessel
                         if (!ask("Exit vessel", k.getName() + " Kerman will leave \"" + v2.getName() + "\". Are you sure?")) return;
                         mission.leftVessel(k, v2, date, details);
                     } else if (v2 == null) { // Entering vessel
                         if (!ask("Enter vessel", k.getName() + " Kerman will board \"" + v.getName() + "\". Are you sure?")) return;
                         mission.enteredVessel(k, v, date, details);
-                    } else // What the fuck?
-                        say("Something went extremely wrong, please delete your life");
+                    }
                 }
 
                 case CONDECORATION_PANEL -> {
