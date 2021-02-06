@@ -423,8 +423,8 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
         fields.add(new Field("Status", status.toString()));
-        fields.add(new Field("Location", location.toString()));
         if (status.equals(VesselStatus.CRASHED)) fields.add(new Field("Crash details", statusDetails));
+        fields.add(new Field("Location", location.toString()));
         for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.toString()));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
         for (Mission m : missionObjs) fields.add(new Field("Mission", m.getName()));
