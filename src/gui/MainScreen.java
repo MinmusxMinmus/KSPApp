@@ -175,6 +175,10 @@ public class MainScreen extends KSPGUI {
                 say("Please select a mission");
                 return;
             }
+            if (!m.isActive()) {
+                say("You can't edit a finished mission");
+                return;
+            }
             KSPGUI editor = new MissionUpdater(controller, "Mission editor", m);
             editor.appear("Mission editor");
         });

@@ -214,6 +214,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
                 .collect(Collectors.toSet());
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     public Set<Kerbal> getCrew() {
         return Collections.unmodifiableSet(crewObjs);
     }
