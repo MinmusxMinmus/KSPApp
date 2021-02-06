@@ -378,6 +378,6 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     @Override
     public String toString() {
-        return name + " Kerman (" + job.toString() + "): " + location.toString();
+        return (KIA ? "(KIA) " : "") + name + " Kerman (" + job.toString() + "): " + location.toString();
     }
 }
