@@ -265,12 +265,12 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
         fields.add(new Field("Name", name));
         fields.add(new Field("Mission start", start.toString(true, true)));
-        for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.toString()));
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
         for (Map.Entry<String, CrewDetails> e : crew.entrySet())
             fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().toString(false, true)));
-        for (MissionEvent ev : events) fields.add(new Field("Event", ev.toString()));
+        for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Condecoration", c.toString()));
+        for (MissionEvent ev : events) fields.add(new Field("Event", ev.toString()));
 
         return fields;
     }
