@@ -164,7 +164,7 @@ public class MissionUpdater extends KSPGUI {
 
     private final CardLayout cardLayout;
     private final Mission mission;
-    private String currentCard = null;
+    private String currentCard;
 
 
     public MissionUpdater(GUIController controller, String title, Mission m) {
@@ -198,6 +198,16 @@ public class MissionUpdater extends KSPGUI {
     }
 
     private void listenerSetup() {
+
+        // Precise time listener
+        preciseTimeCheckBox.addItemListener(e -> {
+            hourTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            secondTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            hourLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            secondLabel.setEnabled(preciseTimeCheckBox.isSelected());
+        });
 
         // Different card button listeners
         newLogEntryButton.addActionListener(e -> {
@@ -346,7 +356,7 @@ public class MissionUpdater extends KSPGUI {
                         return;
                     }
 
-                    if (!ask("Add event", "Are you sure you want to add this event to the mission logs?")) return;;
+                    if (!ask("Add event", "Are you sure you want to add this event to the mission logs?")) return;
 
                     mission.logEvent(new Location(inSpace, body), date, briefing);
                 }
@@ -561,7 +571,7 @@ public class MissionUpdater extends KSPGUI {
                         return;
                     }
 
-                    if (!ask("Award condecoration", "Are you sure you want to award this condecoration?")) return;;
+                    if (!ask("Award condecoration", "Are you sure you want to award this condecoration?")) return;
 
                     // Award condecoration
                     mission.awardCondecoration(k, title, condecorationText, date);

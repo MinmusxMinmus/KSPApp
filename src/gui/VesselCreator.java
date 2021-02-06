@@ -86,6 +86,16 @@ public class VesselCreator extends KSPGUI {
 
     private void listenerSetup() {
 
+        // Precise time listener
+        preciseTimeCheckBox.addItemListener(e -> {
+            hourTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            secondTextField.setEnabled(preciseTimeCheckBox.isSelected());
+            hourLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            minuteLabel.setEnabled(preciseTimeCheckBox.isSelected());
+            secondLabel.setEnabled(preciseTimeCheckBox.isSelected());
+        });
+
         // Selected celestial body listener
         locationComboBox.addActionListener(e -> {
             CelestialBody celestialBody = (CelestialBody) locationComboBox.getSelectedItem();
