@@ -260,6 +260,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         return this.log.remove(log);
     }
 
+    public Set<Mission> getMissions() {
+        return new HashSet<>(missionObjs);
+    }
+
     public List<Condecoration> getCondecorations() {
         return condecorations;
     }
