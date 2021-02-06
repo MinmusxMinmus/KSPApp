@@ -127,6 +127,7 @@ public class MainScreen extends KSPGUI {
 
             KSPGUI window;
             String name = MAIN_SCREEN;
+            descriptionArea.setText("Notes about the item will be shown here...");
 
             switch (edit) {
                 case KERBAL_LIST -> {
