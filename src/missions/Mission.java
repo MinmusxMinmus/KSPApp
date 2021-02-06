@@ -8,6 +8,7 @@ import kerbals.Kerbal;
 import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
@@ -89,14 +90,21 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     // Logic methods
-    public void missionEnd(String comment) {
+    public void missionEnd(String comment, KSPDate date) {
+        // Last event location, or KSC
+        MissionEvent event = events.get(events.size() - 1);
+        Location lastLocation;
+        if (event == null) {
+            lastLocation = new Location(false, CelestialBody.KERBIN);
+        } else lastLocation = event.getLocation();
+        // Mission end event
+        logEvent(lastLocation, date, "Mission end: " + comment);
         // Finish mission for all kerbals involved
         for (Kerbal k : crewObjs) k.missionEnd(this, comment);
         // Finish mission for all vessels involved
         for (Vessel v : vesselObjs) v.missionEnd(this);
         // End mission
         this.active = false;
-        setDescription(getDescription() + "\n\nMISSION END\n" + comment);
     }
 
     public void logEvent(Location location, KSPDate date,  String details) {

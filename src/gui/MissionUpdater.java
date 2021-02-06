@@ -158,6 +158,9 @@ public class MissionUpdater extends KSPGUI {
     private JTextField vesselDetailsTextField;
     private JPanel condecorationTitlePanel;
     private JTextField condecorationTitleTextField;
+    private JButton endMissionButton;
+    private JPanel missionEndPanel;
+    private JTextArea missionEndTextArea;
 
     private final CardLayout cardLayout;
     private final Mission mission;
@@ -228,6 +231,54 @@ public class MissionUpdater extends KSPGUI {
         moveCrewAroundButton.addActionListener(e -> {
             cardLayout.show(cardPanel, MOVE_CREW_PANEL);
             currentCard = MOVE_CREW_PANEL;
+        });
+
+        // Mission end listener
+        endMissionButton.addActionListener(e -> {
+            // Date values
+            String year = yearTextField.getText();
+            String day = dayTextField.getText();
+            String hour = hourTextField.getText();
+            String minute = minuteTextField.getText();
+            String second = secondTextField.getText();
+
+            // Date error checking
+            if (year.strip().equals("")
+                    || day.strip().equals("")
+                    || preciseTimeCheckBox.isSelected() && (
+                    hour.strip().equals("")
+                            || minute.strip().equals("")
+                            || second.strip().equals(""))) {
+                say("Please fill out all date fields!");
+                return;
+            }
+
+            // Date creation
+            KSPDate date = (!preciseTimeCheckBox.isSelected())
+                    ? new KSPDate(controller,
+                    parseInt(year),
+                    parseInt(day),
+                    OffsetDateTime.now())
+                    : new KSPDate(controller,
+                    parseInt(year),
+                    parseInt(day), parseInt(hour),
+                    parseInt(minute),
+                    parseInt(second),
+                    OffsetDateTime.now());
+
+            // Get details
+            String details = missionEndTextArea.getText().strip();
+            if (details.equals("")) {
+                say("Please add details regarding the mission end!");
+                return;
+            }
+
+            if (!ask("End mission", "Are you sure you want to end this mission? You won't be able to edit it anymore.")) return;
+
+            mission.missionEnd(details, date);
+
+            say("Succesfully ended mission");
+            dispose();
         });
 
         // Cancel listener
