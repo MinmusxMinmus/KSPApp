@@ -103,6 +103,6 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         if (details.length() <= 30) shortened = details;
         else shortened = details.substring(0, 25) + "...";
 
-        return date.toString(false, true) + " " + shortened;
+        return shortened + " (" + date.toString(false, true) + ")";
     }
 }
