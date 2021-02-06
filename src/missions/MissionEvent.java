@@ -48,6 +48,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
         StringJoiner joiner = new StringJoiner(DELIMITER);
 
         joiner.add(me.missionName);
+        joiner.add(me.date.toStorableString());
         joiner.add(Location.toString(me.location));
         joiner.add(me.details);
 
@@ -98,6 +99,10 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
     @Override
     public String toString() {
-        return null;
-    } // TODO
+        String shortened;
+        if (details.length() <= 13) shortened = details;
+        else shortened = details.substring(0, 10) + "...";
+
+        return date.toString(false, true) + " " + shortened;
+    }
 }
