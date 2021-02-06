@@ -181,6 +181,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     public void enterVessel(Vessel v) {
+        v.addCrew(this);
         vessel = v.getId();
         vesselObj = v;
         v.addEventListener(this);
@@ -188,6 +189,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public void leaveVessel(Vessel v) {
         if (vessel != v.getId()) System.err.println("WARNING: Kerbal leaving a vessel he's not in! Kerbal: " + name + ", vessel ID: " + v.getId());
+        v.removeCrew(this);
         vessel = 0;
         vesselObj = null;
         v.removeEventListener(this);
@@ -344,10 +346,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
         fields.add(new Field("Location", location.toString()));
-        if (vessel != 0) fields.add(new Field("Currently on:", vesselObj.getName()));
-        for (Mission m : missionObjs) fields.add(new Field("Deployed in:", m.getName()));
-        for (FlightLog l : log) fields.add(new Field("Participated in:", l.toString()));
+        for (Mission m : missionObjs) fields.add(new Field("Deployed in", m.getName()));
+        for (FlightLog l : log) fields.add(new Field("Participated in", l.getMissionName()));
         for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.toString()));
+        if (vessel != 0) fields.add(new Field("Current vessel", vesselObj.getName()));
 
         return fields;
     }
