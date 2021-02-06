@@ -3,6 +3,7 @@ package missions;
 import controller.ControllerInterface;
 import controller.GUIController;
 import kerbals.Condecoration;
+import kerbals.Job;
 import kerbals.Kerbal;
 import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
@@ -102,50 +103,83 @@ public class Mission extends KSPObject implements KSPObjectListener {
         events.add(new MissionEvent(getController(), getName(), date, location, details));
     }
 
-    public boolean addCrew(Kerbal k, String position, KSPDate date) {
-        logEvent(k.getLocation(), date, k.getName() + " Kerman joined the mission as " + position);
+    public boolean addCrew(Kerbal k, String position, KSPDate date, String details) {
+        logEvent(k.getLocation(), date, k.getName() + " Kerman joined the mission as " + position + ": " + details);
         crewObjs.add(k);
         crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
         k.addEventListener(this);
         return true;
     }
-    public boolean removeCrew(Kerbal k, KSPDate date) {
-        logEvent(k.getLocation(), date, k.getName() + " Kerman (" + getCrewDetails(k).getPosition() + ") dismissed from the mission");
+    public boolean removeCrew(Kerbal k, KSPDate date, String details) {
+        logEvent(k.getLocation(), date, k.getName() + " Kerman (" + getCrewDetails(k).getPosition() + ") dismissed from the mission: " + details);
         crewObjs.remove(k);
         crew.remove(k.getName());
         k.removeEventListener(this);
         return true;
     }
+    public void updateCrew(Set<Kerbal> crewToRemove, Map<Kerbal, String> crewToAdd, KSPDate date, String details) {
+        for (Kerbal k : crewToRemove) removeCrew(k, date, details);
+        for (Map.Entry<Kerbal, String> e : crewToAdd.entrySet()) addCrew(e.getKey(), e.getValue(), date, details);
+    }
     public void moveCrew(Kerbal k, Location location, KSPDate date, String details) {
         k.setLocation(location);
         logEvent(location, date, k.getName() + " Kerman changed location to " + location + ": " + details);
+    }
+    public void leftVessel(Kerbal k, Vessel v, KSPDate date, String details) {
+        if (!crewObjs.contains(k)) System.err.println("WARNING: Editing kerbal not in mission! Mission: " + name + ", kerbal: " + k.getName());
+        k.leaveVessel(v);
+        logEvent(k.getLocation(), date, k.getName() + " Kerman left vessel " + v.getName() + " with ID " + v.getId() + ": " + details);
+    }
+    public void enteredVessel(Kerbal k, Vessel v, KSPDate date, String details) {
+        if (!crewObjs.contains(k)) System.err.println("WARNING: Editing kerbal not in mission! Mission: " + name + ", kerbal: " + k.getName());
+        k.enterVessel(v);
+        logEvent(k.getLocation(), date, k.getName() + " Kerman boarded vessel " + v.getName() + " with ID " + v.getId() + ": " + details);
+    }
+    public void kerbalRescued(String name, boolean male, boolean badass, Job job, KSPDate date, Vessel rescuer, String position, String details) {
+        Kerbal rescuee = new Kerbal(getController(), name, male, badass, job, this.name, date, rescuer.getLocation(), rescuer);
+        logEvent(rescuer.getLocation(), date, "Rescued " + name + " Kerman " + rescuer.getLocation() + ": " + details);
+        addCrew(rescuee, position, date);
     }
     public void KIA(Kerbal k, KSPDate date, String details) {
         k.KIA();
         logEvent(k.getLocation(), date, k.getName() + " Kerman went KIA: " + details);
     }
 
-    public boolean addVessel(Vessel v, KSPDate date) {
-        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel joined the mission");
+    public boolean addVessel(Vessel v, KSPDate date, String details) {
+        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel joined the mission: " + details);
         vesselObjs.add(v);
         vessels.add(v.getId());
         v.addEventListener(this);
         return true;
     }
-    public boolean removeVessel(Vessel v, KSPDate date) {
-        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel dismissed from the mission");
+    public boolean removeVessel(Vessel v, KSPDate date, String details) {
+        logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel dismissed from the mission: " + details);
         vesselObjs.remove(v);
         vessels.remove(v.getId());
         v.removeEventListener(this);
         return true;
     }
+    public void updateVessels(List<Vessel> vesselsToRemove, List<Vessel> vesselsToAdd, KSPDate date, String details) {
+        for (Vessel v : vesselsToRemove) removeVessel(v, date, details);
+        for (Vessel v : vesselsToAdd) addVessel(v, date, details);
+    }
+    public void updateVessel(Vessel v, VesselStatus status, Location location, KSPDate date, String details) {
+        v.setLocation(location);
+        if (status.equals(VesselStatus.CRASHED)) {
+            v.setCrashed(date, details);
+            logEvent(location, date, "Vessel " + v.getName() + " with  ID " + v.getId() + " crashed while " + location + ": " + details);
+        } else {
+            v.setStatus(status);
+            logEvent(location, date, "Vessel " + v.getName() + " with  ID " + v.getId() + " marked as " + status.toString() + " while " + location + ": " + details);
+        }
+    }
 
-    public void awardCondecoration(Kerbal k, String title, String condecoration, KSPDate date, boolean log) {
+    public void awardCondecoration(Kerbal k, String title, String condecoration, KSPDate date) {
         if (!crewObjs.contains(k)) System.err.println("WARNING: Awarding condecoration to non-mission member! Mission: " + name + ", kerbal name: " + k.getName());
         Condecoration c = new Condecoration(getController(), k.getName(), name, date, title, condecoration);
         condecorations.add(c);
         k.addCondecoration(c);
-        if (log) logEvent(k.getLocation(), date, "Awarded condecoration to " + k.getName() + " Kerman");
+        logEvent(k.getLocation(), date, "Awarded condecoration to " + k.getName() + " Kerman");
     }
 
     // Getter/Setter methods
