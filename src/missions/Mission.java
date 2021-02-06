@@ -142,12 +142,12 @@ public class Mission extends KSPObject implements KSPObjectListener {
         return start;
     }
 
-    public Set<Long> getVessels() {
-        return new HashSet<>(vessels);
+    public Set<Vessel> getVessels() {
+        return new HashSet<>(vesselObjs);
     }
 
-    public Set<String> getCrew() {
-        return Collections.unmodifiableSet(crew.keySet());
+    public Set<Kerbal> getCrew() {
+        return Collections.unmodifiableSet(crewObjs);
     }
 
     public CrewDetails getCrewDetails(Kerbal kerbal) {
