@@ -34,6 +34,15 @@ public class GoodListModel<T> implements ListModel<T> {
 
     }
 
+    public void clear() {
+        items.clear();
+        for (ListDataListener ldl : listDataListeners)
+            ldl.contentsChanged(new ListDataEvent(this,
+                    ListDataEvent.CONTENTS_CHANGED,
+                    items.size() - 1,
+                    items.size()));
+    }
+
     @Override
     public int getSize() {
         return items.size();
