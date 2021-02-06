@@ -1,17 +1,33 @@
 package gui;
 
 import controller.GUIController;
+import kerbals.Job;
+import kerbals.Kerbal;
 import missions.Mission;
+import other.display.GoodListModel;
+import other.display.MissionAssignedKerbalTableModel;
+import other.display.MissionKerbalTableModel;
+import other.util.CelestialBody;
 import other.util.KSPDate;
+import other.util.Location;
+import vessels.Vessel;
+import vessels.VesselStatus;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
 public class MissionUpdater extends KSPGUI {
 
+    private static final String CHOICES_PANEL = "Choices";
     private static final String LOG_PANEL = "Log";
     private static final String VESSEL_PANEL = "Vessels";
     private static final String CREW_PANEL = "Crew";
@@ -20,6 +36,8 @@ public class MissionUpdater extends KSPGUI {
     private static final String UPDATE_CREW_PANEL = "UpdateCrew";
     private static final String MOVE_CREW_PANEL = "MoveCrew";
     private static final String CONDECORATION_PANEL = "Condecoration";
+
+    private static final String DEFAULT_RESCUED_POSITION = "Rescued member";
 
     private JPanel mainPanel;
     private JPanel cardPanel;
@@ -36,7 +54,7 @@ public class MissionUpdater extends KSPGUI {
     private JLabel missionLogsLabel;
     private JPanel namePanel;
     private JLabel celestialBodyLabel;
-    private JComboBox celestialBodyComboBox;
+    private JComboBox<CelestialBody> celestialBodyComboBox;
     private JCheckBox inSpaceCheckBox;
     private JPanel briefingPanel;
     private JTextArea briefingTextArea;
@@ -49,15 +67,13 @@ public class MissionUpdater extends KSPGUI {
     private JPanel updateVesselPanel;
     private JLabel statusUpdateLabel;
     private JPanel updateCrewPanel;
-    private JLabel newCondecorationLabel;
+    private JLabel crewUpdateLabel;
     private JPanel buttonsPanel;
     private JButton OKButton;
     private JButton cancelButton;
     private JPanel vesselTablesPanel;
     private JScrollPane vesselFreePane;
     private JScrollPane vesselAssignedPane;
-    private JTable table1;
-    private JTable table2;
     private JPanel crewTablesPanel;
     private JScrollPane crewFreePane;
     private JScrollPane crewAssignedPane;
@@ -66,14 +82,14 @@ public class MissionUpdater extends KSPGUI {
     private JPanel basicInformationPanel;
     private JCheckBox maleCheckBox;
     private JCheckBox badassCheckBox;
-    private JComboBox jobComboBox;
+    private JComboBox<Job> jobComboBox;
     private JLabel jobLabel;
     private JTextField nameTextField;
     private JLabel nameLabel;
     private JLabel kermanLabel;
     private JPanel rescuedDetailsPanel;
     private JPanel rescuedNamePanel;
-    private JComboBox rescueVesselComboBox;
+    private JComboBox<Vessel> rescueVesselComboBox;
     private JPanel rescueVesselPanel;
     private JPanel creationDatePanel;
     private JPanel yearPanel;
@@ -93,13 +109,13 @@ public class MissionUpdater extends KSPGUI {
     private JTextField secondTextField;
     private JCheckBox preciseTimeCheckBox;
     private JPanel somethingPanel;
-    private JComboBox updateVesselComboBox;
-    private JComboBox updateStatusComboBox;
+    private JComboBox<Vessel> updateVesselComboBox;
+    private JComboBox<VesselStatus> updateStatusComboBox;
     private JLabel updateStatusLabel;
-    private JComboBox celestialBodyComboBox1;
-    private JCheckBox inSpaceCheckBox1;
+    private JComboBox<CelestialBody> updateVesselBodyComboBox;
+    private JCheckBox updateVesselInSpaceCheckBox;
     private JPanel vesselInformationPanel;
-    private JLabel celestialBodyLabel1;
+    private JLabel updateVesselBodyLabel;
     private JCheckBox KIACheckBox;
     private JLabel detailsLabel;
     private JTextField detailsTextField;
@@ -112,16 +128,24 @@ public class MissionUpdater extends KSPGUI {
     private JPanel condecorationPanel;
     private JLabel crewMoverLabel;
     private JLabel condecorationCenterLabel;
-    private JComboBox condecorationCrewComboBox;
+    private JComboBox<Kerbal> condecorationCrewComboBox;
     private JPanel condecorationCrewPanel;
     private JTextArea condecorationTextArea;
     private JPanel condecorationAwardPanel;
     private JPanel crewMovePanel;
-    private JComboBox crewMoveComboBox;
-    private JTable newVesselTable;
+    private JComboBox<Kerbal> crewMoveComboBox;
     private JScrollPane newVesselPane;
+    private JList<Vessel> newVesselList;
+    private JComboBox<Kerbal> updateCrewComboBox;
+    private JComboBox<CelestialBody> updateCrewBodyComboBox;
+    private JCheckBox updateCrewInSpaceCheckBox;
+    private JLabel celestialBodyLabel2;
+    private JTextField missionPositionTextField;
+    private JLabel missionPositionLabel;
+    private JList<Vessel> availableVesselsList;
+    private JList<Vessel> assignedVesselsList;
 
-    private CardLayout cardLayout;
+    private final CardLayout cardLayout;
     private final Mission mission;
     private String currentCard = null;
 
@@ -131,18 +155,28 @@ public class MissionUpdater extends KSPGUI {
         this.mission = m;
         setContentPane(mainPanel);
         cardLayout = (CardLayout) cardPanel.getLayout();
-        cardLayout.show(mainPanel, "Choices");
+        cardLayout.show(cardPanel, CHOICES_PANEL);
+        currentCard = CHOICES_PANEL;
 
-        // Default date: last event's date
-        KSPDate defaultDate = m.getEvents().get(m.getEvents().size()).getDate();
-        if (defaultDate != null) {
-            yearTextField.setText(Integer.toString(defaultDate.getYear()));
-            dayTextField.setText(Integer.toString(defaultDate.getDay()));
-            hourTextField.setText(Integer.toString(defaultDate.getHour()));
-            minuteTextField.setText(Integer.toString(defaultDate.getMinute()));
-            secondTextField.setText(Integer.toString(defaultDate.getSecond()));
-        }
+        // Default date: last event's date, or mission start
+        KSPDate defaultDate;
+        if (m.getEvents().size() != 0) defaultDate = m.getEvents().get(m.getEvents().size()).getDate();
+        else defaultDate = m.getStart();
 
+        yearTextField.setText(Integer.toString(defaultDate.getYear()));
+        dayTextField.setText(Integer.toString(defaultDate.getDay()));
+        hourTextField.setText(Integer.toString(defaultDate.getHour()));
+        minuteTextField.setText(Integer.toString(defaultDate.getMinute()));
+        secondTextField.setText(Integer.toString(defaultDate.getSecond()));
+
+        logPanelSetup();
+        vesselPanelSetup();
+        crewPanelSetup();
+        rescuePanelSetup();
+        updateVesselSetup();
+        updateCrewSetup();
+        moveCrewSetup();
+        condecorationSetup();
         listenerSetup();
     }
 
@@ -150,43 +184,45 @@ public class MissionUpdater extends KSPGUI {
 
         // Different card button listeners
         newLogEntryButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, LOG_PANEL);
+            cardLayout.show(cardPanel, LOG_PANEL);
             currentCard = LOG_PANEL;
         });
         addRemoveCrewButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, CREW_PANEL);
+            cardLayout.show(cardPanel, CREW_PANEL);
             currentCard = CREW_PANEL;
         });
         updateCrewButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, UPDATE_CREW_PANEL);
+            cardLayout.show(cardPanel, UPDATE_CREW_PANEL);
             currentCard = UPDATE_CREW_PANEL;
         });
         addRemoveVesselsButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, VESSEL_PANEL);
+            cardLayout.show(cardPanel, VESSEL_PANEL);
             currentCard = VESSEL_PANEL;
         });
         newRescuedKerbalButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, RESCUE_PANEL);
+            cardLayout.show(cardPanel, RESCUE_PANEL);
             currentCard = RESCUE_PANEL;
         });
         updateVesselButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, UPDATE_VESSEL_PANEL);
+            cardLayout.show(cardPanel, UPDATE_VESSEL_PANEL);
             currentCard = UPDATE_VESSEL_PANEL;
         });
         condecorationsButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, CONDECORATION_PANEL);
+            cardLayout.show(cardPanel, CONDECORATION_PANEL);
             currentCard = CONDECORATION_PANEL;
         });
         moveCrewAroundButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, MOVE_CREW_PANEL);
+            cardLayout.show(cardPanel, MOVE_CREW_PANEL);
             currentCard = MOVE_CREW_PANEL;
         });
 
         // Cancel listener
         cancelButton.addActionListener(e -> {
             // Confirmation
-            if (ask("Cancel mission editing", "Are you sure you want to cancel?")) {
-                dispose();
+            if (currentCard.equals(CHOICES_PANEL)) dispose();
+            else if (ask("Cancel mission editing", "Are you sure you want to cancel?")) {
+                cardLayout.show(cardPanel, CHOICES_PANEL);
+                currentCard = CHOICES_PANEL;
             }
         });
 
@@ -228,56 +264,221 @@ public class MissionUpdater extends KSPGUI {
                 // TODO implement specific confirmation checks and messages
                 default -> {
                     boolean confirm = ask("No edits", "No changes will be applied. Are you sure?");
-                    if (confirm) dispose();
+                    if (!confirm) return;
                 }
             }
 
             // Form end
             dispose();
         });
-
-        logPanelListeners();
-        vesselPanelListeners();
-        crewPanelListeners();
-        rescuePanelListeners();
-        updateVesselListeners();
-        updateCrewListeners();
-        moveCrewListeners();
-        condecorationListeners();
     }
 
-    private void condecorationListeners() {
-        // TODO
+    private void condecorationSetup() {
+        // Kerbal combo box
+        DefaultComboBoxModel<Kerbal> crewModel = new DefaultComboBoxModel<>();
+        condecorationCrewComboBox.setModel(crewModel);
+        crewModel.addAll(mission.getCrew());
+
+        // No dynamic changes, no listeners
     }
 
-    private void moveCrewListeners() {
-        // TODO
+    private void moveCrewSetup() {
+        // Kerbal combo box
+        DefaultComboBoxModel<Kerbal> crewModel = new DefaultComboBoxModel<>();
+        crewMoveComboBox.setModel(crewModel);
+        crewModel.addAll(mission.getCrew());
+
+        // Vessel list
+        GoodListModel<Vessel> listModel = new GoodListModel<>();
+        newVesselList.setModel(listModel);
+
+        // Crew listener
+        crewMoveComboBox.addActionListener(e -> {
+            Kerbal k = (Kerbal) crewModel.getSelectedItem();
+            if (k == null) return; // Shouldn't happen, but who knows?
+            Location location = k.getLocation();
+            boolean inShip = k.getVessel() != 0;
+            Vessel v = controller.getInstance(k.getVessel());
+
+            listModel.clear(); // Remove all previous vessels
+
+            // Nearby vessels
+            Set<Vessel> nearbyVessels = controller.getVessels().stream()
+                    .filter(ve -> ve.getLocation().closeTo(v.getLocation()))
+                    .filter(ve -> !ve.getStatus().equals(VesselStatus.CRASHED))
+                    .collect(Collectors.toSet());
+
+            if (inShip) { // If the kerbal is in a ship, add connected vessels first
+                Set<Vessel> vessels = v.getVessels();
+                vessels.forEach(ve -> {
+                    nearbyVessels.remove(ve); // Remove duplicates
+                    listModel.add(ve);
+                });
+            }
+            // Afterwards, add all vessels that are close enough
+            nearbyVessels.forEach(listModel::add);
+        });
     }
 
-    private void updateCrewListeners() {
-        // TODO
+    private void updateCrewSetup() {
+        // Kerbal combo box
+        DefaultComboBoxModel<Kerbal> crewModel = new DefaultComboBoxModel<>();
+        updateCrewComboBox.setModel(crewModel);
+        Set<Kerbal> EVAKerbals = mission.getCrew().stream()
+                .filter(k -> k.getVessel() == 0)
+                .collect(Collectors.toSet());
+        crewModel.addAll(EVAKerbals);
+
+        // Celestial body combo box
+        DefaultComboBoxModel<CelestialBody> bodyModel = new DefaultComboBoxModel<>();
+        updateCrewBodyComboBox.setModel(bodyModel);
+        bodyModel.addAll(Arrays.asList(CelestialBody.values()));
+
+        // Death listener
+        KIACheckBox.addActionListener(e -> {
+            detailsLabel.setEnabled(KIACheckBox.isSelected());
+            detailsTextField.setEnabled(KIACheckBox.isSelected());
+        });
     }
 
-    private void updateVesselListeners() {
-        // TODO
+    private void updateVesselSetup() {
+        // Vessel combo box
+        DefaultComboBoxModel<Vessel> vesselModel = new DefaultComboBoxModel<>();
+        updateVesselComboBox.setModel(vesselModel);
+        vesselModel.addAll(mission.getVessels(VesselStatus.NOMINAL));
+        vesselModel.addAll(mission.getVessels(VesselStatus.STRANDED));
+
+        // Status combo box
+        DefaultComboBoxModel<VesselStatus> statusModel = new DefaultComboBoxModel<>();
+        updateStatusComboBox.setModel(statusModel);
+        statusModel.addAll(Arrays.asList(VesselStatus.values()));
+
+        // Celestial body combo box
+        DefaultComboBoxModel<CelestialBody> bodyModel = new DefaultComboBoxModel<>();
+        updateVesselBodyComboBox.setModel(bodyModel);
+        bodyModel.addAll(Arrays.asList(CelestialBody.values()));
+
+        // Vessel listener
+        updateVesselComboBox.addActionListener(e -> {
+            Vessel v = (Vessel) vesselModel.getSelectedItem();
+            if (v == null) return; // Who knows, again?
+            // Match values
+            statusModel.setSelectedItem(v.getStatus());
+            bodyModel.setSelectedItem(v.getLocation().getCelestialBody());
+            inSpaceCheckBox.setSelected(v.getLocation().isInSpace());
+        });
+
     }
 
-    private void rescuePanelListeners() {
-        // TODO
+    private void rescuePanelSetup() {
+        // Vessel combo box
+        DefaultComboBoxModel<Vessel> vesselModel = new DefaultComboBoxModel<>();
+        rescueVesselComboBox.setModel(vesselModel);
+        vesselModel.addAll(mission.getVessels(VesselStatus.NOMINAL));
+        vesselModel.addAll(mission.getVessels(VesselStatus.STRANDED));
+
+        // Default mission position
+        missionPositionTextField.setText(DEFAULT_RESCUED_POSITION);
+
+        // Job combo box
+        DefaultComboBoxModel<Job> jobModel = new DefaultComboBoxModel<>();
+        jobComboBox.setModel(jobModel);
+        jobModel.addAll(Arrays.asList(Job.values()));
+
+        // No dynamic updating, no listeners
     }
 
-    private void crewPanelListeners() {
-        // TODO
+    private void crewPanelSetup() {
+        // Crew tables
+        Set<Kerbal> availableKerbals = controller.getKerbals().stream()
+                .filter(k -> k.getMissions().contains(mission))
+                .collect(Collectors.toSet());
+        Set<Kerbal> assignedKerbals = mission.getCrew();
+        MissionKerbalTableModel availableModel = new MissionKerbalTableModel(availableKerbals);
+        MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(assignedKerbals);
+        crewFreeTable.setModel(availableModel);
+        crewAssignedTable.setModel(assignedModel);
+
+        // Available kerbal table listener
+        crewFreeTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = crewFreeTable.rowAtPoint(e.getPoint());
+                if (row >= 0 && row < availableModel.getRowCount()) {
+                    Kerbal k = availableModel.getKerbal(row);
+                    availableModel.removeKerbal(k);
+                    assignedModel.addKerbal(k);
+                }
+            }
+        });
+
+        // Selected kerbal table listener
+        crewAssignedTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = crewAssignedTable.rowAtPoint(e.getPoint());
+                int col = crewAssignedTable.columnAtPoint(e.getPoint());
+                if (row >= 0)
+                    if (row < assignedModel.getRowCount() // Is a row on the table
+                            && col != assignedModel.getColumnCount() - 1 // Is not the last cell (Position in the mission)
+                            && crewAssignedTable.getSelectedRow() == row) { // Double click
+                        Kerbal k = assignedModel.getKerbal(row);
+                        assignedModel.removeKerbal(k);
+                        availableModel.addKerbal(k);
+                    }
+            }
+        });
     }
 
-    private void vesselPanelListeners() {
-        // TODO
+    private void vesselPanelSetup() {
+        // Vessel lists
+        GoodListModel<Vessel> availableModel = new GoodListModel<>();
+        GoodListModel<Vessel> assignedModel = new GoodListModel<>();
+        availableVesselsList.setModel(availableModel);
+        assignedVesselsList.setModel(assignedModel);
+        controller.getVessels().stream() // Available vessels
+                .filter(v -> !v.inMission(mission))
+                .filter(v -> !v.getStatus().equals(VesselStatus.CRASHED))
+                .forEach(availableModel::add);
+        mission.getVessels().stream() // Assigned vessels
+                .filter(v -> !v.getStatus().equals(VesselStatus.CRASHED))
+                .forEach(assignedModel::add);
+
+        // Available vessel listener
+        availableVesselsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int index = availableVesselsList.locationToIndex(e.getPoint());
+                if (index < 0 || index > availableModel.getSize()) return;
+                Vessel v = availableModel.getElementAt(index);
+                availableModel.remove(index);
+                assignedModel.add(v);
+                availableModel.sort(Comparator.comparing(Vessel::toString));
+                assignedModel.sort(Comparator.comparing(Vessel::toString));
+            }
+        });
+
+        // Assigned vessel listener
+        assignedVesselsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int index = assignedVesselsList.locationToIndex(e.getPoint());
+                if (index < 0 || index > assignedModel.getSize()) return;
+                Vessel v = assignedModel.getElementAt(index);
+                assignedModel.remove(index);
+                availableModel.add(v);
+                assignedModel.sort(Comparator.comparing(Vessel::toString));
+                availableModel.sort(Comparator.comparing(Vessel::toString));
+            }
+        });
     }
 
-    private void logPanelListeners() {
-        // TODO
+    private void logPanelSetup() {
+        // Celestial body combo box
+        DefaultComboBoxModel<CelestialBody> bodyModel = new DefaultComboBoxModel<>();
+        celestialBodyComboBox.setModel(bodyModel);
+        bodyModel.addAll(Arrays.asList(CelestialBody.values()));
+
+        // No dynamic editing, no listeners
     }
-
-
-    // TODO Crew updater: only show crew that's not inside a ship
 }
