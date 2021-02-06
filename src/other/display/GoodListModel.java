@@ -39,8 +39,19 @@ public class GoodListModel<T> implements ListModel<T> {
         for (ListDataListener ldl : listDataListeners)
             ldl.contentsChanged(new ListDataEvent(this,
                     ListDataEvent.CONTENTS_CHANGED,
-                    items.size() - 1,
+                    0,
                     items.size()));
+    }
+
+    public void remove(int index) {
+        if (index < 0 || index > items.size()) return;
+        T t = items.remove(index);
+        if (t != null)
+            for (ListDataListener ldl : listDataListeners)
+                ldl.contentsChanged(new ListDataEvent(this,
+                        ListDataEvent.CONTENTS_CHANGED,
+                        index,
+                        index + 1));
     }
 
     @Override
