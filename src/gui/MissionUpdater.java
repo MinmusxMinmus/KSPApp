@@ -177,7 +177,7 @@ public class MissionUpdater extends KSPGUI {
 
         // Default date: last event's date, or mission start
         KSPDate defaultDate;
-        if (m.getEvents().size() != 0) defaultDate = m.getEvents().get(m.getEvents().size()).getDate();
+        if (m.getEvents().size() != 0) defaultDate = m.getEvents().get(m.getEvents().size() - 1).getDate();
         else defaultDate = m.getStart();
 
         yearTextField.setText(Integer.toString(defaultDate.getYear()));
