@@ -287,7 +287,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     /**
      * @return {@code true} by default
      */
-    public boolean removeKerbal(Kerbal k) {
+    public boolean removeCrew(Kerbal k) {
         crewObjs.remove(k);
         crew.remove(k.getName());
         k.removeEventListener(this);
@@ -437,7 +437,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Crew member deleted
         if (event.getSource() instanceof Kerbal kerbal) {
-            removeKerbal(kerbal);
+            removeCrew(kerbal);
         }
 
         // Concept deleted
