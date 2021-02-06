@@ -540,10 +540,10 @@ public class MissionUpdater extends KSPGUI {
                     }
 
                     if (v == null) { // Leaving vessel
-                        if (!ask("Exit vessel", k.getName() + " Kerman will leave " + v2.getName() + ". Are you sure?")) return;
+                        if (!ask("Exit vessel", k.getName() + " Kerman will leave \"" + v2.getName() + "\". Are you sure?")) return;
                         mission.leftVessel(k, v2, date, details);
                     } else if (v2 == null) { // Entering vessel
-                        if (!ask("Enter vessel", k.getName() + " Kerman will board" + v.getName() + ". Are you sure?")) return;
+                        if (!ask("Enter vessel", k.getName() + " Kerman will board \"" + v.getName() + "\". Are you sure?")) return;
                         mission.enteredVessel(k, v, date, details);
                     } else // What the fuck?
                         say("Something went extremely wrong, please delete your life");
@@ -631,7 +631,7 @@ public class MissionUpdater extends KSPGUI {
 
             // Nearby vessels
             Set<Vessel> nearbyVessels = controller.getVessels().stream()
-                    .filter(ve -> ve.getLocation().closeTo(v.getLocation()))
+                    .filter(ve -> ve.getLocation().closeTo(location))
                     .filter(ve -> !ve.getStatus().equals(VesselStatus.CRASHED))
                     .collect(Collectors.toSet());
 
