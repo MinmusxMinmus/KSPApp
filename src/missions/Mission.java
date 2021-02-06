@@ -132,6 +132,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
         return true;
     }
 
+    public void awardCondecoration(Kerbal k, String condecoration, KSPDate date, boolean log) {
+        if (!crewObjs.contains(k)) System.err.println("WARNING: Awarding condecoration to non-mission member! Mission: " + name + ", kerbal name: " + k.getName());
+        Condecoration c = new Condecoration(getController(), k.getName(), name, date, condecoration);
+        condecorations.add(c);
+        k.addCondecoration(c);
+        if (log) logEvent(k.getLocation(), date, "Awarded condecoration to " + k.getName() + " Kerman");
+    }
+
     // Getter/Setter methods
     public String getName() {
         return name;
