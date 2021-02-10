@@ -63,6 +63,7 @@ public class VesselCreator extends KSPGUI {
     private final MissionKerbalTableModel freeModel = new MissionKerbalTableModel(
             controller.getKerbals().stream()
                     .filter(k -> k.getLocation().landedAt(CelestialBody.KERBIN))
+                    .filter(k -> !k.isKIA())
                     .collect(Collectors.toSet()));
     private final MissionKerbalTableModel assignedModel = new MissionKerbalTableModel(new LinkedList<>());
 
