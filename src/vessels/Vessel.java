@@ -437,7 +437,8 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Crew member deleted
         if (event.getSource() instanceof Kerbal kerbal) {
-            removeCrew(kerbal);
+            crew.remove(kerbal.getName());
+            crewObjs.remove(kerbal);
         }
 
         // Concept deleted
@@ -448,12 +449,14 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
         // Mission deleted
         if (event.getSource() instanceof Mission mission) {
-            removeMission(mission);
+            missions.remove(mission.getName());
+            missionObjs.remove(mission);
         }
 
         // Connected vessel deleted
         if (event.getSource() instanceof Vessel vessel) {
-            removeVessel(vessel);
+            vessels.remove(vessel.getId());
+            vesselObjs.remove(vessel);
         }
     }
 

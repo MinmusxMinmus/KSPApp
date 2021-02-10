@@ -51,6 +51,7 @@ public abstract class KSPObject implements Displayable {
 
     public void fireDeletionEvent(String status) {
         for (KSPObjectListener listener : listeners) listener.onDeletion(new KSPObjectDeletionEvent(this, status));
+        listeners.clear();
     }
 
     /** Indicates to the object that the controller has finished loading every {@link KSPObject} in memory. This allows

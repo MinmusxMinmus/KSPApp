@@ -312,14 +312,12 @@ public class Mission extends KSPObject implements KSPObjectListener {
         if (event.getSource() instanceof Kerbal k) {
             crewObjs.remove(k);
             crew.remove(k.getName());
-            k.removeEventListener(this);
         }
 
         // Vessel deleted
         if (event.getSource() instanceof Vessel v) {
             vesselObjs.remove(v);
             vessels.remove(v.getId());
-            v.removeEventListener(this);
         }
     }
 
