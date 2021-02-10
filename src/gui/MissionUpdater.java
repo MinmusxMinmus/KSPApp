@@ -172,6 +172,7 @@ public class MissionUpdater extends KSPGUI {
         this.mission = m;
         setContentPane(mainPanel);
         cardLayout = (CardLayout) cardPanel.getLayout();
+
         cardLayout.show(cardPanel, CHOICES_PANEL);
         currentCard = CHOICES_PANEL;
 
@@ -517,7 +518,6 @@ public class MissionUpdater extends KSPGUI {
                     // Apply changes
                     if (KIACheckBox.isSelected()) mission.KIA(k, date, details);
                     else mission.moveCrew(k, location, date, details);
-
                 }
 
                 case MOVE_CREW_PANEL -> {
