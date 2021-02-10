@@ -600,7 +600,6 @@ public class MissionUpdater extends KSPGUI {
             updateCrewSetup();
             moveCrewSetup();
             condecorationSetup();
-            listenerSetup();
         });
     }
 
