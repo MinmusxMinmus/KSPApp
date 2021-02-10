@@ -177,6 +177,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         v.setLocation(location);
         if (status.equals(VesselStatus.CRASHED)) {
             v.setCrashed(date, details);
+            getController().vesselCrashed(v);
             logEvent(location, date, "Vessel " + v.getName() + " with  ID " + v.getId() + " crashed while " + location + ": " + details);
         } else {
             v.setStatus(status);
