@@ -99,8 +99,8 @@ public class Mission extends KSPObject implements KSPObjectListener {
         } else lastLocation = event.getLocation();
         // Mission end event
         logEvent(lastLocation, date, "Mission end: " + comment);
-        // Finish mission for all kerbals involved
-        for (Kerbal k : crewObjs) k.missionEnd(this, comment);
+        // Finish mission for all living kerbals involved
+        for (Kerbal k : crewObjs.stream().filter(k -> !k.isKIA()).collect(Collectors.toSet())) k.missionEnd(this, comment);
         // Finish mission for all vessels involved
         for (Vessel v : vesselObjs) v.missionEnd(this);
         // End mission
@@ -277,8 +277,10 @@ public class Mission extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Name", name));
         fields.add(new Field("Mission start", start.toString(true, true)));
         fields.add(new Field("In progress?", active ? "Yes" : "No"));
-        for (Map.Entry<String, CrewDetails> e : crew.entrySet())
-            fields.add(new Field(e.getValue().getPosition(), e.getKey() + " Kerman, boarded at " + e.getValue().getBoardTime().toString(false, true)));
+        for (Kerbal k : crewObjs) {
+            CrewDetails cd = crew.get(k.getName());
+            fields.add(new Field(cd.getPosition(), (k.isKIA() ? "(KIA) " : "") + k.getName() + " Kerman, boarded at " + cd.getBoardTime().toString(false, true)));
+        }
         for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Condecoration", c.toString()));
         for (MissionEvent ev : events) fields.add(new Field("Event", ev.toString()));
