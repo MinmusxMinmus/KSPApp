@@ -94,6 +94,52 @@ public class KSPDate extends KSPObject {
         return new KSPDate(controller, s);
     }
 
+    public boolean before(KSPDate date) {
+        return before(date.year, date.day, date.hour, date.minute, date.second);
+    }
+
+    public boolean before(int y, int d, int h, int m, int s) {
+        if (year > y) return false;
+        else if (year < y) return true;
+
+        if (day > d) return false;
+        else if (day < d) return true;
+
+        if (hour > h) return false;
+        else if (hour < h) return true;
+
+        if (minute > m) return false;
+        else if (minute < m) return true;
+
+        // Same dates -> not before
+        return second < s;
+    }
+
+    public boolean after(KSPDate date) {
+        return after(date.year, date.day, date.hour, date.minute, date.second);
+    }
+
+    public boolean after(int y, int d, int h, int m, int s) {
+        if (year > y) return true;
+        else if (year < y) return false;
+
+        if (day > d) return true;
+        else if (day < d) return false;
+
+        if (hour > h) return true;
+        else if (hour < h) return false;
+
+        if (minute > m) return true;
+        else if (minute < m) return false;
+
+        // Same dates -> not after
+        return second > s;
+    }
+
+    public boolean same(KSPDate date) {
+        return !(before(date) || after(date));
+    }
+
     @Override
     public void ready() { }
 
