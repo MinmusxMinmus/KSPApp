@@ -380,10 +380,10 @@ public class MissionUpdater extends KSPGUI {
 
                 case CREW_PANEL -> {
                     // Get crew to remove
-                    Set<Kerbal> newNotInMissionCrew = ((MissionKerbalTableModel)crewAssignedTable.getModel()).getCrew();
+                    Set<Kerbal> newNotInMissionCrew = ((MissionKerbalTableModel)crewFreeTable.getModel()).getCrew();
 
                     // Get crew to add
-                    Map<Kerbal, String> newMissionCrew = ((MissionAssignedKerbalTableModel)crewFreeTable.getModel()).getCrew2();
+                    Map<Kerbal, String> newMissionCrew = ((MissionAssignedKerbalTableModel)crewAssignedTable.getModel()).getCrew2();
 
                     // Get details
                     String details = crewDetailsTextField.getText().strip();
