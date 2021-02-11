@@ -795,6 +795,29 @@ public class MissionUpdater extends KSPGUI {
                 assignedModel.add(v);
                 availableModel.sort(Comparator.comparing(Vessel::toString));
                 assignedModel.sort(Comparator.comparing(Vessel::toString));
+                // Update date fields
+                KSPDate last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                yearTextField.setText(Integer.toString(last.getYear()));
+                dayTextField.setText(Integer.toString(last.getDay()));
+                hourTextField.setText(Integer.toString(last.getHour()));
+                minuteTextField.setText(Integer.toString(last.getMinute()));
+                secondTextField.setText(Integer.toString(last.getSecond()));
+
+                assignedModel.getItems().stream().map(Vessel::getCreationDate).forEach(creationDate -> {
+                    if (creationDate.after(
+                            Integer.parseInt(yearTextField.getText()),
+                            Integer.parseInt(dayTextField.getText()),
+                            Integer.parseInt(hourTextField.getText()),
+                            Integer.parseInt(minuteTextField.getText()),
+                            Integer.parseInt(secondTextField.getText())
+                    )) {
+                        yearTextField.setText(Integer.toString(creationDate.getYear()));
+                        dayTextField.setText(Integer.toString(creationDate.getDay()));
+                        hourTextField.setText(Integer.toString(creationDate.getHour()));
+                        minuteTextField.setText(Integer.toString(creationDate.getMinute()));
+                        secondTextField.setText(Integer.toString(creationDate.getSecond()));
+                    }
+                });
             }
         });
 
@@ -809,6 +832,29 @@ public class MissionUpdater extends KSPGUI {
                 availableModel.add(v);
                 assignedModel.sort(Comparator.comparing(Vessel::toString));
                 availableModel.sort(Comparator.comparing(Vessel::toString));
+                // Update date fields
+                KSPDate last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                yearTextField.setText(Integer.toString(last.getYear()));
+                dayTextField.setText(Integer.toString(last.getDay()));
+                hourTextField.setText(Integer.toString(last.getHour()));
+                minuteTextField.setText(Integer.toString(last.getMinute()));
+                secondTextField.setText(Integer.toString(last.getSecond()));
+
+                assignedModel.getItems().stream().map(Vessel::getCreationDate).forEach(creationDate -> {
+                    if (creationDate.after(
+                            Integer.parseInt(yearTextField.getText()),
+                            Integer.parseInt(dayTextField.getText()),
+                            Integer.parseInt(hourTextField.getText()),
+                            Integer.parseInt(minuteTextField.getText()),
+                            Integer.parseInt(secondTextField.getText())
+                    )) {
+                        yearTextField.setText(Integer.toString(creationDate.getYear()));
+                        dayTextField.setText(Integer.toString(creationDate.getDay()));
+                        hourTextField.setText(Integer.toString(creationDate.getHour()));
+                        minuteTextField.setText(Integer.toString(creationDate.getMinute()));
+                        secondTextField.setText(Integer.toString(creationDate.getSecond()));
+                    }
+                });
             }
         });
     }
