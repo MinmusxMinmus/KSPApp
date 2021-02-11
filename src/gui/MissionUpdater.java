@@ -529,8 +529,8 @@ public class MissionUpdater extends KSPGUI {
                     }
 
                     // Get vessels
-                    Vessel v = newVesselList.getSelectedValue();
-                    Vessel v2 = controller.getInstance(k.getVessel());
+                    Vessel newVessel = newVesselList.getSelectedValue();
+                    Vessel currentVessel = controller.getInstance(k.getVessel());
 
                     // Get details
                     String details = moveCrewDetailsTextField.getText().strip();
@@ -539,17 +539,27 @@ public class MissionUpdater extends KSPGUI {
                         return;
                     }
 
-                    if (v == null && v2 == null) {
-                        say("This member doesn't seem to be in a vessel. Select a vessel to join, or try with a different member!");
-                        return;
+                    // Case 1: no selected vessel
+                    if (newVessel == null) {
+                        // Case 1.1: no current vessel as well
+                        if (currentVessel == null) {
+                            say("This member doesn't seem to be in a vessel. Select a vessel to join, or try with a different member!");
+                            return;
+                        }
+                        // Case 1.2: leaving the current vessel
+                        if (!ask("Exit vessel", k.getName() + " Kerman will leave \"" + currentVessel.getName() + "\". Are you sure?")) return;
+                        mission.leftVessel(k, currentVessel, date, details);
                     }
-
-                    if (v == null) { // Leaving vessel
-                        if (!ask("Exit vessel", k.getName() + " Kerman will leave \"" + v2.getName() + "\". Are you sure?")) return;
-                        mission.leftVessel(k, v2, date, details);
-                    } else if (v2 == null) { // Entering vessel
-                        if (!ask("Enter vessel", k.getName() + " Kerman will board \"" + v.getName() + "\". Are you sure?")) return;
-                        mission.enteredVessel(k, v, date, details);
+                    // Case 2: selected vessel
+                    else {
+                        // Case 2.1: kerbal inside a vessel
+                        if (currentVessel != null) {
+                            say("This crew member is already in a vessel. Make it leave the current vessel first (select nothing), then try again!");
+                            return;
+                        }
+                        // Case 2.2: entering selected vessel
+                        if (!ask("Enter vessel", k.getName() + " Kerman will board \"" + newVessel.getName() + "\". Are you sure?")) return;
+                        mission.enteredVessel(k, newVessel, date, details);
                     }
                 }
 
