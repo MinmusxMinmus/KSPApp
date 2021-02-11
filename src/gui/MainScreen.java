@@ -127,7 +127,7 @@ public class MainScreen extends KSPGUI {
             if (edit == null) return;
 
             KSPGUI window;
-            String name = MAIN_SCREEN;
+            String name;
             descriptionArea.setText("Notes about the item will be shown here...");
 
             switch (edit) {
@@ -158,6 +158,8 @@ public class MainScreen extends KSPGUI {
             }
 
             window.appear(name);
+            searchModel.clear();
+            selectionComboBox.setSelectedIndex(-1);
         });
 
         // Edit button listener
@@ -211,9 +213,7 @@ public class MainScreen extends KSPGUI {
         });
 
         // Update button listener
-        updateButton.addActionListener(e -> {
-            controller.ready();
-        });
+        updateButton.addActionListener(e -> controller.ready());
 
         // Search selection listener
         searchList.addListSelectionListener(e -> {
