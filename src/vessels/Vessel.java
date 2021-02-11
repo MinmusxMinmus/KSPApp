@@ -277,6 +277,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         return true;
     }
 
+    public KSPDate getCreationDate() {
+        return creationDate;
+    }
+
     public Set<Kerbal> getCrew() {
         return new HashSet<>(crewObjs);
     }
