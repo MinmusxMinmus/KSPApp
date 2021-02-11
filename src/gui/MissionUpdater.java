@@ -18,11 +18,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
@@ -749,6 +746,31 @@ public class MissionUpdater extends KSPGUI {
                     availableModel.removeKerbal(k);
                     assignedModel.addKerbal(k);
                 }
+                // Update date fields
+                KSPDate last;
+                if (mission.getEvents().isEmpty()) last = new KSPDate(controller, 0, 0, 0, 0, 0);
+                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                yearTextField.setText(Integer.toString(last.getYear()));
+                dayTextField.setText(Integer.toString(last.getDay()));
+                hourTextField.setText(Integer.toString(last.getHour()));
+                minuteTextField.setText(Integer.toString(last.getMinute()));
+                secondTextField.setText(Integer.toString(last.getSecond()));
+
+                assignedModel.getCrew().stream().map(Kerbal::getHiringDate).forEach(hiringDate -> {
+                    if (hiringDate.after(
+                            Integer.parseInt(yearTextField.getText()),
+                            Integer.parseInt(dayTextField.getText()),
+                            Integer.parseInt(hourTextField.getText()),
+                            Integer.parseInt(minuteTextField.getText()),
+                            Integer.parseInt(secondTextField.getText())
+                    )) {
+                        yearTextField.setText(Integer.toString(hiringDate.getYear()));
+                        dayTextField.setText(Integer.toString(hiringDate.getDay()));
+                        hourTextField.setText(Integer.toString(hiringDate.getHour()));
+                        minuteTextField.setText(Integer.toString(hiringDate.getMinute()));
+                        secondTextField.setText(Integer.toString(hiringDate.getSecond()));
+                    }
+                });
             }
         });
 
@@ -766,6 +788,31 @@ public class MissionUpdater extends KSPGUI {
                         assignedModel.removeKerbal(k);
                         availableModel.addKerbal(k);
                     }
+                // Update date fields
+                KSPDate last;
+                if (mission.getEvents().isEmpty()) last = new KSPDate(controller, 0, 0, 0, 0, 0);
+                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                yearTextField.setText(Integer.toString(last.getYear()));
+                dayTextField.setText(Integer.toString(last.getDay()));
+                hourTextField.setText(Integer.toString(last.getHour()));
+                minuteTextField.setText(Integer.toString(last.getMinute()));
+                secondTextField.setText(Integer.toString(last.getSecond()));
+
+                assignedModel.getCrew().stream().map(Kerbal::getHiringDate).forEach(hiringDate -> {
+                    if (hiringDate.after(
+                            Integer.parseInt(yearTextField.getText()),
+                            Integer.parseInt(dayTextField.getText()),
+                            Integer.parseInt(hourTextField.getText()),
+                            Integer.parseInt(minuteTextField.getText()),
+                            Integer.parseInt(secondTextField.getText())
+                    )) {
+                        yearTextField.setText(Integer.toString(hiringDate.getYear()));
+                        dayTextField.setText(Integer.toString(hiringDate.getDay()));
+                        hourTextField.setText(Integer.toString(hiringDate.getHour()));
+                        minuteTextField.setText(Integer.toString(hiringDate.getMinute()));
+                        secondTextField.setText(Integer.toString(hiringDate.getSecond()));
+                    }
+                });
             }
         });
     }
@@ -796,7 +843,9 @@ public class MissionUpdater extends KSPGUI {
                 availableModel.sort(Comparator.comparing(Vessel::toString));
                 assignedModel.sort(Comparator.comparing(Vessel::toString));
                 // Update date fields
-                KSPDate last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                KSPDate last;
+                if (mission.getEvents().isEmpty()) last = mission.getStart();
+                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
@@ -833,7 +882,9 @@ public class MissionUpdater extends KSPGUI {
                 assignedModel.sort(Comparator.comparing(Vessel::toString));
                 availableModel.sort(Comparator.comparing(Vessel::toString));
                 // Update date fields
-                KSPDate last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                KSPDate last;
+                if (mission.getEvents().isEmpty()) last = mission.getStart();
+                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
