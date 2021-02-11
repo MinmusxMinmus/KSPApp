@@ -159,7 +159,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         // Remove all missions, log the vessel crash of course
         for (Mission m : getMissions()) {
             m.logEvent(location, date, "\"" + getName() + "\" vessel crashed: " + details);
-            removeMission(m);
+            missionEnd(m);
         }
         // Set details
         setStatusDetails(details);
@@ -318,24 +318,6 @@ public class Vessel extends KSPObject implements KSPObjectListener {
 
     public Set<Mission> getMissions() {
         return new HashSet<>(missionObjs);
-    }
-    /**
-     * @return {@code true} by default
-     */
-    public boolean addMission(Mission m) {
-        missions.add(m.getName());
-        missionObjs.add(m);
-        m.addEventListener(this);
-        return true;
-    }
-    /**
-     * @return {@code true} by default
-     */
-    public boolean removeMission(Mission m) {
-        missionObjs.remove(m);
-        missions.remove(m.getName());
-        m.removeEventListener(this);
-        return true;
     }
 
     public boolean inMission(Mission m) {

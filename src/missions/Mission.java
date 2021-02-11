@@ -159,14 +159,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
         logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel joined the mission: " + details);
         vesselObjs.add(v);
         vessels.add(v.getId());
-        v.addEventListener(this);
+        v.missionStart(this);
         return true;
     }
     public boolean removeVessel(Vessel v, KSPDate date, String details) {
         logEvent(v.getLocation(), date, "\"" + v.getName() + "\" vessel dismissed from the mission: " + details);
         vesselObjs.remove(v);
         vessels.remove(v.getId());
-        v.removeEventListener(this);
+        v.missionEnd(this);
         return true;
     }
     public void updateVessels(List<Vessel> vesselsToRemove, List<Vessel> vesselsToAdd, KSPDate date, String details) {
