@@ -21,8 +21,8 @@ public class MissionAssignedKerbalTableModel extends MissionKerbalTableModel {
     }
 
     public void removeKerbal(Kerbal kerbal) {
-        super.removeKerbal(kerbal);
         int index = getKerbalList().indexOf(kerbal);
+        super.removeKerbal(kerbal);
         positionList.remove(index);
         fireTableDataChanged();
     }
