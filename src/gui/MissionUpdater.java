@@ -677,6 +677,15 @@ public class MissionUpdater extends KSPGUI {
             detailsLabel.setEnabled(KIACheckBox.isSelected());
             detailsTextField.setEnabled(KIACheckBox.isSelected());
         });
+
+        // Kerbal listener
+        updateCrewComboBox.addActionListener(e -> {
+            Kerbal k = (Kerbal) updateCrewComboBox.getSelectedItem();
+            if (k == null) return; // Just in case
+            // Match values
+            updateCrewBodyComboBox.setSelectedItem(k.getLocation().getCelestialBody());
+            updateCrewInSpaceCheckBox.setSelected(k.getLocation().isInSpace());
+        });
     }
 
     private void updateVesselSetup() {
