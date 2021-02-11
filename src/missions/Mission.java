@@ -112,17 +112,36 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     public boolean addCrew(Kerbal k, String position, KSPDate date, String details) {
+        // Check for crew already in mission
+        if (crew.containsKey(k.getName()) || crewObjs.contains(k)) {
+            CrewDetails detailss = crew.get(k.getName());
+            if (detailss == null) return false; // Who knows, maybe only the object is there
+
+            // If the position is the same, don't update
+            if (detailss.getPosition().equals(position)) return false;
+            // Update otherwise
+            logEvent(k.getLocation(), date, k.getName() + " Kerman changed position from \"" + detailss.getPosition() + "\" to \"" + position + "\": " + details);
+
+            crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
+
+            return true;
+        }
+
         logEvent(k.getLocation(), date, k.getName() + " Kerman joined the mission as " + position + ": " + details);
         crewObjs.add(k);
         crew.put(k.getName(), new CrewDetails(getController(), k.getName(), position, date));
         k.addEventListener(this);
+        k.missionStart(this);
         return true;
     }
     public boolean removeCrew(Kerbal k, KSPDate date, String details) {
-        logEvent(k.getLocation(), date, k.getName() + " Kerman (" + getCrewDetails(k).getPosition() + ") dismissed from the mission: " + details);
+        // Doesn't remove crew if crew is not in the mission
+        if (!(crew.containsKey(k.getName()) || crewObjs.contains(k))) return false;
         crewObjs.remove(k);
         crew.remove(k.getName());
         k.removeEventListener(this);
+        k.missionEnd(this, "Dismissed from the mission");
+        logEvent(k.getLocation(), date, k.getName() + " Kerman (" + getCrewDetails(k).getPosition() + ") dismissed from the mission: " + details);
         return true;
     }
     public void updateCrew(Set<Kerbal> crewToRemove, Map<Kerbal, String> crewToAdd, KSPDate date, String details) {
