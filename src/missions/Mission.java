@@ -144,11 +144,17 @@ public class Mission extends KSPObject implements KSPObjectListener {
         logEvent(k.getLocation(), date, k.getName() + " Kerman boarded vessel " + v.getName() + " with ID " + v.getId() + ": " + details);
     }
     public void kerbalRescued(String name, boolean male, boolean badass, Job job, KSPDate date, Vessel rescuer, String position, String details) {
+        // Create kerbal, log rescue event
         Kerbal rescuee = new Kerbal(getController(), name, male, badass, job, this.name, date, rescuer.getLocation(), rescuer);
         logEvent(rescuer.getLocation(), date, "Rescued " + name + " Kerman " + rescuer.getLocation() + ": " + details);
+        // Add kerbal to database
         getController().addKerbal(rescuee);
+        // Update kerbal mission
         rescuee.missionStart(this);
+        // Add to crew
         addCrew(rescuee, position, date, details);
+        // Add to vessel
+        rescuer.addCrew(rescuee);
     }
     public void KIA(Kerbal k, KSPDate date, String details) {
         k.KIA();
