@@ -346,7 +346,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Recruitment", origin));
         fields.add(new Field("Recruitment date", hiringDate.toString(true, true)));
         fields.add(new Field("Location", location.toString()));
-        for (Mission m : missionObjs) fields.add(new Field("Deployed in", m.getName()));
+        for (Mission m : missionObjs) fields.add(new Field("Deployed in", m.getName() + " (" + m.getCrewDetails(this).getPosition() + ")"));
         for (FlightLog l : log) fields.add(new Field("Participated in", l.getMissionName()));
         for (Condecoration c : condecorations) fields.add(new Field("Honorable mention", c.toString()));
         if (vessel != 0) fields.add(new Field("Current vessel", vesselObj.getName()));
