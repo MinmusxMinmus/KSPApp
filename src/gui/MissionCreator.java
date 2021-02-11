@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
@@ -60,7 +61,7 @@ public class MissionCreator extends KSPGUI {
     private JTable assignedVesselsTable;
 
     // Custom components
-    private final MissionKerbalTableModel freeModel = new MissionKerbalTableModel(controller.getKerbals());
+    private final MissionKerbalTableModel freeModel = new MissionKerbalTableModel(controller.getKerbals().stream().filter(k -> !k.isKIA()).collect(Collectors.toSet()));
     private final MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(new LinkedList<>());
 
     private final MissionVesselTableModel freeVModel = new MissionVesselTableModel(controller.getVessels());
