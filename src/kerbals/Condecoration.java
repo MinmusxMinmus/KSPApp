@@ -18,7 +18,7 @@ import java.util.StringJoiner;
 public class Condecoration extends KSPObject implements KSPObjectListener {
 
     private static final String DELIMITER = ":C:";
-    private static final int ENCODE_FIELD_AMOUNT = 6;
+    private static final int ENCODE_FIELD_AMOUNT = 5;
 
     // Persistent fields
     /**
