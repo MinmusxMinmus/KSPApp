@@ -764,7 +764,7 @@ public class MissionUpdater extends KSPGUI {
                 // Update date fields
                 KSPDate last;
                 if (mission.getEvents().isEmpty()) last = new KSPDate(controller, 0, 0, 0, 0, 0);
-                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                else last = mission.getEvents().get(mission.getEvents().size() - 1).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
@@ -806,7 +806,7 @@ public class MissionUpdater extends KSPGUI {
                 // Update date fields
                 KSPDate last;
                 if (mission.getEvents().isEmpty()) last = new KSPDate(controller, 0, 0, 0, 0, 0);
-                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                else last = mission.getEvents().get(mission.getEvents().size() - 1).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
@@ -860,7 +860,7 @@ public class MissionUpdater extends KSPGUI {
                 // Update date fields
                 KSPDate last;
                 if (mission.getEvents().isEmpty()) last = mission.getStart();
-                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                else last = mission.getEvents().get(mission.getEvents().size() - 1).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
@@ -899,7 +899,7 @@ public class MissionUpdater extends KSPGUI {
                 // Update date fields
                 KSPDate last;
                 if (mission.getEvents().isEmpty()) last = mission.getStart();
-                else last = mission.getEvents().get(mission.getEvents().size()).getDate();
+                else last = mission.getEvents().get(mission.getEvents().size() - 1).getDate();
                 yearTextField.setText(Integer.toString(last.getYear()));
                 dayTextField.setText(Integer.toString(last.getDay()));
                 hourTextField.setText(Integer.toString(last.getHour()));
