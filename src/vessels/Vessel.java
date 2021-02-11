@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class Vessel extends KSPObject implements KSPObjectListener {
 
-    public static final int ENCODE_FIELD_AMOUNT = 11; // ALWAYS ACCOUNT FOR DESCRIPTION
+    public static final int ENCODE_FIELD_AMOUNT = 12; // ALWAYS ACCOUNT FOR DESCRIPTION
     public static final String DELIMITER = ":VI:";
 
     // Persistent fields
@@ -61,6 +61,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * The vessel's creation date.
      */
     private final KSPDate creationDate;
+    /**
+     * The name of the vessel's last mission, before crashing
+     */
+    private String lastMission;
 
     /**
      * Contains all of the vessel's crew members' names.
@@ -136,9 +140,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.status = VesselStatus.valueOf(fields.get(5));
         this.statusDetails = fields.get(6).equals("(none)") ? null : fields.get(6);
         this.creationDate = KSPDate.fromString(controller, fields.get(7));
-        this.crew = fields.get(8).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(8).split(DELIMITER)).collect(Collectors.toSet());
-        this.vessels = fields.get(9).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(9).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
-        this.missions = fields.get(10).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(10).split(DELIMITER)));
+        this.lastMission = fields.get(8);
+        this.crew = fields.get(9).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(9).split(DELIMITER)).collect(Collectors.toSet());
+        this.vessels = fields.get(10).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(10).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
+        this.missions = fields.get(11).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(11).split(DELIMITER)));
     }
 
 
@@ -149,13 +154,14 @@ public class Vessel extends KSPObject implements KSPObjectListener {
      * before calling this method
      * @param details Details regarding the crash
      */
-    public void setCrashed(KSPDate date, String details) {
+    public void setCrashed(KSPDate date, String lastMission, String details) {
         // Set crash status
         setStatus(VesselStatus.CRASHED);
+        this.lastMission = lastMission;
         // Kill all crew members
         for (Kerbal k : crewObjs) k.KIA();
         // Destroy all vessels. Makes sure to not be recursive.
-        for (Vessel v : vesselObjs) if (v.status != VesselStatus.CRASHED) v.setCrashed(date, details);
+        for (Vessel v : vesselObjs) if (v.status != VesselStatus.CRASHED) v.setCrashed(date, lastMission, details);
         // Remove all missions, log the vessel crash of course
         for (Mission m : getMissions()) {
             m.logEvent(location, date, "\"" + getName() + "\" vessel crashed: " + details);
@@ -388,6 +394,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         ret.add(status.name());
         ret.add(statusDetails == null ? "(none)" : statusDetails);
         ret.add(creationDate.toStorableString());
+        ret.add(lastMission);
         ret.add(crewJoiner.toString());
         ret.add(vesselJoiner.toString());
         ret.add(missionJoiner.toString());
@@ -405,7 +412,10 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
         fields.add(new Field("Status", status.toString()));
-        if (status.equals(VesselStatus.CRASHED)) fields.add(new Field("Crash details", statusDetails));
+        if (status.equals(VesselStatus.CRASHED)) {
+            fields.add(new Field("Crash details", statusDetails));
+            fields.add(new Field("Last mission", lastMission));
+        }
         fields.add(new Field("Location", location.toString()));
         for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.toString()));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
