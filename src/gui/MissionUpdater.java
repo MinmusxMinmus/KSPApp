@@ -553,6 +553,7 @@ public class MissionUpdater extends KSPGUI {
                         // Case 2.1: kerbal inside a vessel
                         if (currentVessel != null) {
                             say("This crew member is already in a vessel. Make it leave the current vessel first (select nothing), then try again!");
+                            newVesselList.clearSelection();
                             return;
                         }
                         // Case 2.2: entering selected vessel
