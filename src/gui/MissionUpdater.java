@@ -3,6 +3,7 @@ package gui;
 import controller.GUIController;
 import kerbals.Job;
 import kerbals.Kerbal;
+import missions.CrewDetails;
 import missions.Mission;
 import other.display.GoodListModel;
 import other.display.MissionAssignedKerbalTableModel;
@@ -735,6 +736,11 @@ public class MissionUpdater extends KSPGUI {
         MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(crewInMission);
         crewFreeTable.setModel(availableModel);
         crewAssignedTable.setModel(assignedModel);
+        // Setting positions
+        for (int i = 0; i != assignedModel.getRowCount(); i++) {
+            CrewDetails cd = mission.getCrewDetails(assignedModel.getKerbal(i));
+            if (cd != null) assignedModel.setValueAt(cd.getPosition(), i, assignedModel.getColumnCount() - 1);
+        }
 
         // Available kerbal table listener
         crewFreeTable.addMouseListener(new MouseAdapter() {
