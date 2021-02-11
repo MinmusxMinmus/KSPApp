@@ -283,7 +283,11 @@ public class Mission extends KSPObject implements KSPObjectListener {
         }
         for (Vessel v : vesselObjs) fields.add(new Field("Vessel", v.toString()));
         for (Condecoration c : condecorations) fields.add(new Field("Condecoration", c.toString()));
-        for (MissionEvent ev : events) fields.add(new Field("Event", ev.toString()));
+        for (MissionEvent ev : events) {
+            String date = "(" + ev.getDate().toString(false, true) + ")";
+            String location = ev.getLocation().toString();
+            fields.add(new Field(date + " " + location, ev.getDetails()));
+        }
 
         return fields;
     }
