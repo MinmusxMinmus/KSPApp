@@ -286,7 +286,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         for (MissionEvent ev : events) {
             String date = "(" + ev.getDate().toString(false, true) + ")";
             String location = ev.getLocation().toString();
-            fields.add(new Field(date + " " + location, ev.getDetails()));
+            fields.add(new Field("Event " + date + " " + location, ev.getDetails()));
         }
 
         return fields;
