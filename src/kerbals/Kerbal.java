@@ -303,6 +303,9 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         if (vesselObj != null) {
             vesselObj.addEventListener(this);
         } else if (vessel != 0) System.err.println("WARNING: Kerbal aboard an unknown vessel! Kerbal: " + name + ", vessel ID = " + vessel);
+
+        // Reaady flight logs
+        log.forEach(FlightLog::ready);
     }
 
     @Override
