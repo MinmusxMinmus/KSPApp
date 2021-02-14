@@ -306,6 +306,9 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
         // Reaady flight logs
         log.forEach(FlightLog::ready);
+
+        // Ready condecorations
+        condecorations.forEach(Condecoration::ready);
     }
 
     @Override

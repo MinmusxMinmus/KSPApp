@@ -122,6 +122,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     public void ready() {
         mission = getController().getMission(missionName);
         if (mission != null) mission.addEventListener(this);
+        else missionName = "[REDACTED]";
         kerbal = getController().getKerbal(kerbalName);
         if (kerbal != null) kerbal.addEventListener(this);
     }
