@@ -8,6 +8,8 @@ import other.display.KSPObjectTableModel;
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Locale;
 
 public class MainScreen extends KSPGUI {
@@ -52,6 +54,7 @@ public class MainScreen extends KSPGUI {
     private final KSPObjectTableModel tableModel = new KSPObjectTableModel();
     private final DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
     private String currentSelection;
+    private KSPObject currentSelectedObject;
 
     public MainScreen(GUIController controller) {
         super(controller, MAIN_SCREEN);
@@ -226,6 +229,8 @@ public class MainScreen extends KSPGUI {
             KSPObject object = searchList.getSelectedValue();
             if (object == null) return;
 
+            this.currentSelectedObject = object;
+
             // Values
             tableModel.setItem(object);
 
@@ -252,6 +257,27 @@ public class MainScreen extends KSPGUI {
             controller.discard();
             say("Changes discarded");
             reset();
+        });
+
+        // Table detail listener
+        valuesTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (currentSelectedObject == null) return;
+                int row = valuesTable.rowAtPoint(e.getPoint());
+                if (row < 0 && row >= tableModel.getRowCount()) return;
+
+                // Check for extra details
+                if (currentSelectedObject.isComplexField(row)) {
+                    if (currentSelectedObject.getComplexField(row) == null) {
+                        say("This field can't be accessed!");
+                        return;
+                    }
+                    DetailsWindow window = new DetailsWindow(controller, currentSelectedObject.getComplexField(row));
+                    window.appear("Specific details");
+                }
+            }
         });
     }
 
