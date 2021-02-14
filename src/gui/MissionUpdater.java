@@ -651,7 +651,7 @@ public class MissionUpdater extends KSPGUI {
                     .collect(Collectors.toSet());
 
             if (inShip) { // If the kerbal is in a ship, add connected vessels first
-                Set<Vessel> vessels = v.getVessels();
+                List<Vessel> vessels = v.getVessels();
                 vessels.forEach(ve -> {
                     nearbyVessels.remove(ve); // Remove duplicates
                     listModel.add(ve);
@@ -744,7 +744,7 @@ public class MissionUpdater extends KSPGUI {
         Set<Kerbal> crewNotInMission = controller.getKerbals().stream()
                 .filter(k -> !k.getMissions().contains(mission))
                 .collect(Collectors.toSet());
-        Set<Kerbal> crewInMission = mission.getCrew();
+        List<Kerbal> crewInMission = mission.getCrew();
         MissionKerbalTableModel availableModel = new MissionKerbalTableModel(crewNotInMission);
         MissionAssignedKerbalTableModel assignedModel = new MissionAssignedKerbalTableModel(crewInMission);
         crewFreeTable.setModel(availableModel);

@@ -50,6 +50,16 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return true;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        return mission;
+    }
+
+    @Override
     public void ready() {
         mission = getController().getMission(missionName);
         if (mission != null) mission.addEventListener(this);

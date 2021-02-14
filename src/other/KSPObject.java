@@ -40,6 +40,9 @@ public abstract class KSPObject implements Displayable {
         return controller;
     }
 
+    public abstract boolean isComplexField(int index);
+
+    public abstract KSPObject getComplexField(int index);
 
     public void addEventListener(KSPObjectListener listener) {
         listeners.add(listener);

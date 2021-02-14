@@ -336,6 +336,28 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        if (index < 4) return false;
+        if (index == 4) return true;
+        return index >= 6;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        int missioni = missionObjs.size();
+        int logi = log.size();
+        int condi = condecorations.size();
+
+        if (index == 4) return originObj; // Origin
+        if (index <= 6) return null; // Any other lower field
+        if (index <= 6 + missioni) return missionObjs.get(index - 7); // Current mission
+        if (index <= 6 + missioni + logi) return log.get(index - 7 -missioni); // Flight log
+        if (index <= 6 + missioni + logi + condi) return condecorations.get(index - 7 - missioni - logi); // Condecorations
+        if (index == 6 + missioni + logi + condi + 1) return vesselObj; // Current vessel
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 

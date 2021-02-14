@@ -210,6 +210,17 @@ public class Concept extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return index == 3;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        if (index == 3) return conceptObj;
+        return null;
+    }
+
+    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Deleted parent concept
         if (event.getSource() instanceof Concept) {

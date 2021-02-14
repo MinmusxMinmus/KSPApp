@@ -54,6 +54,16 @@ public class IterationChange extends KSPObject {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return false;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        return null;
+    }
+
+    @Override
     public void ready() {
     }
 

@@ -289,6 +289,26 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return index > 2;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        int crewi = crewObjs.size();
+        int vessi = vesselObjs.size();
+        int condi = condecorations.size();
+        int evi = events.size();
+
+        if (index <= 2) return null;
+        if (index <= 2 + crewi) return crewObjs.get(index - 3);
+        if (index <= 2 + crewi + vessi) return vesselObjs.get(index - 3 - crewi);
+        if (index <= 2 + crewi + vessi + condi) return condecorations.get(index - 3 - crewi - vessi);
+        if (index <= 2 + crewi + vessi + condi + evi) return events.get(index - 3 - crewi - vessi - condi);
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 

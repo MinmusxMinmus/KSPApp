@@ -407,6 +407,28 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        if (index == 4) return true;
+        if (index <= 7) return false;
+        return true;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        if (index == 4) return conceptObj;
+        if (index <= 7) return null;
+
+        int crewi = crewObjs.size();
+        int vessi = vesselObjs.size();
+        int missi = missionObjs.size();
+
+        if (index <= 7 + crewi) return crewObjs.get(index - 8);
+        if (index <= 7 + crewi + vessi) return vesselObjs.get(index - 8 - crewi);
+        if (index <= 7 + crewi + vessi + missi) return missionObjs.get(index - 8 - crewi - vessi);
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 
@@ -416,15 +438,11 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         fields.add(new Field("ID", Long.toString(id)));
         fields.add(new Field("Concept", concept));
         fields.add(new Field("Status", status.toString()));
-        if (status.equals(VesselStatus.CRASHED)) {
-            fields.add(new Field("Crash details", statusDetails));
-            fields.add(new Field("Last mission", lastMission));
-        }
         fields.add(new Field("Location", location.toString()));
+        fields.add(new Field("Additional details", statusDetails));
         for (Kerbal k : crewObjs) fields.add(new Field("Crew member", k.toString()));
         for (Vessel v : vesselObjs) fields.add(new Field("Connected vessel", v.getName()));
         for (Mission m : missionObjs) fields.add(new Field("Mission", m.getName()));
-
 
         return fields;
     }

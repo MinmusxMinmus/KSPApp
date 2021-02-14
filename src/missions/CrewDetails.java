@@ -89,6 +89,16 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return false;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        return null;
+    }
+
+    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Kerbal deleted
         if (event.getSource() instanceof Kerbal k) {

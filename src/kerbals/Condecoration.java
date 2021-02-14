@@ -92,6 +92,18 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isComplexField(int index) {
+        return index == 0 || index == 2;
+    }
+
+    @Override
+    public KSPObject getComplexField(int index) {
+        if (index == 0) return mission;
+        if (index == 2) return kerbal;
+        return null;
+    }
+
+    @Override
     public void ready() {
         mission = getController().getMission(missionName);
         if (mission != null) mission.addEventListener(this);
