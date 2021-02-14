@@ -14,6 +14,9 @@ public interface ControllerInterface {
     Mission getMission(String name);
     Set<Mission> getMissions();
 
+    Mission getArchive(String name);
+    Set<Mission> getArchives();
+
     Concept getConcept(String name);
     Set<Concept> getConcepts();
 
@@ -27,6 +30,9 @@ public interface ControllerInterface {
     void addMission(Mission mission);
     void addConcept(Concept concept);
     long addVessel(Vessel vessel);
+
+    // Special case: finished missions go to the archives
+    void missionFinished(Mission mission);
 
     // Special case: recovered instances get deleted from memory
     void vesselRecovered(Vessel vessel);

@@ -26,15 +26,17 @@ public class GUIController implements ControllerInterface {
 
     private static final String KERBAL_REGION = "Kerbals";
     private static final String MISSION_REGION = "Missions";
+    private static final String ARCHIVE_REGION = "Archives";
     private static final String CONCEPT_REGION = "Concepts";
     private static final String VESSEL_REGION = "Vessels";
     private static final String CRASHED_REGION = "Crashed";
 
     private final List<Kerbal> kerbals;
     private final List<Mission> missions;
+    private final List<Mission> archives;
     private final List<Concept> concepts;
     private final List<Vessel> vessels;
-    private final List<Vessel> crashedVessels = new LinkedList<>();
+    private final List<Vessel> crashedVessels;
     private final Random random;
 
     // Persistence
@@ -45,18 +47,36 @@ public class GUIController implements ControllerInterface {
         this.random = new Random(LocalDate.now().hashCode());
         this.kerbals = new LinkedList<>();
         this.missions = new LinkedList<>();
+        this.archives = new LinkedList<>();
         this.concepts = new LinkedList<>();
         this.vessels = new LinkedList<>();
+        this.crashedVessels = new LinkedList<>();
 
         manager = new StorageManager("KSPDB", Version.V100);
 
         getPersistenceKerbals();
         getPersistenceMissions();
+        getPersistenceArchives();
         getPersistenceConcepts();
         getPersistenceVessels();
         getPersistenceCrashedVessels();
 
         ready();
+    }
+
+    private void getPersistenceArchives() {
+        if (manager.getRegion(ARCHIVE_REGION) == null) manager.addRegion(ARCHIVE_REGION);
+        Atom atom = manager.getRegion(ARCHIVE_REGION);
+        atom.getItems().stream()
+                .map(atom::getItem)
+                .forEach(c -> {
+                    if (c.size() != Mission.ENCODE_FIELD_AMOUNT) {
+                        System.err.println("WARNING: Corrupt archive found: " + c + "\nExpected "
+                                + Mission.ENCODE_FIELD_AMOUNT + " fields, got " + c.size());
+                        return;
+                    }
+                    archives.add(new Mission(this, new LinkedList<>(c)));
+                });
     }
 
     private void getPersistenceCrashedVessels() {
@@ -302,6 +322,16 @@ public class GUIController implements ControllerInterface {
     }
 
     @Override
+    public Mission getArchive(String name) {
+        return archives.stream().filter(m -> m.getName().equals(name)).findFirst().orElse(null);
+    }
+
+    @Override
+    public Set<Mission> getArchives() {
+        return new HashSet<>(archives);
+    }
+
+    @Override
     public Set<Concept> getConcepts() {
         concepts.sort((vc1, vc2) -> {
             // Different family
@@ -357,6 +387,12 @@ public class GUIController implements ControllerInterface {
         instance.ready();
         vessels.add(instance);
         return instance.getId();
+    }
+
+    @Override
+    public void missionFinished(Mission mission) {
+        missions.remove(mission);
+        archives.add(mission);
     }
 
     @Override

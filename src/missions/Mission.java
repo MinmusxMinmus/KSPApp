@@ -103,6 +103,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         for (Vessel v : vesselObjs) v.missionEnd(this);
         // End mission
         this.active = false;
+        getController().missionFinished(this);
     }
 
     public void logEvent(Location location, KSPDate date,  String details) {

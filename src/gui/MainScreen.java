@@ -17,6 +17,7 @@ public class MainScreen extends KSPGUI {
     private static final String VESSEL_CONCEPT_LIST = "Vessel concepts";
     private static final String VESSEL_INSTANCE_LIST = "Vessel instances";
     private static final String CRASHED_INSTANCE_LIST = "Crashed vessels";
+    private static final String ARCHIVE_LIST = "Mission archives";
     // TODO add new item: edit here
 
     private JPanel mainPanel;
@@ -71,6 +72,7 @@ public class MainScreen extends KSPGUI {
         comboBoxModel.addElement(VESSEL_CONCEPT_LIST);
         comboBoxModel.addElement(VESSEL_INSTANCE_LIST);
         comboBoxModel.addElement(CRASHED_INSTANCE_LIST);
+        comboBoxModel.addElement(ARCHIVE_LIST);
         // TODO add new item: edit here
 
         // Search result list requires a model to insert and remove data
@@ -117,6 +119,8 @@ public class MainScreen extends KSPGUI {
                         searchModel.addAll(controller.getVessels());
                 case CRASHED_INSTANCE_LIST -> // Add crashed instances to list
                         searchModel.addAll(controller.getCrashedVessels());
+                case ARCHIVE_LIST -> // Add mission archives to list
+                        searchModel.addAll(controller.getArchives());
                 // TODO add new item: edit here
             }
         });
@@ -151,6 +155,10 @@ public class MainScreen extends KSPGUI {
                     say("You can't create a crashed vessel!");
                     return;
                 }
+                case ARCHIVE_LIST -> {
+                    say("You can't create an archived mission!");
+                    return;
+                }
                 // TODO Add new item: edit here
                 default -> {
                     return;
@@ -177,12 +185,10 @@ public class MainScreen extends KSPGUI {
                 say("Please select a mission");
                 return;
             }
-            if (!m.isActive()) {
-                say("You can't edit a finished mission");
-                return;
-            }
             KSPGUI editor = new MissionUpdater(controller, "Mission editor", m);
             editor.appear("Mission editor");
+            searchModel.clear();
+            selectionComboBox.setSelectedIndex(-1);
         });
 
         // Delete button listener
@@ -199,7 +205,7 @@ public class MainScreen extends KSPGUI {
                     status = askString("Deletion reason", """
                             Please type the reason for the deletion.
                             Try to keep it short and concise, as it has to somewhat fit in the display tables.
-                            Each category has its own way to interpret that reason, and because of that you should beaware of the different formats.
+                            Each category has its own way to interpret that reason, and because of that you should be aware of the different formats.
                             Kerbals: Reason of suspension (KIAs are managed by missions)
                             Missions: Reason of classification.
                             Vessel concepts: Reason of deletion
