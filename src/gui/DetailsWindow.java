@@ -25,7 +25,7 @@ public class DetailsWindow extends KSPGUI{
         tableModel.setItem(this.object);
         detailsTable.setModel(tableModel);
 
-        textArea.setText(object.getDescription().equals("") ? "(No description)" : object.getDescription());
+        textArea.setText(object.getDescription() == null || object.getDescription().equals("") ? "(No description)" : object.getDescription());
 
         detailsTable.addMouseListener(new MouseAdapter() {
             @Override
