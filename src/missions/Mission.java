@@ -92,11 +92,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
     // Logic methods
     public void missionEnd(String comment, KSPDate date) {
         // Last event location, or KSC
-        MissionEvent event = events.get(events.size() - 1);
         Location lastLocation;
-        if (event == null) {
-            lastLocation = new Location(false, CelestialBody.KERBIN);
-        } else lastLocation = event.getLocation();
+        if (events.isEmpty()) lastLocation = new Location(false, CelestialBody.KERBIN);
+        else lastLocation = events.get(events.size() - 1).getLocation();
         // Mission end event
         logEvent(lastLocation, date, "Mission end: " + comment);
         // Finish mission for all living kerbals involved
