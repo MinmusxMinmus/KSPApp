@@ -282,7 +282,10 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     public void ready() {
         // Set origin
         originObj = getController().getMission(origin);
-        if (originObj != null) originObj.addEventListener(this);
+        if (originObj != null) {
+            origin = "[REDACTED]";
+            originObj.addEventListener(this);
+        }
 
         // Set current missions
         missionObjs = new LinkedList<>();
