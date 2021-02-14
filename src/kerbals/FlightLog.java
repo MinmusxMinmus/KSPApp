@@ -73,9 +73,8 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     public void ready() {
         mission = getController().getMission(missionName);
         if (mission != null) {
-            missionName = "[REDACTED]";
             mission.addEventListener(this);
-        }
+        } else missionName = "[REDACTED]";
     }
 
     @Override
