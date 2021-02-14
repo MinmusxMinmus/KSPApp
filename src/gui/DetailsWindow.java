@@ -12,6 +12,7 @@ public class DetailsWindow extends KSPGUI{
     private JPanel mainPanel;
     private JScrollPane scrollPane;
     private JTable detailsTable;
+    private JTextArea textArea;
 
     private final KSPObjectTableModel tableModel;
     private final KSPObject object;
@@ -23,6 +24,8 @@ public class DetailsWindow extends KSPGUI{
         tableModel = new KSPObjectTableModel();
         tableModel.setItem(this.object);
         detailsTable.setModel(tableModel);
+
+        textArea.setText(object.getDescription().equals("") ? "(No description)" : object.getDescription());
 
         detailsTable.addMouseListener(new MouseAdapter() {
             @Override
