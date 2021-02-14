@@ -14,6 +14,7 @@ public class Main {
 
             MainScreen gui = new MainScreen(c);
             gui.pack();
+            gui.setLocationRelativeTo(null);
             gui.setVisible(true);
 
 

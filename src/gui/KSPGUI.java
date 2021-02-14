@@ -25,6 +25,7 @@ public abstract class KSPGUI extends JFrame {
 
     public void appear() {
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
