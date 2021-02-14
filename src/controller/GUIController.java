@@ -43,7 +43,7 @@ public class GUIController implements ControllerInterface {
 
     private final StorageManager manager;
 
-    public GUIController() throws IOException {
+    public GUIController(String filename) throws IOException {
         this.random = new Random(LocalDate.now().hashCode());
         this.kerbals = new LinkedList<>();
         this.missions = new LinkedList<>();
@@ -52,7 +52,7 @@ public class GUIController implements ControllerInterface {
         this.vessels = new LinkedList<>();
         this.crashedVessels = new LinkedList<>();
 
-        manager = new StorageManager("KSPDB", Version.V100);
+        manager = new StorageManager(filename, Version.V100);
 
         getPersistenceKerbals();
         getPersistenceMissions();
