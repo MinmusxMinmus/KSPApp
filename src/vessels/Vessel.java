@@ -69,15 +69,15 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     /**
      * Contains all of the vessel's crew members' names.
      */
-    private final Set<String> crew;
+    private final List<String> crew;
     /**
      * Contains all of the currently connected/docked vessel to this one, as represented by their identifiers.
      */
-    private final Set<Long> vessels;
+    private final List<Long> vessels;
     /**
      * Contains the names of all missions this vessel is currently participating in.
      */
-    private final Set<String> missions;
+    private final List<String> missions;
 
     // Dynamic fields
     /**
@@ -87,15 +87,15 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     /**
      * Contains all {@link Kerbal} instances of the {@link Vessel#crew} attribute.
      */
-    private Set<Kerbal> crewObjs;
+    private List<Kerbal> crewObjs;
     /**
      * Contains all vessel instances of the {@link Vessel#vessels} attribute.
      */
-    private Set<Vessel> vesselObjs;
+    private List<Vessel> vesselObjs;
     /**
      * Contains all {@link Mission} instances of the {@link Vessel#missions} attribute.
      */
-    private Set<Mission> missionObjs;
+    private List<Mission> missionObjs;
 
     // Constructors
     /**
@@ -119,9 +119,9 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.status = VesselStatus.NOMINAL;
         this.statusDetails = null;
         this.creationDate = creationDate;
-        this.crew = Arrays.stream(crew).map(Kerbal::getName).collect(Collectors.toSet());
-        this.vessels = vessels.stream().map(Vessel::getId).collect(Collectors.toSet());
-        this.missions = new HashSet<>();
+        this.crew = Arrays.stream(crew).map(Kerbal::getName).collect(Collectors.toList());
+        this.vessels = vessels.stream().map(Vessel::getId).collect(Collectors.toList());
+        this.missions = new LinkedList<>();
         this.missionObjs = null;
     }
 
@@ -141,9 +141,9 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         this.statusDetails = fields.get(6).equals("(none)") ? null : fields.get(6);
         this.creationDate = KSPDate.fromString(controller, fields.get(7));
         this.lastMission = fields.get(8);
-        this.crew = fields.get(9).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(9).split(DELIMITER)).collect(Collectors.toSet());
-        this.vessels = fields.get(10).equals("(none)") ? new HashSet<>() : Arrays.stream(fields.get(10).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toSet());
-        this.missions = fields.get(11).equals("(none)") ? new HashSet<>() : new HashSet<>(Arrays.asList(fields.get(11).split(DELIMITER)));
+        this.crew = fields.get(9).equals("(none)") ? new LinkedList<>() : Arrays.stream(fields.get(9).split(DELIMITER)).collect(Collectors.toList());
+        this.vessels = fields.get(10).equals("(none)") ? new LinkedList<>() : Arrays.stream(fields.get(10).split(DELIMITER)).map(Long::parseLong).collect(Collectors.toList());
+        this.missions = fields.get(11).equals("(none)") ? new LinkedList<>() : new LinkedList<>(Arrays.asList(fields.get(11).split(DELIMITER)));
     }
 
 
@@ -281,8 +281,8 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         return creationDate;
     }
 
-    public Set<Kerbal> getCrew() {
-        return new HashSet<>(crewObjs);
+    public List<Kerbal> getCrew() {
+        return new LinkedList<>(crewObjs);
     }
 
     /**
@@ -304,8 +304,8 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         return true;
     }
 
-    public Set<Vessel> getVessels() {
-        return new HashSet<>(vesselObjs);
+    public List<Vessel> getVessels() {
+        return new LinkedList<>(vesselObjs);
     }
     /**
      * @return {@code true} by default
@@ -345,7 +345,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         }
 
         // Get missions
-        missionObjs = new HashSet<>();
+        missionObjs = new LinkedList<>();
         for (String name : missions) {
             Mission mission = getController().getMission(name);
             if (mission != null) {
@@ -355,7 +355,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         }
 
         // Get crew
-        crewObjs = new HashSet<>();
+        crewObjs = new LinkedList<>();
         for (String name : crew) {
             Kerbal kerbal = getController().getKerbal(name);
             if (kerbal != null) {
@@ -365,7 +365,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
         }
 
         // Get vessels
-        vesselObjs = new HashSet<>();
+        vesselObjs = new LinkedList<>();
         for (long id : vessels) {
             Vessel vessel = getController().getInstance(id);
             if (vessel != null) {
