@@ -151,6 +151,16 @@ public class KSPDate extends KSPObject {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return false;
+    }
+
+    @Override
+    public String getText(int index) {
+        return null;
+    }
+
+    @Override
     public void ready() { }
 
     @Override

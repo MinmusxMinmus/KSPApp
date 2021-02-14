@@ -358,6 +358,16 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return false;
+    }
+
+    @Override
+    public String getText(int index) {
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 

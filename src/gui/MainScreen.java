@@ -168,7 +168,7 @@ public class MainScreen extends KSPGUI {
                 }
             }
 
-            window.appear(name);
+            window.appear();
             searchModel.clear();
             selectionComboBox.setSelectedIndex(-1);
         });
@@ -189,7 +189,7 @@ public class MainScreen extends KSPGUI {
                 return;
             }
             KSPGUI editor = new MissionUpdater(controller, "Mission editor", m);
-            editor.appear("Mission editor");
+            editor.appear();
             searchModel.clear();
             selectionComboBox.setSelectedIndex(-1);
         });
@@ -275,7 +275,13 @@ public class MainScreen extends KSPGUI {
                         return;
                     }
                     DetailsWindow window = new DetailsWindow(controller, currentSelectedObject.getComplexField(row));
-                    window.appear("Specific details");
+                    window.appear();
+                }
+
+                // Check for string details
+                if (currentSelectedObject.isTextField(row)) {
+                    TextWindow window = new TextWindow(controller, currentSelectedObject.getText(row));
+                    window.appear();
                 }
             }
         });

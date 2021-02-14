@@ -64,6 +64,17 @@ public class IterationChange extends KSPObject {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return index == 2;
+    }
+
+    @Override
+    public String getText(int index) {
+        if (index == 2) return changes;
+        return null;
+    }
+
+    @Override
     public void ready() {
     }
 

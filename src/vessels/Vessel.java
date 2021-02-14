@@ -429,6 +429,17 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return index == 7;
+    }
+
+    @Override
+    public String getText(int index) {
+        if (index == 7) return statusDetails;
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         List<Field> fields = new LinkedList<>();
 

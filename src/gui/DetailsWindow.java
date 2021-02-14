@@ -41,7 +41,13 @@ public class DetailsWindow extends KSPGUI{
                         return;
                     }
                     DetailsWindow window = new DetailsWindow(controller, object.getComplexField(row));
-                    window.appear("Specific details");
+                    window.appear();
+                }
+
+                // Check for string details
+                if (object.isTextField(row)) {
+                    TextWindow window = new TextWindow(controller, object.getText(row));
+                    window.appear();
                 }
             }
         });

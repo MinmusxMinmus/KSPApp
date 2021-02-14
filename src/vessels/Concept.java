@@ -221,6 +221,16 @@ public class Concept extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return false;
+    }
+
+    @Override
+    public String getText(int index) {
+        return null;
+    }
+
+    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Deleted parent concept
         if (event.getSource() instanceof Concept) {

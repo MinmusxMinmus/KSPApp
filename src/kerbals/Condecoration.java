@@ -86,9 +86,13 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
         fields.add(new Field("Date", date.toString(true, true)));
         fields.add(new Field("Subject", kerbalName + " Kerman"));
         fields.add(new Field("Title", title));
-        fields.add(new Field("Mention", mention));
 
         return fields;
+    }
+
+    @Override
+    public String getDescription() {
+        return mention;
     }
 
     @Override
@@ -100,6 +104,17 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     public KSPObject getComplexField(int index) {
         if (index == 0) return mission;
         if (index == 2) return kerbal;
+        return null;
+    }
+
+    @Override
+    public boolean isTextField(int index) {
+        return index == 3;
+    }
+
+    @Override
+    public String getText(int index) {
+        if (index == 3) return title;
         return null;
     }
 

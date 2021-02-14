@@ -23,10 +23,9 @@ public abstract class KSPGUI extends JFrame {
         setTitle(title);
     }
 
-    public void appear(String title) {
+    public void appear() {
         pack();
         setVisible(true);
-        setTitle(title);
     }
 
     /** Utility method to display a choice box with the desired message.

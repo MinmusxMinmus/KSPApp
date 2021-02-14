@@ -99,6 +99,16 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return false;
+    }
+
+    @Override
+    public String getText(int index) {
+        return null;
+    }
+
+    @Override
     public void onDeletion(KSPObjectDeletionEvent event) {
         // Kerbal deleted
         if (event.getSource() instanceof Kerbal k) {

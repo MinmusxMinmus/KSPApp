@@ -82,6 +82,21 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public boolean isTextField(int index) {
+        return false;
+    }
+
+    @Override
+    public String getDescription() {
+        return details;
+    }
+
+    @Override
+    public String getText(int index) {
+        return null;
+    }
+
+    @Override
     public void ready() {
         mission = getController().getMission(missionName);
         if (mission != null) mission.addEventListener(this);
@@ -93,7 +108,6 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
         fields.add(new Field("Mission", missionName));
         fields.add(new Field("Previous location", location == null ? "Unknown" : location.toString()));
-        fields.add(new Field("Details", details));
 
         return fields;
     }

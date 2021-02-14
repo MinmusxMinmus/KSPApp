@@ -44,6 +44,10 @@ public abstract class KSPObject implements Displayable {
 
     public abstract KSPObject getComplexField(int index);
 
+    public abstract boolean isTextField(int index);
+
+    public abstract String getText(int index);
+
     public void addEventListener(KSPObjectListener listener) {
         listeners.add(listener);
     }
