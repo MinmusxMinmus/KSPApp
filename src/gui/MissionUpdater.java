@@ -609,6 +609,9 @@ public class MissionUpdater extends KSPGUI {
             updateCrewSetup();
             moveCrewSetup();
             condecorationSetup();
+
+            // Save mission changes
+            controller.saveMissionChanges();
         });
     }
 

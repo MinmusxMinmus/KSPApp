@@ -260,6 +260,38 @@ public class GUIController implements ControllerInterface {
         }
         manager.replaceRegion(atom);
 
+        if (manager.getRegion(ARCHIVE_REGION) == null) manager.addRegion(ARCHIVE_REGION);
+        atom = manager.getRegion(ARCHIVE_REGION);
+        // Remove all previous items
+        for (Key key : atom.getItems()) atom.removeItem(key);
+        // Add everything again
+        for (Mission m : archives) {
+            atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
+            count++;
+        }
+        manager.replaceRegion(atom);
+
+        try {
+            manager.save();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean saveMissionChanges() {
+        int count = 0;
+        if (manager.getRegion(MISSION_REGION) == null) manager.addRegion(MISSION_REGION);
+        Atom atom = manager.getRegion(MISSION_REGION);
+        // Remove all previous items
+        for (Key key : atom.getItems()) atom.removeItem(key);
+        // Add everything again
+        for (Mission m : missions) {
+            atom.addItem(new Key(Integer.toString(count)), m.toStorableCollection());
+            count++;
+        }
+        manager.replaceRegion(atom);
 
         try {
             manager.save();
