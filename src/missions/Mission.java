@@ -365,6 +365,9 @@ public class Mission extends KSPObject implements KSPObjectListener {
         if (crewObjs.size() != crew.keySet().size())
             System.err.println("WARNING: Crew member miscount in mission \"" + name + "\", this usually means that certain kerbals weren't found on the database.\n" +
                     "Expected " + crew.keySet().size() + ", got " + crewObjs.size());
+
+        // Crew detail readying
+        crew.values().forEach(CrewDetails::ready);
     }
 
     @Override
