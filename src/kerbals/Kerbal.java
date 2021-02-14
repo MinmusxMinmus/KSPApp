@@ -71,7 +71,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     /**
      * Indicates the mission the kerbal is currently on
      */
-    private final Set<String> missions;
+    private final List<String> missions;
     /**
      * Honorable mentions that speak to the kerbal's achievements.
      */
@@ -80,7 +80,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     // Dynamic fields
     private Mission originObj;
     private Vessel vesselObj;
-    private Set<Mission> missionObjs;
+    private List<Mission> missionObjs;
 
     // Constructors
     /**
@@ -107,7 +107,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         this.vessel = vessel == null ? 0 : vessel.getId();
 
         this.log = new LinkedList<>();
-        this.missions = new HashSet<>();
+        this.missions = new LinkedList<>();
         this.condecorations = new LinkedList<>();
     }
 
@@ -131,8 +131,8 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
                 ? new LinkedList<>()
                 : Arrays.stream(fields.get(10).split(DELIMITER)).map(s -> FlightLog.fromString(controller, s)).collect(Collectors.toList());
         this.missions = fields.get(11).equals("(none)")
-                ? new HashSet<>()
-                : new HashSet<>(Arrays.asList(fields.get(11).split(DELIMITER)));
+                ? new LinkedList<>()
+                : new LinkedList<>(Arrays.asList(fields.get(11).split(DELIMITER)));
         this.condecorations = fields.get(12).equals("(none)")
                 ? new LinkedList<>()
                 : Arrays.stream(fields.get(12).split(DELIMITER)).map(s -> Condecoration.fromString(controller, s)).collect(Collectors.toList());
@@ -285,7 +285,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         if (originObj != null) originObj.addEventListener(this);
 
         // Set current missions
-        missionObjs = new HashSet<>();
+        missionObjs = new LinkedList<>();
         for (String name : missions) {
             Mission m = getController().getMission(name);
             if (m != null) {
