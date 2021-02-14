@@ -26,22 +26,22 @@ public class Mission extends KSPObject implements KSPObjectListener {
     // Persistent fields
     private String name;
     private final KSPDate start;
-    private final Set<Long> vessels;
+    private final List<Long> vessels;
     private boolean active = true;
     private final Map<String, CrewDetails> crew; // perhaps replace with a new object?
     private final List<MissionEvent> events;
-    private final Set<Condecoration> condecorations;
+    private final List<Condecoration> condecorations;
 
     // Dynamic fields
-    private Set<Vessel> vesselObjs;
-    private Set<Kerbal> crewObjs;
+    private List<Vessel> vesselObjs;
+    private List<Kerbal> crewObjs;
 
     /** Generates a mission from scratch.
      * @param name Mission name
      * @param crew A map corresponding to the crew and their roles
      * @param start Mission start date
      */
-    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, Set<Long> vessels, KSPDate start) {
+    public Mission(ControllerInterface controller, String name, Map<Kerbal, String> crew, List<Long> vessels, KSPDate start) {
         super(controller);
         this.name = name;
         this.vessels = vessels;
@@ -50,7 +50,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.crew = crew2;
         this.start = start;
         this.events = new LinkedList<>();
-        this.condecorations = new HashSet<>();
+        this.condecorations = new LinkedList<>();
     }
 
     /** Generate a mission from a list of fields stored in persistence.
@@ -63,7 +63,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
         this.start = KSPDate.fromString(controller, fields.get(2));
         this.active = Boolean.parseBoolean(fields.get(3));
 
-        Set<Long> vessels = new HashSet<>();
+        List<Long> vessels = new LinkedList<>();
         if (!fields.get(4).equals("(none)")) for (String s : fields.get(4).split(DELIMITER)) vessels.add(Long.parseLong(s));
         this.vessels = vessels;
 
@@ -83,7 +83,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
             events.add(MissionEvent.fromString(controller, event));
         this.events = events;
 
-        Set<Condecoration> condecorations = new HashSet<>();
+        List<Condecoration> condecorations = new LinkedList<>();
         if (!fields.get(7).equals("(none)")) for (String c : fields.get(7).split(DELIMITER))
             condecorations.add(Condecoration.fromString(controller, c));
         this.condecorations = condecorations;
@@ -229,22 +229,22 @@ public class Mission extends KSPObject implements KSPObjectListener {
         return start;
     }
 
-    public Set<Vessel> getVessels() {
-        return new HashSet<>(vesselObjs);
+    public List<Vessel> getVessels() {
+        return new LinkedList<>(vesselObjs);
     }
 
-    public Set<Vessel> getVessels(VesselStatus status) {
+    public List<Vessel> getVessels(VesselStatus status) {
         return vesselObjs.stream()
                 .filter(v -> v.getStatus().equals(status))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     public boolean isActive() {
         return active;
     }
 
-    public Set<Kerbal> getCrew() {
-        return Collections.unmodifiableSet(crewObjs);
+    public List<Kerbal> getCrew() {
+        return new LinkedList<>(crewObjs);
     }
 
     public CrewDetails getCrewDetails(Kerbal kerbal) {
@@ -313,7 +313,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
     @Override
     public void ready() {
         // Get vessel
-        this.vesselObjs = new HashSet<>();
+        this.vesselObjs = new LinkedList<>();
         for (Vessel v : getController().getVessels()) if (vessels.contains(v.getId())) {
             vesselObjs.add(v);
             v.addEventListener(this);
@@ -325,7 +325,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
 
         // Get crew
-        this.crewObjs = new HashSet<>();
+        this.crewObjs = new LinkedList<>();
         for (Kerbal k : getController().getKerbals()) if (crew.containsKey(k.getName())) {
             crewObjs.add(k);
             k.addEventListener(this);
