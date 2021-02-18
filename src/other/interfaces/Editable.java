@@ -1,11 +1,13 @@
 package other.interfaces;
 
-import other.interfaces.Displayable;
+import other.util.Field;
+
+import java.util.List;
 
 /**
  * Works in pair with {@link Displayable} to indicate the object is, indeed, editable.
  */
 public interface Editable extends Displayable {
-    boolean isEditable(int rowIndex);
-    boolean setField(int index, Object object);
+    List<Field> getEditableFields();
+    void setField(String fieldName, String value);
 }

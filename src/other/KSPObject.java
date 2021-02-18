@@ -2,6 +2,7 @@ package other;
 
 import controller.ControllerInterface;
 import other.interfaces.Displayable;
+import other.interfaces.Editable;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
 
@@ -9,7 +10,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Vector;
 
-public abstract class KSPObject implements Displayable {
+public abstract class KSPObject implements Displayable, Editable {
 
     protected static final String DELIMITER = "::";
     private final ControllerInterface controller;
