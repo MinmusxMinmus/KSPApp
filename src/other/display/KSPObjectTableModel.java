@@ -9,10 +9,15 @@ import java.util.List;
 
 public class KSPObjectTableModel extends AbstractTableModel {
 
-    protected List<Field> fields = new LinkedList<>();
+    private List<Field> fields = new LinkedList<>();
 
     public void setItem(Displayable item) {
         this.fields = item.getFields();
+        fireTableDataChanged();
+    }
+
+    public void clear() {
+        this.fields = new LinkedList<>();
         fireTableDataChanged();
     }
 
