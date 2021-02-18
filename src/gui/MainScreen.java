@@ -169,8 +169,7 @@ public class MainScreen extends KSPGUI {
             }
 
             window.appear();
-            searchModel.clear();
-            selectionComboBox.setSelectedIndex(-1);
+            clear();
         });
 
         // Edit button listener
@@ -178,7 +177,9 @@ public class MainScreen extends KSPGUI {
             KSPObject object = searchList.getSelectedValue();
             String s = (String) selectionComboBox.getSelectedItem();
             if (object != null && s != null) {
-                // TODO
+                ObjectEditor editor = new ObjectEditor(controller, object);
+                editor.appear();
+                clear();
             }
         });
 
@@ -190,8 +191,7 @@ public class MainScreen extends KSPGUI {
             }
             KSPGUI editor = new MissionUpdater(controller, "Mission editor", m);
             editor.appear();
-            searchModel.clear();
-            selectionComboBox.setSelectedIndex(-1);
+            clear();
         });
 
         // Delete button listener
@@ -302,5 +302,11 @@ public class MainScreen extends KSPGUI {
         // Default description
         descriptionArea.setText("Notes about the item will be shown here...");
         revalidate();
+    }
+
+    private void clear() {
+        tableModel.clear();
+        searchModel.clear();
+        selectionComboBox.setSelectedIndex(-1);
     }
 }
