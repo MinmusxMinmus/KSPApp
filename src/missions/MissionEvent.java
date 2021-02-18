@@ -129,4 +129,14 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
 
         return shortened + " (" + date.toString(false, true) + ")";
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        return new LinkedList<>();
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+
+    }
 }

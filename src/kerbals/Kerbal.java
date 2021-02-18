@@ -424,4 +424,28 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     public String toString() {
         return (KIA ? "(KIA) " : "") + name + " Kerman (" + job.toString() + "): " + location.toString();
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Name", name));
+        fields.add(new Field("Job", job.toString()));
+        fields.add(new Field("Gender (Male / Female)", male ? "Male" : "Female"));
+        fields.add(new Field("Badass? (Yes / No)", badass ? "Yes" : "No"));
+        fields.add(new Field("Recruitment (Mission name / Small description)", origin));
+
+        return fields;
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+        switch (fieldName) {
+            case "Name" -> this.name = value;
+            case "Job" -> this.job = Job.fromString(value);
+            case "Gender (Male / Female)" -> this.male = value.equals("Male");
+            case "Badass? (Yes / No)" -> this.badass = value.equals("Yes");
+            case "Recruitment (Mission name / Small description)" -> this.origin = value;
+        }
+    }
 }

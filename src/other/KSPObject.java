@@ -66,4 +66,6 @@ public abstract class KSPObject implements Displayable, Editable {
      * the current object to utilize the {@link KSPObject#controller} methods.
      */
     public abstract void ready();
+
+    // TODO all objects require a "value changed" event, for example if a kerbal changes name missions with him will die!
 }

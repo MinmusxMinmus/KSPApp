@@ -125,4 +125,14 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
                 ", boarded at " +
                 boardTime.toString(false, true);
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        return new LinkedList<>();
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+
+    }
 }

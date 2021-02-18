@@ -489,4 +489,19 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     public String toString() {
         return concept + " Mk" + getIteration() + ": " + status.toString() + ", " + location.toString();
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Location details", statusDetails));
+
+        return fields;
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+        if (!fieldName.equals("Location details")) return;
+        this.statusDetails = value;
+    }
 }

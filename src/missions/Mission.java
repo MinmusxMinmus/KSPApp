@@ -389,4 +389,19 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public String toString() {
         return name;
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Name", name));
+
+        return fields;
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+        if (!fieldName.equals("Name")) return;
+        this.name = value;
+    }
 }

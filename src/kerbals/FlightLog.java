@@ -99,4 +99,14 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     public String toString() {
         return "Participated in " + missionName;
     }
+
+    @Override
+    public List<Field> getEditableFields() {
+        return new LinkedList<>();
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+
+    }
 }

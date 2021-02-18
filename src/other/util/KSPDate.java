@@ -207,4 +207,13 @@ public class KSPDate extends KSPObject {
         return sb.toString();
     }
 
+    @Override
+    public List<Field> getEditableFields() {
+        return new LinkedList<>();
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+
+    }
 }

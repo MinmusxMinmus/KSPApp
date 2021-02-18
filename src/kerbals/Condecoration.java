@@ -29,7 +29,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
      * The name of the {@link Kerbal} who received the award.
      */
     private String kerbalName;
-    private final String title;
+    private String title;
     /**
      * The {@link KSPDate} at which the condecoration was handed out.
      */
@@ -37,7 +37,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     /**
      * The condecoration's description.
      */
-    private final String mention;
+    private String mention;
 
     // Dynamic fields
     /**
@@ -96,6 +96,11 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void setDescription(String description) {
+        this.mention = description;
+    }
+
+    @Override
     public boolean isComplexField(int index) {
         return index == 0 || index == 2;
     }
@@ -139,5 +144,20 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     public String toString() {
         return "(" + date.toString(false, true) + ") Awarded to "
                 + kerbalName + " Kerman during " + missionName + ".\n" + title + ": " + mention;
+    }
+
+    @Override
+    public List<Field> getEditableFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Title", title));
+
+        return fields;
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+        if (!fieldName.equals("Title")) return;
+        this.title = value;
     }
 }

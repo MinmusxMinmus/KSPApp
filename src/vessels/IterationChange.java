@@ -14,7 +14,7 @@ public class IterationChange extends KSPObject {
     public static final String DELIMITER = ":IC:";
 
     private final int iteration;
-    private final String changes;
+    private String changes;
     private final KSPDate changeDate;
 
     public IterationChange(ControllerInterface controller, int iteration, String changes, KSPDate changeDate) {
@@ -95,4 +95,18 @@ public class IterationChange extends KSPObject {
     }
 
 
+    @Override
+    public List<Field> getEditableFields() {
+        List<Field> fields = new LinkedList<>();
+
+        fields.add(new Field("Changes", changes));
+
+        return fields;
+    }
+
+    @Override
+    public void setField(String fieldName, String value) {
+        if (!fieldName.equals("Changes")) return;
+        this.changes = value;
+    }
 }
