@@ -47,7 +47,7 @@ public abstract class KSPObject implements Displayable, Editable {
     public abstract String getText(int index);
 
     public void addEventListener(KSPObjectListener listener) {
-        listeners.add(listener);
+        if (!listeners.contains(listener)) listeners.add(listener);
     }
 
     public void removeEventListener(KSPObjectListener listener) {
