@@ -4,6 +4,7 @@ import other.KSPObject;
 import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Destination;
 import other.util.Field;
 import other.util.KSPDate;
@@ -26,6 +27,8 @@ public class Concept extends KSPObject implements KSPObjectListener {
     public static final int ENCODE_FIELD_AMOUNT = 9; // ALWAYS ACCOUNT FOR DESCRIPTION, IN THIS CASE PARENT CLASS TOO
 
     public static final String DELIMITER = ":VC:";
+
+    public static final String NAME = "Name";
 
     // Persistent fields
     /**
@@ -240,6 +243,11 @@ public class Concept extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+
+    }
+
+    @Override
     public String toString() {
         return name + " Mk" + iteration;
     }
@@ -248,14 +256,14 @@ public class Concept extends KSPObject implements KSPObjectListener {
     public List<Field> getEditableFields() {
         List<Field> fields = new LinkedList<>();
 
-        fields.add(new Field("Name", name));
+        fields.add(new Field(NAME, name));
 
         return fields;
     }
 
     @Override
-    public void setField(String fieldName, String value) {
-        if (!fieldName.equals("Name")) return;
+    protected void setField(String fieldName, String value) {
+        if (!fieldName.equals(NAME)) return;
         this.name = value;
     }
 }

@@ -105,7 +105,7 @@ public class IterationChange extends KSPObject {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
         if (!fieldName.equals("Changes")) return;
         this.changes = value;
     }

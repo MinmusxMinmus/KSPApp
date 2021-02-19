@@ -213,7 +213,7 @@ public class KSPDate extends KSPObject {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
 
     }
 }

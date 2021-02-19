@@ -5,6 +5,7 @@ import other.*;
 import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 import other.util.KSPDate;
 
@@ -141,6 +142,26 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Kerbal) {
+            // Updating kerbal
+            switch (event.getFieldName()) {
+                case Kerbal.NAME -> {
+                    if (kerbalName.equals(event.getOldValue())) kerbalName = event.getNewValue();
+                }
+            }
+        }
+        else if (event.getSource() instanceof Mission) {
+            // Updating mission
+            switch (event.getFieldName()) {
+                case Mission.NAME -> {
+                    if (missionName.equals(event.getOldValue())) missionName = event.getNewValue();
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return "(" + date.toString(false, true) + ") Awarded to "
                 + kerbalName + " Kerman during " + missionName + ".\n" + title + ": " + mention;
@@ -156,7 +177,7 @@ public class Condecoration extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
         if (!fieldName.equals("Title")) return;
         this.title = value;
     }

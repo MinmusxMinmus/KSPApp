@@ -8,6 +8,7 @@ import kerbals.Kerbal;
 import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.CelestialBody;
 import other.util.Field;
 import other.util.KSPDate;
@@ -22,6 +23,7 @@ public class Mission extends KSPObject implements KSPObjectListener {
 
     public static final int ENCODE_FIELD_AMOUNT = 8; // ALWAYS ACCOUNT FOR DESCRIPTION
     private static final String DELIMITER = ":m:";
+    public static final String NAME = "Name";
 
     // Persistent fields
     private String name;
@@ -386,6 +388,20 @@ public class Mission extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Kerbal) {
+            // Updating crew
+            switch (event.getFieldName()) {
+                case Kerbal.NAME -> {
+                    CrewDetails details = crew.get(event.getOldValue());
+                    crew.remove(event.getOldValue());
+                    crew.put(event.getNewValue(), details);
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return name;
     }
@@ -394,14 +410,14 @@ public class Mission extends KSPObject implements KSPObjectListener {
     public List<Field> getEditableFields() {
         List<Field> fields = new LinkedList<>();
 
-        fields.add(new Field("Name", name));
+        fields.add(new Field(NAME, name));
 
         return fields;
     }
 
     @Override
-    public void setField(String fieldName, String value) {
-        if (!fieldName.equals("Name")) return;
+    protected void setField(String fieldName, String value) {
+        if (!fieldName.equals(NAME)) return;
         this.name = value;
     }
 }

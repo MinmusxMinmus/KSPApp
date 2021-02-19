@@ -5,6 +5,7 @@ import other.*;
 import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 
 import java.util.LinkedList;
@@ -96,6 +97,18 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Mission) {
+            // Update mission
+            switch (event.getFieldName()) {
+                case Mission.NAME -> {
+                    if (missionName.equals(event.getOldValue())) missionName = event.getNewValue();
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return "Participated in " + missionName;
     }
@@ -106,7 +119,7 @@ public class FlightLog extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
 
     }
 }

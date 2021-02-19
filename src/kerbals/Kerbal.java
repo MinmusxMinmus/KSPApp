@@ -5,6 +5,7 @@ import missions.Mission;
 import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
@@ -26,6 +27,12 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
 
     public static final String DELIMITER = ":k:";
     public static final int ENCODE_FIELD_AMOUNT = 13; // ALWAYS ACCOUNT FOR DESCRIPTION
+    
+    public static final String NAME = "Name";
+    public static final String JOB = "Job";
+    public static final String GENDER = "Gender (Male / Female)";
+    public static final String BADASS = "Badass? (Yes / No)";
+    public static final String RECRUITMENT = "Recruitment (Mission name / Small description)";
 
     // Persistent fields
     /**
@@ -421,6 +428,22 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Mission) {
+            switch (event.getFieldName()) {
+                case Mission.NAME -> {
+                    // Active missions
+                    if (missions.contains(event.getOldValue()))
+                        missions.set(missions.indexOf(event.getOldValue()), event.getNewValue());
+                    // Origin mission
+                    if (origin.equals(event.getOldValue())) origin = event.getNewValue();
+                }
+            }
+        }
+
+    }
+
+    @Override
     public String toString() {
         return (KIA ? "(KIA) " : "") + name + " Kerman (" + job.toString() + "): " + location.toString();
     }
@@ -429,23 +452,23 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
     public List<Field> getEditableFields() {
         List<Field> fields = new LinkedList<>();
 
-        fields.add(new Field("Name", name));
-        fields.add(new Field("Job", job.toString()));
-        fields.add(new Field("Gender (Male / Female)", male ? "Male" : "Female"));
-        fields.add(new Field("Badass? (Yes / No)", badass ? "Yes" : "No"));
-        fields.add(new Field("Recruitment (Mission name / Small description)", origin));
+        fields.add(new Field(NAME, name));
+        fields.add(new Field(JOB, job.toString()));
+        fields.add(new Field(GENDER, male ? "Male" : "Female"));
+        fields.add(new Field(BADASS, badass ? "Yes" : "No"));
+        fields.add(new Field(RECRUITMENT, origin));
 
         return fields;
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
         switch (fieldName) {
-            case "Name" -> this.name = value;
-            case "Job" -> this.job = Job.fromString(value);
-            case "Gender (Male / Female)" -> this.male = value.equals("Male");
-            case "Badass? (Yes / No)" -> this.badass = value.equals("Yes");
-            case "Recruitment (Mission name / Small description)" -> this.origin = value;
+            case NAME -> this.name = value;
+            case JOB -> this.job = Job.fromString(value);
+            case GENDER -> this.male = value.equals("Male");
+            case BADASS -> this.badass = value.equals("Yes");
+            case RECRUITMENT -> this.origin = value;
         }
     }
 }

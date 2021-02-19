@@ -6,6 +6,7 @@ import missions.Mission;
 import other.KSPObject;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
@@ -486,6 +487,37 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        // Updated crew member
+        if (event.getSource() instanceof Kerbal) {
+            switch (event.getFieldName()) {
+                case Kerbal.NAME -> {
+                    if (crew.contains(event.getOldValue()))
+                        crew.set(crew.indexOf(event.getOldValue()), event.getNewValue());
+                }
+            }
+        }
+        else if (event.getSource() instanceof Mission) {
+            switch (event.getFieldName()) {
+                case Mission.NAME -> {
+                    // Current mission
+                    if (missions.contains(event.getOldValue()))
+                        missions.set(missions.indexOf(event.getOldValue()), event.getNewValue());
+                    // Last mission
+                    if (lastMission.equals(event.getOldValue())) lastMission = event.getNewValue();
+                }
+            }
+        }
+        else if (event.getSource() instanceof Concept) {
+            switch (event.getFieldName()) {
+                case Concept.NAME -> {
+                    if (concept.equals(event.getOldValue())) concept = event.getNewValue();
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return concept + " Mk" + getIteration() + ": " + status.toString() + ", " + location.toString();
     }
@@ -500,7 +532,7 @@ public class Vessel extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
         if (!fieldName.equals("Location details")) return;
         this.statusDetails = value;
     }

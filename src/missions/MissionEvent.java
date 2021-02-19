@@ -4,6 +4,7 @@ import other.*;
 import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 import other.util.KSPDate;
 import other.util.Location;
@@ -122,6 +123,18 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Mission) {
+            // Updating mission
+            switch (event.getFieldName()) {
+                case Mission.NAME -> {
+                    if (missionName.equals(event.getOldValue())) missionName = event.getNewValue();
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         String shortened;
         if (details.length() <= 30) shortened = details;
@@ -136,7 +149,7 @@ public class MissionEvent extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
 
     }
 }

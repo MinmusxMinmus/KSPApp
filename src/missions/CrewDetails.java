@@ -5,6 +5,7 @@ import other.*;
 import controller.ControllerInterface;
 import other.interfaces.KSPObjectDeletionEvent;
 import other.interfaces.KSPObjectListener;
+import other.interfaces.KSPObjectUpdateEvent;
 import other.util.Field;
 import other.util.KSPDate;
 
@@ -118,6 +119,18 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     }
 
     @Override
+    public void onUpdate(KSPObjectUpdateEvent event) {
+        if (event.getSource() instanceof Kerbal) {
+            // Updating kerbal shared values
+            switch (event.getFieldName()) {
+                case Kerbal.NAME -> {
+                    if (name.equals(event.getOldValue())) name = event.getNewValue();
+                }
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return name + " Kerman" +
                 (kerbal != null && kerbal.isKIA() ? " (KIA)" : "") +
@@ -132,7 +145,7 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     }
 
     @Override
-    public void setField(String fieldName, String value) {
+    protected void setField(String fieldName, String value) {
 
     }
 }
