@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface Editable extends Displayable {
     List<Field> getEditableFields();
-    void setField(String fieldName, String value);
+    void setEditableField(String fieldName, String oldValue, String newValue);
 }

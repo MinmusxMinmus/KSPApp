@@ -59,14 +59,22 @@ public abstract class KSPObject implements Displayable, Editable {
         listeners.clear();
     }
 
-    public void fireUpdateEvent() {
-        for (KSPObjectListener listener : listeners) listener.onUpdate(new KSPObjectUpdateEvent(this));
+    public void fireUpdateEvent(String fieldName, String oldValue, String newValue) {
+        for (KSPObjectListener listener : listeners) listener.onUpdate(new KSPObjectUpdateEvent(this, fieldName, oldValue, newValue));
     }
 
     /** Indicates to the object that the controller has finished loading every {@link KSPObject} in memory. This allows
      * the current object to utilize the {@link KSPObject#controller} methods.
      */
     public abstract void ready();
+
+    @Override
+    public void setEditableField(String fieldName, String oldValue, String newValue) {
+        setField(fieldName, newValue);
+        fireUpdateEvent(fieldName, oldValue, newValue);
+    }
+
+    protected abstract void setField(String fieldName, String value);
 
     // TODO all objects require a "value changed" event, for example if a kerbal changes name missions with him will die!
 }

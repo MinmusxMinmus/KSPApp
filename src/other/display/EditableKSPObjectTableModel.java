@@ -54,7 +54,7 @@ public class EditableKSPObjectTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (columnIndex != 1) return;
         Field editedField = fields.get(rowIndex);
-        object.setField(editedField.getName(), (String)aValue);
+        object.setEditableField(editedField.getName(), editedField.getValue(), (String) aValue);
         fields = object.getEditableFields();
         fireTableCellUpdated(rowIndex, columnIndex);
     }
