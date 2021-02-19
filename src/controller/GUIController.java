@@ -325,7 +325,9 @@ public class GUIController implements ControllerInterface {
 
     @Override
     public Mission getMission(String name) {
-        return missions.stream().filter(m -> m.getName().equals(name)).findFirst().orElse(null);
+        return missions.stream().filter(m -> m.getName().equals(name)).findFirst().orElse(
+                archives.stream().filter(m -> m.getName().equals(name)).findFirst().orElse(null)
+        );
     }
 
     @Override
