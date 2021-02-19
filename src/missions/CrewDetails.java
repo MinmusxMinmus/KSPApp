@@ -45,8 +45,8 @@ public class CrewDetails extends KSPObject implements KSPObjectListener {
     public static String toString(CrewDetails crewDetails) {
         StringJoiner joiner = new StringJoiner(DELIMITER);
 
-        joiner.add(crewDetails.name);
         joiner.add(crewDetails.getDescription() == null ? "(None)" : crewDetails.getDescription());
+        joiner.add(crewDetails.name);
         joiner.add(crewDetails.position);
         joiner.add(crewDetails.boardTime.toStorableString());
 
