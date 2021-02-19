@@ -165,6 +165,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         missions.remove(m.getName());
         FlightLog flightLog = new FlightLog(getController(), m.getName());
         flightLog.setDescription("Mission end: " + comment);
+        flightLog.ready();
         log.add(flightLog);
     }
 
@@ -181,6 +182,7 @@ public class Kerbal extends KSPObject implements KSPObjectListener {
         for (Mission m : missionObjs) {
             FlightLog fl = new FlightLog(getController(), m.getName());
             fl.setDescription("Went KIA during the development of " + m.getName() + ", while " + location.toString());
+            fl.ready();
             log.add(fl);
         }
         missionObjs.clear();
