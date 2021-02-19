@@ -57,8 +57,8 @@ public abstract class KSPObject implements Displayable, Editable {
         listeners.remove(listener);
     }
 
-    public void fireDeletionEvent(String status) {
-        for (KSPObjectListener listener : listeners) listener.onDeletion(new KSPObjectDeletionEvent(this, status));
+    public void fireDeletionEvent() {
+        for (KSPObjectListener listener : listeners) listener.onDeletion(new KSPObjectDeletionEvent(this));
         listeners.clear();
     }
 

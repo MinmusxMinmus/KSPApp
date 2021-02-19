@@ -181,8 +181,8 @@ public class GUIController implements ControllerInterface {
         addConcept(vc);
     }
 
-    public void delete(KSPObject object, String status) {
-        object.fireDeletionEvent(status);
+    public void delete(KSPObject object) {
+        object.fireDeletionEvent();
         if (object instanceof Kerbal k ) kerbals.remove(k);
         else if (object instanceof Mission m ) missions.remove(m);
         else if (object instanceof Concept vc) concepts.remove(vc);
@@ -429,7 +429,7 @@ public class GUIController implements ControllerInterface {
 
     @Override
     public void vesselRecovered(Vessel vessel) {
-        vessel.fireDeletionEvent("Recovered lmao");
+        vessel.fireDeletionEvent();
         vessels.remove(vessel);
     }
 

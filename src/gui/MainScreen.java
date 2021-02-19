@@ -203,20 +203,7 @@ public class MainScreen extends KSPGUI {
                         "Are you sure you want to delete this "
                                 + s.substring(0, s.length() - 1).toLowerCase(Locale.ROOT) + "?");
                 if (!ask) return;
-                String status;
-                while (true) {
-                    status = askString("Deletion reason", """
-                            Please type the reason for the deletion.
-                            Try to keep it short and concise, as it has to somewhat fit in the display tables.
-                            Each category has its own way to interpret that reason, and because of that you should be aware of the different formats.
-                            Kerbals: Reason of suspension (KIAs are managed by missions)
-                            Missions: Reason of classification.
-                            Vessel concepts: Reason of deletion
-                            Vessel instances: Reason for no longer being tracked (Vessel destruction is handled by mission)""");
-                    if (status != null) break;
-                    say("Please input a reason!");
-                }
-                controller.delete(object, status);
+                controller.delete(object);
                 reset();
             }
         });
