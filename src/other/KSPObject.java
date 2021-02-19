@@ -1,10 +1,7 @@
 package other;
 
 import controller.ControllerInterface;
-import other.interfaces.Displayable;
-import other.interfaces.Editable;
-import other.interfaces.KSPObjectDeletionEvent;
-import other.interfaces.KSPObjectListener;
+import other.interfaces.*;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -60,6 +57,10 @@ public abstract class KSPObject implements Displayable, Editable {
     public void fireDeletionEvent() {
         for (KSPObjectListener listener : listeners) listener.onDeletion(new KSPObjectDeletionEvent(this));
         listeners.clear();
+    }
+
+    public void fireUpdateEvent() {
+        for (KSPObjectListener listener : listeners) listener.onUpdate(new KSPObjectUpdateEvent(this));
     }
 
     /** Indicates to the object that the controller has finished loading every {@link KSPObject} in memory. This allows
